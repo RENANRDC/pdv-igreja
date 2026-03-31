@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { criarPedido } from "../../services/pedidos"
 import { QRCodeCanvas } from "qrcode.react"
 import Link from "next/link"
@@ -40,9 +40,10 @@ export default function Home() {
   const [valorRecebidoPedido, setValorRecebidoPedido] = useState(0)
 
   // 🔥 MODO DE VENDA
-  const { vendaMode, setVendaMode, loadingVendaMode } = useVendaMode()
+  const { vendaMode, setVendaMode, isLoaded } = useVendaMode()
+  const [mostrarModoModal, setMostrarModoModal] = useState<boolean>(true)
 
-  if (loadingVendaMode) return null
+  if (!isLoaded) return null
 
   function adicionarItem(produto: Omit<Item, "quantidade">) {
     setItens((prev) => {
@@ -530,6 +531,43 @@ export default function Home() {
         </div>
 
       )}
+
+      {mostrarModoModal && (
+  <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50">
+    <div className="bg-white text-black p-6 rounded-2xl w-full max-w-sm text-center">
+
+      <h2 className="text-xl font-bold mb-4">
+        Tipo de atendimento
+      </h2>
+
+      <div className="flex flex-col gap-3">
+
+        <button
+          onClick={() => {
+            setVendaMode("balcao")
+            setMostrarModoModal(false)
+          }}
+          className="bg-blue-600 text-white p-4 rounded-xl font-bold"
+        >
+          🧾 Balcão
+        </button>
+
+        <button
+          onClick={() => {
+            setVendaMode("avulso")
+            setMostrarModoModal(false)
+          }}
+          className="bg-green-600 text-white p-4 rounded-xl font-bold"
+        >
+          📲 Avulso
+        </button>
+
+      </div>
+
+    </div>
+  </div>
+)}
+
     </div>
   )
 }
