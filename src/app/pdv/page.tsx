@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useEffect } from "react"
+import { useState } from "react"
 import { criarPedido } from "../../services/pedidos"
 import { QRCodeCanvas } from "qrcode.react"
 import Link from "next/link"
@@ -39,11 +39,16 @@ export default function Home() {
   const [trocoPedido, setTrocoPedido] = useState(0)
   const [valorRecebidoPedido, setValorRecebidoPedido] = useState(0)
 
-  // 🔥 MODO DE VENDA
-  const { vendaMode, setVendaMode, isLoaded } = useVendaMode()
-  const [mostrarModoModal, setMostrarModoModal] = useState<boolean>(true)
+// 🔥 TOPO DO COMPONENTE - ADICIONE ISSO
+const { vendaMode, setVendaMode } = useVendaMode()
 
-  if (!isLoaded) return null
+// ✅ Lê localStorage na inicialização do estado
+const [mostrarModoModal, setMostrarModoModal] = useState(() => {
+  if (typeof window === "undefined") return false
+  return !localStorage.getItem("modo_venda")
+})
+
+// ✅ Remove o useEffect completamente!
 
   function adicionarItem(produto: Omit<Item, "quantidade">) {
     setItens((prev) => {
@@ -105,6 +110,14 @@ export default function Home() {
   }
 
   async function handleConfirmarPagamento() {
+    if (formaPagamento === "dinheiro") {
+      const valor = parseFloat(valorRecebido || "0")
+
+      if (valor <= 0) {
+        setErro("Digite o valor recebido")
+        return
+      }
+    }
     try {
       const res = await criarPedido(nome, itens, formaPagamento)
 
@@ -113,8 +126,12 @@ export default function Home() {
       // 🔥 salva snapshot antes de limpar
       setNomePedido(nome)
       setItensPedido(itens)
-      setTrocoPedido(troco)
-      setValorRecebidoPedido(parseFloat(valorRecebido || "0"))
+
+      const valorRecebidoNum = parseFloat(valorRecebido || "0")
+      const trocoCalculado = Math.max(0, valorRecebidoNum - total)
+
+      setTrocoPedido(trocoCalculado)
+      setValorRecebidoPedido(valorRecebidoNum)
 
       setQrUrl(url)
       setCodigoPedido(res.codigo)
@@ -158,17 +175,19 @@ export default function Home() {
         `Cliente: ${nomePedido}\n\n` +
         `Itens:\n${itensTexto}\n\n`
 
-      // 🔥 PAGAMENTO
-      texto += `Pagamento: ${formaPagamento.toUpperCase()}\n`
+// 🔥 PAGAMENTO
+texto += `Pagamento: ${formaPagamento.toUpperCase()}\n`
 
-      if (formaPagamento === "dinheiro") {
-        texto +=
-          `Valor do pedido: R$ ${totalPedido}\n` +
-          `Valor pago: R$ ${valorRecebidoPedido.toFixed(2)}\n` +
-          `Troco: R$ ${trocoPedido.toFixed(2)}\n`
-      } else {
-        texto += `Total: R$ ${totalPedido}\n`
-      }
+if (formaPagamento === "dinheiro") {
+
+  texto +=
+    `Valor do pedido: R$ ${totalPedido}\n` +
+    `Valor pago: R$ ${valorRecebidoPedido.toFixed(2)}\n` +
+    `Troco: R$ ${trocoPedido.toFixed(2)}\n`
+
+} else {
+  texto += `Total: R$ ${totalPedido}\n`
+}
 
       texto += `\nAcompanhar pedido:\n${qrUrl}`
 
@@ -180,28 +199,43 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-gray-900 text-white p-4">
 
-      <h1 className="text-2xl font-bold mb-2">PDV</h1>
+<div className="flex items-center justify-between mb-4">
 
-      {/* 🔥 SELETOR DE MODO */}
-      <div className="flex gap-2 mb-4">
-        <button
-          onClick={() => setVendaMode("balcao")}
-          className={`flex-1 p-2 rounded ${
-            vendaMode === "balcao" ? "bg-blue-600" : "bg-gray-700"
-          }`}
-        >
-          🧾 Balcão
-        </button>
+  {/* ESQUERDA */}
+  <h1 className="text-xl font-bold">PDV</h1>
 
-        <button
-          onClick={() => setVendaMode("avulso")}
-          className={`flex-1 p-2 rounded ${
-            vendaMode === "avulso" ? "bg-green-600" : "bg-gray-700"
-          }`}
-        >
-          📲 Avulso
-        </button>
-      </div>
+  {/* DIREITA */}
+<div className="flex items-center gap-2">
+
+  {/* MODO */}
+  <div
+    className={`flex items-center gap-1 text-sm font-semibold px-3 h-9 rounded-lg ${
+      vendaMode === "balcao"
+        ? "bg-blue-600"
+        : "bg-green-600"
+    }`}
+  >
+    <span>
+      {vendaMode === "balcao" ? "🧾" : "📲"}
+    </span>
+    <span>
+      {vendaMode === "balcao" ? "Balcão" : "Celular"}
+    </span>
+  </div>
+
+  {/* TROCAR */}
+  <button
+    onClick={() => {
+      localStorage.removeItem("modo_venda")
+      setMostrarModoModal(true)
+    }}
+    className="flex items-center justify-center text-sm font-semibold px-3 h-9 rounded-lg bg-gray-700 hover:bg-gray-600 transition"
+  >
+    🔄 Trocar
+  </button>
+
+</div>
+</div>
 
       <Link
         href="/pedidos/controle"
@@ -213,7 +247,10 @@ export default function Home() {
       <input
         placeholder="Nome do cliente"
         value={nome}
-        onChange={(e) => setNome(e.target.value)}
+        onChange={(e) => {
+          setNome(e.target.value)
+          if (erro) setErro(null) // 🔥 LIMPA ERRO AUTOMATICAMENTE
+        }}
         className="w-full p-3 rounded-lg bg-gray-800 mb-4"
       />
 
@@ -262,7 +299,11 @@ export default function Home() {
       </div>
 
       <p className="text-green-400">{mensagem}</p>
-
+{erro && (
+  <p className="text-red-400 font-bold mt-2">
+    {erro}
+  </p>
+)}
       <div className="h-32"></div>
 
       <div className="fixed bottom-0 left-0 w-full bg-gray-800 p-4">
@@ -327,7 +368,7 @@ export default function Home() {
                   className="w-full p-3 rounded border"
                 />
                 <p className="mt-2 font-bold">
-                  Troco: R$ {trocoPedido.toFixed(2)}
+                  Troco: R$ {troco.toFixed(2)}
                 </p>
               </div>
             )}
@@ -342,7 +383,10 @@ export default function Home() {
 
               <button
                 onClick={handleConfirmarPagamento}
-                className="flex-1 bg-green-600 text-white p-3 rounded"
+                disabled={
+                  formaPagamento === "dinheiro" && !valorRecebido
+                }
+                className="flex-1 bg-green-600 text-white p-3 rounded disabled:opacity-50"
               >
                 Confirmar
               </button>
@@ -436,11 +480,10 @@ export default function Home() {
                   🖨️ Imprimir
                 </button>
               )}
+        
 
-              
-
-              {/* AVULSO */}
-              {vendaMode === "avulso" && (
+              {/* Celular */}
+              {vendaMode === "Celular" && (
                 <>
                   <input
                     placeholder="Número WhatsApp (ex: 44999999999)"
@@ -474,8 +517,7 @@ export default function Home() {
           </div>
 
           {/* PRINT */}
-          <div className="hidden print:block text-black text-xs w-[280px] mx-auto font-mono">
-
+          <div className="mx-auto w-72 text-xs text-black font-mono hidden print-area">
             <div className="text-center mb-2">
               <p className="font-bold">CENTRAL GOURMET</p>
               <p>------------------------------</p>
@@ -527,7 +569,13 @@ export default function Home() {
             </p>
 
           </div>
-
+<style jsx global>{`
+  @media print {
+    .print-area {
+      display: block !important;
+    }
+  }
+`}</style>
         </div>
 
       )}
@@ -542,25 +590,25 @@ export default function Home() {
 
       <div className="flex flex-col gap-3">
 
-        <button
-          onClick={() => {
-            setVendaMode("balcao")
-            setMostrarModoModal(false)
-          }}
-          className="bg-blue-600 text-white p-4 rounded-xl font-bold"
-        >
-          🧾 Balcão
-        </button>
+<button
+  onClick={() => {
+    setVendaMode("balcao")
+    setMostrarModoModal(false) // 🔥 FECHA O MODAL
+  }}
+        className="bg-blue-600 text-white p-4 rounded-xl font-bold"
+      >
+        🧾 Balcão
+      </button>
 
-        <button
-          onClick={() => {
-            setVendaMode("avulso")
-            setMostrarModoModal(false)
-          }}
-          className="bg-green-600 text-white p-4 rounded-xl font-bold"
-        >
-          📲 Avulso
-        </button>
+<button
+  onClick={() => {
+    setVendaMode("Celular")
+    setMostrarModoModal(false) // 🔥 FECHA O MODAL
+  }}
+        className="bg-green-600 text-white p-4 rounded-xl font-bold"
+      >
+        📲 Celular
+      </button>
 
       </div>
 
