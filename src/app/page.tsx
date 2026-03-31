@@ -3,6 +3,7 @@
 import { useState } from "react"
 import { criarPedido } from "../services/pedidos"
 import { QRCodeCanvas } from "qrcode.react"
+import Link from "next/link"
 
 type Item = {
   nome: string
@@ -104,6 +105,13 @@ export default function Home() {
   return (
     <div className="min-h-screen bg-gray-900 text-white p-4">
       <h1 className="text-2xl font-bold mb-4">PDV</h1>
+
+      <Link
+        href="/pedidos/controle"
+        className="inline-block mb-4 bg-gray-700 px-3 py-2 rounded text-sm"
+      >
+        📋 Ver pedidos
+      </Link>
 
       {/* Nome */}
       <input
