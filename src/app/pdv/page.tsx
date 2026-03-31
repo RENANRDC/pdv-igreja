@@ -4,6 +4,7 @@ import { useState } from "react"
 import { criarPedido } from "../../services/pedidos"
 import { QRCodeCanvas } from "qrcode.react"
 import Link from "next/link"
+import { useVendaMode } from "../../hooks/useVendaMode"
 
 type Item = {
   nome: string
@@ -16,8 +17,10 @@ type FormaPagamento = "pix" | "dinheiro" | "cartao"
 
 export default function Home() {
   const [nome, setNome] = useState("")
+  const [nomePedido, setNomePedido] = useState("") // 🔥 snapshot nome
   const [mensagem, setMensagem] = useState("")
   const [itens, setItens] = useState<Item[]>([])
+  const [itensPedido, setItensPedido] = useState<Item[]>([]) // 🔥 snapshot itens
   const [ultimoItem, setUltimoItem] = useState<string | null>(null)
 
   const [confirmando, setConfirmando] = useState(false)
@@ -29,8 +32,17 @@ export default function Home() {
   const [qrUrl, setQrUrl] = useState<string | null>(null)
   const [codigoPedido, setCodigoPedido] = useState<string | null>(null)
 
-  // 🔥 NOVO: ERRO MODAL
   const [erro, setErro] = useState<string | null>(null)
+
+  const [whatsNumero, setWhatsNumero] = useState("")
+
+  const [trocoPedido, setTrocoPedido] = useState(0)
+  const [valorRecebidoPedido, setValorRecebidoPedido] = useState(0)
+
+  // 🔥 MODO DE VENDA
+  const { vendaMode, setVendaMode, loadingVendaMode } = useVendaMode()
+
+  if (loadingVendaMode) return null
 
   function adicionarItem(produto: Omit<Item, "quantidade">) {
     setItens((prev) => {
@@ -97,6 +109,12 @@ export default function Home() {
 
       const url = `${window.location.origin}/pedidos/${res.id}`
 
+      // 🔥 salva snapshot antes de limpar
+      setNomePedido(nome)
+      setItensPedido(itens)
+      setTrocoPedido(troco)
+      setValorRecebidoPedido(parseFloat(valorRecebido || "0"))
+
       setQrUrl(url)
       setCodigoPedido(res.codigo)
 
@@ -112,9 +130,77 @@ export default function Home() {
     }
   }
 
+    function handleWhatsApp() {
+      if (!codigoPedido || !qrUrl) return
+
+      if (!whatsNumero) {
+        alert("Digite o número do WhatsApp")
+        return
+      }
+
+      const numero = whatsNumero.replace(/\D/g, "")
+
+      const totalPedido = itensPedido
+        .reduce((acc, i) => acc + i.preco * i.quantidade, 0)
+        .toFixed(2)
+
+      const itensTexto = itensPedido
+        .map(
+          (i) =>
+            `• ${i.nome} x${i.quantidade} (R$ ${(i.preco * i.quantidade).toFixed(2)})`
+        )
+        .join("\n")
+
+      let texto =
+        `Pedido criado com sucesso!\n\n` +
+        `Pedido: ${codigoPedido}\n` +
+        `Cliente: ${nomePedido}\n\n` +
+        `Itens:\n${itensTexto}\n\n`
+
+      // 🔥 PAGAMENTO
+      texto += `Pagamento: ${formaPagamento.toUpperCase()}\n`
+
+      if (formaPagamento === "dinheiro") {
+        texto +=
+          `Valor do pedido: R$ ${totalPedido}\n` +
+          `Valor pago: R$ ${valorRecebidoPedido.toFixed(2)}\n` +
+          `Troco: R$ ${trocoPedido.toFixed(2)}\n`
+      } else {
+        texto += `Total: R$ ${totalPedido}\n`
+      }
+
+      texto += `\nAcompanhar pedido:\n${qrUrl}`
+
+      const textoEncoded = encodeURIComponent(texto)
+
+      window.open(`https://wa.me/55${numero}?text=${textoEncoded}`, "_blank")
+    }
+
   return (
     <div className="min-h-screen bg-gray-900 text-white p-4">
-      <h1 className="text-2xl font-bold mb-4">PDV</h1>
+
+      <h1 className="text-2xl font-bold mb-2">PDV</h1>
+
+      {/* 🔥 SELETOR DE MODO */}
+      <div className="flex gap-2 mb-4">
+        <button
+          onClick={() => setVendaMode("balcao")}
+          className={`flex-1 p-2 rounded ${
+            vendaMode === "balcao" ? "bg-blue-600" : "bg-gray-700"
+          }`}
+        >
+          🧾 Balcão
+        </button>
+
+        <button
+          onClick={() => setVendaMode("avulso")}
+          className={`flex-1 p-2 rounded ${
+            vendaMode === "avulso" ? "bg-green-600" : "bg-gray-700"
+          }`}
+        >
+          📲 Avulso
+        </button>
+      </div>
 
       <Link
         href="/pedidos/controle"
@@ -240,7 +326,7 @@ export default function Home() {
                   className="w-full p-3 rounded border"
                 />
                 <p className="mt-2 font-bold">
-                  Troco: R$ {troco.toFixed(2)}
+                  Troco: R$ {trocoPedido.toFixed(2)}
                 </p>
               </div>
             )}
@@ -265,63 +351,184 @@ export default function Home() {
         </div>
       )}
 
-      {/* MODAL ERRO */}
-      {erro && (
-        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50">
-          <div className="bg-white text-black p-6 rounded-2xl w-full max-w-sm text-center">
+      {/* MODAL FINAL */}
+      {/* MODAL FINAL */}
+      {codigoPedido && (
+<div className="fixed inset-0 bg-black/90 flex items-center justify-center z-50">
 
-            <div className="text-4xl mb-2">⚠️</div>
+          <div className="bg-white text-black p-6 rounded-2xl w-full max-w-sm print:hidden">
 
-            <h2 className="text-lg font-bold mb-2">Atenção</h2>
-
-            <p className="text-gray-600 mb-4">{erro}</p>
-
-            <button
-              onClick={() => setErro(null)}
-              className="w-full bg-green-600 text-white p-3 rounded-xl font-bold"
-            >
-              OK
-            </button>
-
-          </div>
-        </div>
-      )}
-
-      {/* MODAL QR */}
-      {qrUrl && (
-        <div className="fixed inset-0 bg-black/90 flex items-center justify-center z-50">
-
-          <div className="bg-white text-black p-8 rounded-2xl text-center shadow-2xl">
-
-            <h2 className="text-lg text-gray-500 mb-2">
-              Pedido realizado com sucesso
+            {/* HEADER */}
+            <h2 className="text-center text-gray-500 mb-1">
+              Pedido criado com sucesso
             </h2>
 
-            <h1 className="text-6xl font-bold mb-4">
+            <h1 className="text-5xl font-bold text-center mb-4">
               {codigoPedido}
             </h1>
 
-            <div className="mb-4 flex justify-center">
-              <QRCodeCanvas value={qrUrl} size={220} />
+            {/* CLIENTE */}
+            <div className="mb-3 text-sm">
+              <span className="text-gray-500">Cliente:</span>
+              <p className="font-bold">{nomePedido}</p>
             </div>
 
-            <p className="text-sm text-gray-600 mb-4">
-              Escaneie para acompanhar o pedido
+            {/* ITENS */}
+            <div className="bg-gray-100 p-3 rounded mb-3">
+              {itensPedido.map((item, i) => (
+                <div key={i} className="flex justify-between text-sm mb-1">
+                  <span>{item.nome} x{item.quantidade}</span>
+                  <span>R$ {(item.preco * item.quantidade).toFixed(2)}</span>
+                </div>
+              ))}
+            </div>
+
+            {/* TOTAL */}
+            <div className="flex justify-between font-bold text-lg mb-2">
+              <span>Total</span>
+              <span>R$ {itensPedido
+                .reduce((acc, i) => acc + i.preco * i.quantidade, 0)
+                .toFixed(2)}
+              </span>
+            </div>
+
+            {/* PAGAMENTO */}
+            <div className="mb-3 text-sm">
+              <p>
+                <span className="text-gray-500">Pagamento:</span>{" "}
+                <strong>{formaPagamento.toUpperCase()}</strong>
+              </p>
+
+              {formaPagamento === "dinheiro" ? (
+                <>
+                  <p>
+                    <span className="text-gray-500">Valor do pedido:</span>{" "}
+                    <strong>
+                      R$ {itensPedido
+                        .reduce((acc, i) => acc + i.preco * i.quantidade, 0)
+                        .toFixed(2)}
+                    </strong>
+                  </p>
+
+                  <p>
+                    <span className="text-gray-500">Valor pago:</span>{" "}
+                    <strong>R$ {valorRecebidoPedido.toFixed(2)}</strong>
+                  </p>
+
+                  <p>
+                    <span className="text-gray-500">Troco:</span>{" "}
+                    <strong>R$ {trocoPedido.toFixed(2)}</strong>
+                  </p>
+                </>
+              ) : null}
+            </div>
+
+            {/* AÇÕES */}
+            <div className="flex flex-col gap-2 mt-4">
+
+              {/* BALCÃO */}
+              {vendaMode === "balcao" && (
+                <button
+                  onClick={() => window.print()}
+                  className="w-full bg-blue-600 text-white p-3 rounded-xl font-bold"
+                >
+                  🖨️ Imprimir
+                </button>
+              )}
+
+              
+
+              {/* AVULSO */}
+              {vendaMode === "avulso" && (
+                <>
+                  <input
+                    placeholder="Número WhatsApp (ex: 44999999999)"
+                    value={whatsNumero}
+                    onChange={(e) => setWhatsNumero(e.target.value)}
+                    className="w-full p-3 border rounded"
+                  />
+
+                  <button
+                    onClick={handleWhatsApp}
+                    className="w-full bg-green-600 text-white p-3 rounded-xl font-bold"
+                  >
+                    📲 Enviar via WhatsApp
+                  </button>
+                </>
+              )}
+
+              <button
+                onClick={() => {
+                  setQrUrl(null)
+                  setCodigoPedido(null)
+                  setWhatsNumero("")
+                }}
+                className="w-full bg-gray-800 text-white p-3 rounded-xl font-bold"
+              >
+                Novo Pedido
+              </button>
+
+            </div>
+
+          </div>
+
+          {/* PRINT */}
+          <div className="hidden print:block text-black text-xs w-[280px] mx-auto font-mono">
+
+            <div className="text-center mb-2">
+              <p className="font-bold">CENTRAL GOURMET</p>
+              <p>------------------------------</p>
+            </div>
+
+            <p>Pedido: {codigoPedido}</p>
+            <p>Cliente: {nomePedido}</p>
+
+            <p>------------------------------</p>
+
+            {itensPedido.map((item, i) => (
+              <div key={i} className="flex justify-between">
+                <span>{item.nome} x{item.quantidade}</span>
+                <span>R$ {(item.preco * item.quantidade).toFixed(2)}</span>
+              </div>
+            ))}
+
+            <p>------------------------------</p>
+
+            <p>Total: R$ {itensPedido
+              .reduce((acc, i) => acc + i.preco * i.quantidade, 0)
+              .toFixed(2)}
             </p>
 
-            <button
-              onClick={() => {
-                setQrUrl(null)
-                setCodigoPedido(null)
-              }}
-              className="w-full bg-green-600 hover:bg-green-500 text-white p-3 rounded-xl font-bold transition"
-            >
-              Novo Pedido
-            </button>
+            <p>Pagamento: {formaPagamento.toUpperCase()}</p>
+
+            {formaPagamento === "dinheiro" && (
+              <>
+                <p>Valor pedido: R$ {itensPedido
+                  .reduce((acc, i) => acc + i.preco * i.quantidade, 0)
+                  .toFixed(2)}
+                </p>
+
+                <p>Valor pago: R$ {valorRecebidoPedido.toFixed(2)}</p>
+                <p>Troco: R$ {trocoPedido.toFixed(2)}</p>
+              </>
+            )}
+
+            <p>------------------------------</p>
+
+            <p className="text-center mt-2">Acompanhar pedido</p>
+
+            <div className="flex justify-center mt-2">
+              {qrUrl && <QRCodeCanvas value={qrUrl} size={100} />}
+            </div>
+
+            <p className="text-center mt-2">
+              Obrigado pela preferência
+            </p>
 
           </div>
 
         </div>
+
       )}
     </div>
   )
