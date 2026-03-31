@@ -85,7 +85,7 @@ export default function Home() {
     try {
       const res = await criarPedido(nome, itens, formaPagamento)
 
-      const url = `${window.location.origin}/pedido/${res.id}`
+      const url = `${window.location.origin}/pedidos/${res.id}`
 
       setQrUrl(url)
       setCodigoPedido(res.codigo)
