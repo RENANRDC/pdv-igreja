@@ -60,7 +60,7 @@ export default function ControlePedidos() {
       {/* 🔥 TOPO */}
       <div className="flex justify-between items-center mb-4">
         <Link
-          href="/"
+          href="/pdv"
           className="bg-gray-700 hover:bg-gray-600 px-3 py-2 rounded text-sm transition"
         >
           ⬅️ Voltar ao PDV
