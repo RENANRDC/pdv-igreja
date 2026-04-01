@@ -122,12 +122,17 @@ async function voltarParaPreparo(id: string) {
             {pendentes.map((pedido) => (
               <div key={pedido.id} className="bg-gray-800 p-3 rounded-xl">
 
-                <div className="flex justify-between mb-2">
-                  <span className="font-bold">#{pedido.codigo}</span>
-                  <span className="text-xs text-gray-300 truncate max-w-[100px]">
-                    {pedido.nomeCliente}
-                  </span>
-                </div>
+              <div className="flex justify-between items-center w-full">
+
+                <span className="text-sm font-semibold">
+                  #{pedido.codigo}
+                </span>
+
+                <span className="text-xs text-gray-200 truncate max-w-[100px]">
+                  {pedido.nomeCliente}
+                </span>
+
+              </div>
 
                 <button
                   onClick={() => assumirPedido(pedido.id)}
@@ -195,11 +200,22 @@ async function voltarParaPreparo(id: string) {
 
           <div className="space-y-2 max-h-[75vh] overflow-y-auto pr-1">
             {finalizados.map((pedido) => (
-              <div key={pedido.id} className="bg-green-900/60 p-2 rounded flex justify-between items-center">
+            <div
+              key={pedido.id}
+              className="bg-green-900/60 p-2 rounded flex justify-between items-center gap-2"
+            >
 
-                <span className="text-sm">
+              <div className="flex justify-between items-center w-full">
+
+                <span className="text-sm font-semibold">
                   #{pedido.codigo}
                 </span>
+
+                <span className="text-xs text-gray-200 truncate max-w-[100px]">
+                  {pedido.nomeCliente}
+                </span>
+
+              </div>
 
                 <button
                   onClick={() => voltarParaPreparo(pedido.id)}
@@ -208,7 +224,7 @@ async function voltarParaPreparo(id: string) {
                   Desfazer
                 </button>
 
-              </div>
+            </div>
             ))}
           </div>
         </div>
