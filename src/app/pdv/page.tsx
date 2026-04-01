@@ -240,46 +240,49 @@ return (
 <div className="min-h-screen bg-gray-900 text-white p-4">
 
   {/* HEADER */}
-    <div className="grid grid-cols-3 items-center mb-4">
+<div className="flex items-center justify-between mb-4 gap-2">
 
-      {/* ESQUERDA */}
-      <div className="flex justify-start">
-        <BackButton href="/" />
-      </div>
+  {/* ESQUERDA */}
+  <BackButton href="/" />
 
-      {/* CENTRO */}
-      <div className="flex justify-center">
-        <h1 className="text-xl font-bold">PDV</h1>
-      </div>
+  {/* CENTRO */}
+  <h1 className="text-lg md:text-xl font-bold whitespace-nowrap">
+    PDV
+  </h1>
 
-      {/* DIREITA */}
-      <div className="flex justify-end items-center gap-2 min-w-35">
+  {/* DIREITA */}
+  <div className="flex items-center gap-2 shrink-0">
 
-        {mounted && vendaMode && (
-          <>
-            <div className={`flex items-center gap-1 text-sm font-semibold px-3 h-9 rounded-lg ${
-              vendaMode === "balcao" ? "bg-blue-600" : "bg-green-600"
-            }`}>
-              <span>{vendaMode === "balcao" ? "🧾" : "📲"}</span>
-              <span>{vendaMode === "balcao" ? "Balcão" : "Celular"}</span>
-            </div>
+    {mounted && vendaMode && (
+      <>
+        <div
+          className={`flex items-center gap-1 text-xs md:text-sm font-semibold px-2 md:px-3 h-8 md:h-9 rounded-lg ${
+            vendaMode === "balcao" ? "bg-blue-600" : "bg-green-600"
+          }`}
+        >
+          <span>{vendaMode === "balcao" ? "🧾" : "📲"}</span>
 
-            <button
-              onClick={() => {
-                localStorage.removeItem("modo_venda")
-                setMostrarModoModal(true)
-              }}
-              className="flex items-center justify-center gap-1 text-xs md:text-sm px-2 md:px-3 h-8 md:h-9 rounded-lg bg-gray-700 hover:bg-gray-600 transition"
-            >
-              🔄
-              <span className="hidden md:inline">Trocar</span>
-            </button>
-          </>
-        )}
+          {/* 🔥 ESCONDE TEXTO SÓ NO MOBILE */}
+          <span className="hidden sm:inline">
+            {vendaMode === "balcao" ? "Balcão" : "Celular"}
+          </span>
+        </div>
 
-      </div>
+        <button
+          onClick={() => {
+            localStorage.removeItem("modo_venda")
+            setMostrarModoModal(true)
+          }}
+          className="flex items-center justify-center h-8 w-8 md:h-9 md:w-auto md:px-3 rounded-lg bg-gray-700 hover:bg-gray-600 transition"
+        >
+          🔄
+          <span className="hidden md:inline ml-1">Trocar</span>
+        </button>
+      </>
+    )}
 
-    </div>
+  </div>
+</div>
   <Link
     href="/pedidos/controle"
     className="inline-block mb-4 bg-gray-700 px-3 py-2 rounded text-sm"
