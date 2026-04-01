@@ -28,7 +28,7 @@ export default function MenuPage() {
           href="/pedidos"
           className="bg-gray-800 hover:bg-gray-700 p-5 rounded-2xl font-semibold text-lg transition flex items-center gap-3"
         >
-          <span className="text-xl">🍳</span>
+          <span className="text-xl">👨‍🍳</span>
           <span>Cozinha</span>
         </Link>
 
