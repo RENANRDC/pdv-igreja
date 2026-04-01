@@ -39,6 +39,8 @@ export default function Home() {
   const [trocoPedido, setTrocoPedido] = useState(0)
   const [valorRecebidoPedido, setValorRecebidoPedido] = useState(0)
 
+  const compacto = itens.length > 5
+
 // 🔥 TOPO DO COMPONENTE - ADICIONE ISSO
 const { vendaMode, setVendaMode } = useVendaMode()
 
@@ -196,63 +198,60 @@ if (formaPagamento === "dinheiro") {
       window.open(`https://wa.me/55${numero}?text=${textoEncoded}`, "_blank")
     }
 
-  return (
-    <div className="min-h-screen bg-gray-900 text-white p-4">
+return (
+<div className="min-h-screen bg-gray-900 text-white p-4">
 
-<div className="flex items-center justify-between mb-4">
+  {/* HEADER */}
+  <div className="flex items-center justify-between mb-4">
 
-  {/* ESQUERDA */}
-  <h1 className="text-xl font-bold">PDV</h1>
+    <h1 className="text-xl font-bold">PDV</h1>
 
-  {/* DIREITA */}
-<div className="flex items-center gap-2">
+    <div className="flex items-center gap-2">
 
-  {/* MODO */}
-  <div
-    className={`flex items-center gap-1 text-sm font-semibold px-3 h-9 rounded-lg ${
-      vendaMode === "balcao"
-        ? "bg-blue-600"
-        : "bg-green-600"
-    }`}
-  >
-    <span>
-      {vendaMode === "balcao" ? "🧾" : "📲"}
-    </span>
-    <span>
-      {vendaMode === "balcao" ? "Balcão" : "Celular"}
-    </span>
+      <div
+        className={`flex items-center gap-1 text-sm font-semibold px-3 h-9 rounded-lg ${
+          vendaMode === "balcao" ? "bg-blue-600" : "bg-green-600"
+        }`}
+      >
+        <span>{vendaMode === "balcao" ? "🧾" : "📲"}</span>
+        <span>{vendaMode === "balcao" ? "Balcão" : "Celular"}</span>
+      </div>
+
+      <button
+        onClick={() => {
+          localStorage.removeItem("modo_venda")
+          setMostrarModoModal(true)
+        }}
+        className="flex items-center justify-center text-sm font-semibold px-3 h-9 rounded-lg bg-gray-700 hover:bg-gray-600 transition"
+      >
+        🔄 Trocar
+      </button>
+
+    </div>
   </div>
 
-  {/* TROCAR */}
-  <button
-    onClick={() => {
-      localStorage.removeItem("modo_venda")
-      setMostrarModoModal(true)
-    }}
-    className="flex items-center justify-center text-sm font-semibold px-3 h-9 rounded-lg bg-gray-700 hover:bg-gray-600 transition"
+  <Link
+    href="/pedidos/controle"
+    className="inline-block mb-4 bg-gray-700 px-3 py-2 rounded text-sm"
   >
-    🔄 Trocar
-  </button>
+    📋 Ver pedidos
+  </Link>
 
-</div>
-</div>
+  <input
+    placeholder="Nome do cliente"
+    value={nome}
+    onChange={(e) => {
+      setNome(e.target.value)
+      if (erro) setErro(null)
+    }}
+    className="w-full p-3 rounded-lg bg-gray-800 mb-4"
+  />
 
-      <Link
-        href="/pedidos/controle"
-        className="inline-block mb-4 bg-gray-700 px-3 py-2 rounded text-sm"
-      >
-        📋 Ver pedidos
-      </Link>
+  {/* 🔥 LAYOUT RESPONSIVO */}
+  <div className="flex flex-col lg:grid lg:grid-cols-3 gap-4">
 
-      <input
-        placeholder="Nome do cliente"
-        value={nome}
-        onChange={(e) => {
-          setNome(e.target.value)
-          if (erro) setErro(null) // 🔥 LIMPA ERRO AUTOMATICAMENTE
-        }}
-        className="w-full p-3 rounded-lg bg-gray-800 mb-4"
-      />
+    {/* PRODUTOS */}
+    <div className="lg:col-span-2">
 
       <div className="grid grid-cols-2 gap-3 mb-4">
         <button
@@ -280,33 +279,91 @@ if (formaPagamento === "dinheiro") {
         </button>
       </div>
 
-      <div className="bg-gray-800 p-3 rounded-lg mb-4">
-        <h3 className="font-bold mb-2">Carrinho</h3>
+    </div>
+
+    {/* CARRINHO */}
+    <div className="bg-gray-800 p-3 rounded-lg mb-4 lg:mb-0 flex flex-col lg:sticky lg:top-4 h-fit">
+
+      <h3 className="font-bold mb-2">Carrinho</h3>
+
+      <div className="flex-1 overflow-y-auto max-h-80 lg:max-h-none">
 
         {itens.length === 0 ? (
           <p className="text-gray-400">Nenhum item</p>
         ) : (
           itens.map((item, i) => (
-            <div key={i} className="flex justify-between mb-2">
-              <span>{item.nome} x{item.quantidade}</span>
-              <div className="flex gap-2">
-                <button onClick={() => removerItem(item.nome)} className="bg-red-500 px-3 py-1 rounded">-</button>
-                <button onClick={() => adicionarItem(item)} className="bg-green-500 px-3 py-1 rounded">+</button>
+            <div
+              key={i}
+              className={`flex items-center justify-between rounded-xl mb-2 ${
+                compacto ? "bg-gray-700 px-3 py-2" : "bg-gray-700 p-3"
+              }`}
+            >
+
+              {/* ESQUERDA */}
+              <div>
+                <p className="font-semibold text-white">
+                  {item.nome}
+                </p>
+
+                {!compacto && (
+                  <>
+                    <p className="text-sm text-gray-400">
+                      {item.quantidade} x R$ {item.preco.toFixed(2)}
+                    </p>
+
+                    <p className="text-sm text-gray-300 font-bold">
+                      R$ {(item.preco * item.quantidade).toFixed(2)}
+                    </p>
+                  </>
+                )}
+
+                {compacto && (
+                  <p className="text-xs text-gray-400">
+                    {item.quantidade}x • R$ {(item.preco * item.quantidade).toFixed(2)}
+                  </p>
+                )}
               </div>
+
+              {/* DIREITA */}
+              <div className={`flex items-center bg-gray-800 overflow-hidden ${
+                compacto ? "rounded-lg" : "rounded-xl"
+              }`}>
+
+                <button
+                  onClick={() => removerItem(item.nome)}
+                  disabled={item.quantidade === 1}
+                  className={`flex items-center justify-center bg-red-600 hover:bg-red-700 active:scale-95 transition font-bold disabled:opacity-40 ${
+                    compacto ? "w-9 h-9" : "w-11 h-11"
+                  }`}
+                >
+                  −
+                </button>
+
+                <div className={`flex items-center justify-center font-bold ${
+                  compacto ? "w-9 h-9 text-base" : "w-11 h-11 text-lg"
+                }`}>
+                  {item.quantidade}
+                </div>
+
+                <button
+                  onClick={() => adicionarItem(item)}
+                  className={`flex items-center justify-center bg-green-600 hover:bg-green-700 active:scale-95 transition font-bold ${
+                    compacto ? "w-9 h-9" : "w-11 h-11"
+                  }`}
+                >
+                  +
+                </button>
+
+              </div>
+
             </div>
           ))
         )}
+
       </div>
 
-      <p className="text-green-400">{mensagem}</p>
-{erro && (
-  <p className="text-red-400 font-bold mt-2">
-    {erro}
-  </p>
-)}
-      <div className="h-32"></div>
-
-      <div className="fixed bottom-0 left-0 w-full bg-gray-800 p-4">
+      {/* TOTAL (desktop) */}
+      <div className="hidden lg:block mt-4">
         <div className="flex justify-between text-lg font-bold mb-2">
           <span>Total</span>
           <span>R$ {total.toFixed(2)}</span>
@@ -315,18 +372,55 @@ if (formaPagamento === "dinheiro") {
         <button
           onClick={handlePedido}
           disabled={!itens.length}
-          className="w-full p-4 rounded-xl bg-green-600 font-bold"
+          className="w-full h-14 rounded-xl bg-green-600 hover:bg-green-700 transition font-bold text-lg disabled:opacity-50"
         >
           Finalizar Pedido
         </button>
 
         <button
           onClick={limparCarrinho}
-          className="w-full mt-2 p-2 bg-red-500 rounded"
+          className="w-full h-12 mt-2 rounded-xl bg-red-600 hover:bg-red-700 transition font-semibold"
         >
-          Limpar
+          Limpar Carrinho
         </button>
       </div>
+
+    </div>
+
+  </div>
+
+  {/* MOBILE (continua igual) */}
+  <p className="text-green-400">{mensagem}</p>
+  {erro && (
+    <p className="text-red-400 font-bold mt-2">
+      {erro}
+    </p>
+  )}
+
+  <div className="h-32"></div>
+
+  <div className="fixed bottom-0 left-0 w-full bg-gray-800 p-4 lg:hidden">
+    <div className="flex justify-between text-lg font-bold mb-2">
+      <span>Total</span>
+      <span>R$ {total.toFixed(2)}</span>
+    </div>
+
+    <button
+      onClick={handlePedido}
+      disabled={!itens.length}
+      className="w-full h-14 rounded-xl bg-green-600 hover:bg-green-700 transition font-bold text-lg disabled:opacity-50"
+    >
+      Finalizar Pedido
+    </button>
+
+    <button
+      onClick={limparCarrinho}
+      className="w-full h-12 mt-2 rounded-xl bg-red-600 hover:bg-red-700 transition font-semibold"
+    >
+      Limpar Carrinho
+    </button>
+</div>
+
 
       {/* MODAL CONFIRMAÇÃO */}
       {confirmando && (
