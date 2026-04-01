@@ -66,12 +66,10 @@ const produtosFiltrados = categoriaSelecionada
     )
   : []
 
+
 const { vendaMode, setVendaMode } = useVendaMode()
 
-const [mostrarModoModal, setMostrarModoModal] = useState(() => {
-  if (typeof window === "undefined") return false
-  return !localStorage.getItem("modo_venda")
-})
+const [mostrarModoModal, setMostrarModoModal] = useState(true)
 
   function adicionarItem(produto: Omit<Item, "quantidade">) {
     setItens((prev) => {
@@ -164,6 +162,7 @@ async function handleConfirmarPagamento() {
     setItens([])
     setConfirmando(false)
     setValorRecebido("")
+    setCategoriaSelecionada(null)
 
   } catch (err) {
     console.error(err)
@@ -229,28 +228,29 @@ return (
 
     <div className="flex items-center gap-2">
 
-      <div
-        className={`flex items-center gap-1 text-sm font-semibold px-3 h-9 rounded-lg ${
-          vendaMode === "balcao" ? "bg-blue-600" : "bg-green-600"
-        }`}
-      >
-        <span>{vendaMode === "balcao" ? "🧾" : "📲"}</span>
-        <span>{vendaMode === "balcao" ? "Balcão" : "Celular"}</span>
-      </div>
 
-      <button
-        onClick={() => {
-          localStorage.removeItem("modo_venda")
-          setMostrarModoModal(true)
-        }}
-        className="flex items-center justify-center text-sm font-semibold px-3 h-9 rounded-lg bg-gray-700 hover:bg-gray-600 transition"
-      >
-        🔄 Trocar
-      </button>
-
+{vendaMode && (
+  <>
+    <div className={`flex items-center gap-1 text-sm font-semibold px-3 h-9 rounded-lg ${
+      vendaMode === "balcao" ? "bg-blue-600" : "bg-green-600"
+    }`}>
+      <span>{vendaMode === "balcao" ? "🧾" : "📲"}</span>
+      <span>{vendaMode === "balcao" ? "Balcão" : "Celular"}</span>
     </div>
-  </div>
 
+    <button
+      onClick={() => {
+        localStorage.removeItem("modo_venda")
+        setMostrarModoModal(true)
+      }}
+      className="flex items-center justify-center text-sm font-semibold px-3 h-9 rounded-lg bg-gray-700 hover:bg-gray-600 transition"
+    >
+      🔄 Trocar
+    </button>
+  </>
+)}
+</div>
+</div>
   <Link
     href="/pedidos/controle"
     className="inline-block mb-4 bg-gray-700 px-3 py-2 rounded text-sm"
