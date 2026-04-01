@@ -5,6 +5,8 @@ import { criarPedido } from "../../services/pedidos"
 import { QRCodeCanvas } from "qrcode.react"
 import Link from "next/link"
 import { useVendaMode } from "@/hooks/useVendaMode"
+import { useCategorias } from "@/hooks/useCategorias"
+import { useProdutos } from "@/hooks/useProdutos"
 
 type Item = {
   nome: string
@@ -29,6 +31,18 @@ export default function Home() {
 
   const [valorRecebido, setValorRecebido] = useState("")
 
+  function formatarReal(valor: string) {
+  const numero = valor.replace(/\D/g, "")
+  return (Number(numero) / 100).toLocaleString("pt-BR", {
+    style: "currency",
+    currency: "BRL",
+  })
+}
+
+function parseReal(valor: string) {
+  return Number(valor.replace(/\D/g, "")) / 100
+}
+
   const [qrUrl, setQrUrl] = useState<string | null>(null)
   const [codigoPedido, setCodigoPedido] = useState<string | null>(null)
 
@@ -41,16 +55,23 @@ export default function Home() {
 
   const compacto = itens.length > 5
 
-// 🔥 TOPO DO COMPONENTE - ADICIONE ISSO
+const { categorias } = useCategorias()
+const { produtos } = useProdutos()
+
+const [categoriaSelecionada, setCategoriaSelecionada] = useState<string | null>(null)
+
+const produtosFiltrados = categoriaSelecionada
+  ? produtos.filter(
+      (p) => p.categoriaId === categoriaSelecionada && p.ativo
+    )
+  : []
+
 const { vendaMode, setVendaMode } = useVendaMode()
 
-// ✅ Lê localStorage na inicialização do estado
 const [mostrarModoModal, setMostrarModoModal] = useState(() => {
   if (typeof window === "undefined") return false
   return !localStorage.getItem("modo_venda")
 })
-
-// ✅ Remove o useEffect completamente!
 
   function adicionarItem(produto: Omit<Item, "quantidade">) {
     setItens((prev) => {
@@ -92,10 +113,10 @@ const [mostrarModoModal, setMostrarModoModal] = useState(() => {
     0
   )
 
-  const troco =
-    formaPagamento === "dinheiro"
-      ? Math.max(0, parseFloat(valorRecebido || "0") - total)
-      : 0
+const troco =
+  formaPagamento === "dinheiro"
+    ? Math.max(0, parseReal(valorRecebido) - total)
+    : 0
 
   function handlePedido() {
     if (!nome) {
@@ -111,44 +132,44 @@ const [mostrarModoModal, setMostrarModoModal] = useState(() => {
     setConfirmando(true)
   }
 
-  async function handleConfirmarPagamento() {
-    if (formaPagamento === "dinheiro") {
-      const valor = parseFloat(valorRecebido || "0")
+async function handleConfirmarPagamento() {
+  if (formaPagamento === "dinheiro") {
+    const valor = parseReal(valorRecebido)
 
-      if (valor <= 0) {
-        setErro("Digite o valor recebido")
-        return
-      }
-    }
-    try {
-      const res = await criarPedido(nome, itens, formaPagamento)
-
-      const url = `${window.location.origin}/pedidos/${res.id}`
-
-      // 🔥 salva snapshot antes de limpar
-      setNomePedido(nome)
-      setItensPedido(itens)
-
-      const valorRecebidoNum = parseFloat(valorRecebido || "0")
-      const trocoCalculado = Math.max(0, valorRecebidoNum - total)
-
-      setTrocoPedido(trocoCalculado)
-      setValorRecebidoPedido(valorRecebidoNum)
-
-      setQrUrl(url)
-      setCodigoPedido(res.codigo)
-
-      setMensagem(`Pedido ${res.codigo} criado!`)
-      setNome("")
-      setItens([])
-      setConfirmando(false)
-      setValorRecebido("")
-
-    } catch (err) {
-      console.error(err)
-      setErro("Erro ao criar pedido")
+    if (valor <= 0) {
+      setErro("Digite o valor recebido")
+      return
     }
   }
+
+  try {
+    const res = await criarPedido(nome, itens, formaPagamento)
+
+    const url = `${window.location.origin}/pedidos/${res.id}`
+
+    setNomePedido(nome)
+    setItensPedido(itens)
+
+    const valorRecebidoNum = parseReal(valorRecebido)
+    const trocoCalculado = Math.max(0, valorRecebidoNum - total)
+
+    setTrocoPedido(trocoCalculado)
+    setValorRecebidoPedido(valorRecebidoNum)
+
+    setQrUrl(url)
+    setCodigoPedido(res.codigo)
+
+    setMensagem(`Pedido ${res.codigo} criado!`)
+    setNome("")
+    setItens([])
+    setConfirmando(false)
+    setValorRecebido("")
+
+  } catch (err) {
+    console.error(err)
+    setErro("Erro ao criar pedido")
+  }
+}
 
     function handleWhatsApp() {
       if (!codigoPedido || !qrUrl) return
@@ -250,36 +271,71 @@ return (
   {/* 🔥 LAYOUT RESPONSIVO */}
   <div className="flex flex-col lg:grid lg:grid-cols-3 gap-4">
 
-    {/* PRODUTOS */}
-    <div className="lg:col-span-2">
+{/* PRODUTOS */}
+<div className="lg:col-span-2 flex flex-col">
 
-      <div className="grid grid-cols-2 gap-3 mb-4">
+  {/* CATEGORIAS */}
+  <div className="flex gap-2 mb-3 overflow-x-auto pb-1">
+
+    {categorias.filter(c => c.ativo).length === 0 && (
+      <p className="text-gray-400">Nenhuma categoria cadastrada</p>
+    )}
+
+    {categorias
+      .filter((c) => c.ativo)
+      .map((cat) => (
         <button
-          onClick={() =>
-            adicionarItem({ nome: "Pizza", preco: 20, barracaId: "pizza" })
-          }
-          className={`p-4 rounded-xl text-lg font-bold transition ${
-            ultimoItem === "Pizza" ? "bg-orange-400 scale-105" : "bg-orange-500"
+          key={cat.id}
+          onClick={() => setCategoriaSelecionada(cat.id)}
+          className={`px-4 py-2 rounded-lg font-semibold whitespace-nowrap border transition ${
+            categoriaSelecionada === cat.id
+              ? "bg-green-600 border-green-500 text-white"
+              : "bg-gray-800 border-gray-700 text-gray-300 hover:bg-gray-700"
           }`}
         >
-          🍕 Pizza
-          <br />R$20
+          {cat.nome}
         </button>
+      ))}
+  </div>
 
-        <button
-          onClick={() =>
-            adicionarItem({ nome: "Coca", preco: 5, barracaId: "bebida" })
-          }
-          className={`p-4 rounded-xl text-lg font-bold transition ${
-            ultimoItem === "Coca" ? "bg-blue-400 scale-105" : "bg-blue-500"
-          }`}
-        >
-          🥤 Coca
-          <br />R$5
-        </button>
+  {/* PRODUTOS */}
+  <div className="grid grid-cols-2 md:grid-cols-3 gap-3 max-h-[60vh] overflow-y-auto pr-1">
+
+    {produtosFiltrados.length === 0 && (
+      <div className="col-span-full text-center text-gray-400 py-10">
+        Nenhum produto nessa categoria
       </div>
+    )}
 
-    </div>
+    {produtosFiltrados.map((prod) => (
+      <button
+        key={prod.id}
+        onClick={() =>
+          adicionarItem({
+            nome: prod.nome,
+            preco: prod.preco,
+            barracaId: prod.categoriaId,
+          })
+        }
+        className={`p-4 rounded-xl text-left border transition-all ${
+          ultimoItem === prod.nome
+            ? "bg-green-500 border-green-400"
+            : "bg-gray-800 border-gray-700 hover:bg-gray-700"
+        }`}
+      >
+        <div className="font-semibold text-white text-sm leading-tight">
+          {prod.nome}
+        </div>
+
+        <div className="text-green-400 font-bold mt-2 text-sm">
+          R$ {prod.preco.toFixed(2)}
+        </div>
+      </button>
+    ))}
+
+  </div>
+
+</div>
 
     {/* CARRINHO */}
     <div className="bg-gray-800 p-3 rounded-lg mb-4 lg:mb-0 flex flex-col lg:sticky lg:top-4 h-fit">
@@ -454,13 +510,13 @@ return (
 
             {formaPagamento === "dinheiro" && (
               <div className="mb-4">
-                <input
-                  type="number"
-                  placeholder="Valor recebido"
-                  value={valorRecebido}
-                  onChange={(e) => setValorRecebido(e.target.value)}
-                  className="w-full p-3 rounded border"
-                />
+              <input
+                type="text"
+                placeholder="R$ 0,00"
+                value={valorRecebido}
+                onChange={(e) => setValorRecebido(formatarReal(e.target.value))}
+                className="w-full p-3 rounded border text-lg font-semibold"
+              />
                 <p className="mt-2 font-bold">
                   Troco: R$ {troco.toFixed(2)}
                 </p>
