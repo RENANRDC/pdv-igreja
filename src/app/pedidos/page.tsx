@@ -128,7 +128,7 @@ async function voltarParaPreparo(id: string) {
                   #{pedido.codigo}
                 </span>
 
-                <span className="text-xs text-gray-200 truncate max-w-[100px]">
+                <span className="text-xs text-gray-200 truncate max-w-25">
                   {pedido.nomeCliente}
                 </span>
 
@@ -158,7 +158,7 @@ async function voltarParaPreparo(id: string) {
 
                 <div className="flex justify-between mb-2">
                   <span className="font-bold">#{pedido.codigo}</span>
-                  <span className="text-xs text-gray-200 truncate max-w-[100px]">
+                  <span className="text-xs text-gray-200 truncate max-w-25">
                     {pedido.nomeCliente}
                   </span>
                 </div>
@@ -211,7 +211,7 @@ async function voltarParaPreparo(id: string) {
                   #{pedido.codigo}
                 </span>
 
-                <span className="text-xs text-gray-200 truncate max-w-[100px]">
+                <span className="text-xs text-gray-200 truncate max-w-25">
                   {pedido.nomeCliente}
                 </span>
 
