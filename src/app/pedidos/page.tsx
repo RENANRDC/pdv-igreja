@@ -66,6 +66,12 @@ export default function Cozinha() {
     })
   }
 
+  async function voltarParaPendente(id: string) {
+    await updateDoc(doc(db, "pedidos", id), {
+      status: "pendente",
+    })
+  }
+
   async function confirmarFinalizar() {
     if (!pedidoSelecionado) return
 
@@ -76,11 +82,11 @@ export default function Cozinha() {
     setPedidoSelecionado(null)
   }
 
-  async function desfazerPedido(id: string) {
-    await updateDoc(doc(db, "pedidos", id), {
-      status: "pendente",
-    })
-  }
+async function voltarParaPreparo(id: string) {
+  await updateDoc(doc(db, "pedidos", id), {
+    status: "em_preparo",
+  })
+}
 
   const pendentes = pedidos.filter(p => p.status === "pendente")
   const emPreparo = pedidos.filter(p => p.status === "em_preparo")
@@ -104,11 +110,10 @@ export default function Cozinha() {
         <div />
       </div>
 
-      {/* 🔥 GRID 3 COLUNAS */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
 
         {/* 🟡 PENDENTES */}
-        <div className="bg-gray-800/40 p-3 rounded-xl">
+        <div className="bg-yellow-500/10 border border-yellow-500/30 p-3 rounded-xl">
           <h2 className="text-yellow-400 font-semibold mb-3">
             Pendentes ({pendentes.length})
           </h2>
@@ -119,7 +124,9 @@ export default function Cozinha() {
 
                 <div className="flex justify-between mb-2">
                   <span className="font-bold">#{pedido.codigo}</span>
-                  <span className="text-xs text-gray-400">{pedido.nomeCliente}</span>
+                  <span className="text-xs text-gray-300 truncate max-w-[100px]">
+                    {pedido.nomeCliente}
+                  </span>
                 </div>
 
                 <button
@@ -135,7 +142,7 @@ export default function Cozinha() {
         </div>
 
         {/* 🔵 EM PREPARO */}
-        <div className="bg-blue-900/20 p-3 rounded-xl border border-blue-800">
+        <div className="bg-blue-500/10 border border-blue-500/30 p-3 rounded-xl">
           <h2 className="text-blue-400 font-semibold mb-3">
             Em preparo ({emPreparo.length})
           </h2>
@@ -146,7 +153,9 @@ export default function Cozinha() {
 
                 <div className="flex justify-between mb-2">
                   <span className="font-bold">#{pedido.codigo}</span>
-                  <span className="text-xs text-gray-300">{pedido.nomeCliente}</span>
+                  <span className="text-xs text-gray-200 truncate max-w-[100px]">
+                    {pedido.nomeCliente}
+                  </span>
                 </div>
 
                 <div className="flex gap-2">
@@ -165,13 +174,21 @@ export default function Cozinha() {
                   </button>
                 </div>
 
+                {/* 🔥 NOVO BOTÃO VOLTAR */}
+                <button
+                  onClick={() => voltarParaPendente(pedido.id)}
+                  className="w-full mt-2 bg-gray-700 p-2 rounded text-xs"
+                >
+                  Voltar
+                </button>
+
               </div>
             ))}
           </div>
         </div>
 
         {/* 🟢 FINALIZADOS */}
-        <div className="bg-green-900/20 p-3 rounded-xl border border-green-800">
+        <div className="bg-green-500/10 border border-green-500/30 p-3 rounded-xl">
           <h2 className="text-green-400 font-semibold mb-3">
             Prontos ({finalizados.length})
           </h2>
@@ -185,7 +202,7 @@ export default function Cozinha() {
                 </span>
 
                 <button
-                  onClick={() => desfazerPedido(pedido.id)}
+                  onClick={() => voltarParaPreparo(pedido.id)}
                   className="bg-yellow-500 text-black px-2 py-1 rounded text-xs"
                 >
                   Desfazer
