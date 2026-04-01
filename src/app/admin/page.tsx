@@ -10,7 +10,7 @@ export default function AdminPage() {
       {/* HEADER */}
       <div className="w-full max-w-sm flex items-center justify-between mb-8">
         <h1 className="text-3xl font-bold">
-          ⚙️ Admin
+          Admin
         </h1>
 
         <BackButton href="/" />
@@ -21,36 +21,40 @@ export default function AdminPage() {
 
         <Link
           href="/admin/categorias"
-          className="bg-gray-800 hover:bg-gray-700 p-4 rounded-xl text-center font-semibold text-lg transition"
+          className="bg-gray-800 hover:bg-gray-700 p-5 rounded-2xl font-semibold text-lg transition flex items-center gap-3"
         >
-          🗂️ Categorias
+          <span className="text-xl">🗂️</span>
+          <span>Categorias</span>
         </Link>
 
         <Link
           href="/admin/produtos"
-          className="bg-gray-800 hover:bg-gray-700 p-4 rounded-xl text-center font-semibold text-lg transition"
+          className="bg-gray-800 hover:bg-gray-700 p-5 rounded-2xl font-semibold text-lg transition flex items-center gap-3"
         >
-          📦 Produtos
+          <span className="text-xl">📦</span>
+          <span>Produtos</span>
         </Link>
 
         <Link
           href="/admin/financeiro"
-          className="bg-gray-800 hover:bg-gray-700 p-4 rounded-xl text-center font-semibold text-lg transition"
+          className="bg-gray-800 hover:bg-gray-700 p-5 rounded-2xl font-semibold text-lg transition flex items-center gap-3"
         >
-          💰 Financeiro
+          <span className="text-xl">💰</span>
+          <span>Financeiro</span>
         </Link>
 
         <Link
           href="/admin/credenciais"
-          className="bg-gray-800 hover:bg-gray-700 p-4 rounded-xl text-center font-semibold text-lg transition"
+          className="bg-gray-800 hover:bg-gray-700 p-5 rounded-2xl font-semibold text-lg transition flex items-center gap-3"
         >
-          🔐 Credenciais
+          <span className="text-xl">🔐</span>
+          <span>Credenciais</span>
         </Link>
 
       </div>
 
       {/* FOOTER */}
-      <p className="text-sm text-gray-400 mt-8 text-center">
+      <p className="text-sm text-gray-400 mt-8 text-center max-w-xs">
         Gerencie categorias, produtos, vendas e configurações do sistema
       </p>
 

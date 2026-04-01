@@ -103,7 +103,7 @@ async function voltarParaPreparo(id: string) {
 
         <div className="flex justify-center">
           <h1 className="text-2xl font-bold">
-            🍳 Cozinha
+            Cozinha
           </h1>
         </div>
 
