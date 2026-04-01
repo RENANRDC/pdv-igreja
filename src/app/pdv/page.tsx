@@ -4,7 +4,7 @@ import { useState } from "react"
 import { criarPedido } from "../../services/pedidos"
 import { QRCodeCanvas } from "qrcode.react"
 import Link from "next/link"
-import { useVendaMode } from "../../hooks/useVendaMode"
+import { useVendaMode } from "@/hooks/useVendaMode"
 
 type Item = {
   nome: string

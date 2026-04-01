@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState, useCallback } from "react"
 import { useParams } from "next/navigation"
 import { doc, onSnapshot } from "firebase/firestore"
-import { db } from "../../../services/firebase"
+import { db } from "@/services/firebase"
 
 type Item = {
   nome: string

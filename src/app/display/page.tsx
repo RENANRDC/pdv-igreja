@@ -7,7 +7,7 @@ import {
   query,
   orderBy,
 } from "firebase/firestore"
-import { db } from "../../services/firebase"
+import { db } from "@/services/firebase"
 
 type Pedido = {
   id: string
