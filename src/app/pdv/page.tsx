@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { criarPedido } from "../../services/pedidos"
 import { QRCodeCanvas } from "qrcode.react"
 import Link from "next/link"
@@ -68,8 +68,25 @@ const produtosFiltrados = categoriaSelecionada
 
 
 const { vendaMode, setVendaMode } = useVendaMode()
+const [mounted, setMounted] = useState(false)
+useEffect(() => {
+  queueMicrotask(() => {
+    setMounted(true)
+  })
+}, [])
+const [mostrarModoModal, setMostrarModoModal] = useState(false)
 
-const [mostrarModoModal, setMostrarModoModal] = useState(true)
+useEffect(() => {
+  const jaAbriu = sessionStorage.getItem("modo_modal_aberto")
+
+  if (!jaAbriu) {
+    queueMicrotask(() => {
+      setMostrarModoModal(true)
+    })
+
+    sessionStorage.setItem("modo_modal_aberto", "true")
+  }
+}, [])
 
   function adicionarItem(produto: Omit<Item, "quantidade">) {
     setItens((prev) => {
@@ -229,7 +246,7 @@ return (
     <div className="flex items-center gap-2">
 
 
-{vendaMode && (
+{mounted && vendaMode && (
   <>
     <div className={`flex items-center gap-1 text-sm font-semibold px-3 h-9 rounded-lg ${
       vendaMode === "balcao" ? "bg-blue-600" : "bg-green-600"
