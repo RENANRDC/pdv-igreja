@@ -156,7 +156,7 @@ export default function PedidoPage() {
   </button>
 
   {!somAtivo && (
-    <span className="text-xs text-gray-300 leading-tight max-w-[160px]">
+    <span className="text-xs text-gray-300 leading-tight max-w-40">
       Ative o som e mantenha essa tela aberta para ser avisado quando estiver pronto.
     </span>
   )}
