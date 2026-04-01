@@ -264,7 +264,7 @@ return (
 
           {/* 🔥 ESCONDE TEXTO SÓ NO MOBILE */}
           <span className="hidden sm:inline">
-            {vendaMode === "balcao" ? "Balcão" : "Celular"}
+            {vendaMode === "balcao" ? "Balcão" : "Mesa"}
           </span>
         </div>
 
@@ -664,8 +664,8 @@ return (
               )}
         
 
-              {/* Celular */}
-              {vendaMode === "Celular" && (
+              {/* Mesa */}
+              {vendaMode === "Mesa" && (
                 <>
                   <input
                     placeholder="Número WhatsApp (ex: 44999999999)"
@@ -784,12 +784,12 @@ return (
 
 <button
   onClick={() => {
-    setVendaMode("Celular")
+    setVendaMode("Mesa")
     setMostrarModoModal(false) // 🔥 FECHA O MODAL
   }}
         className="bg-green-600 text-white p-4 rounded-xl font-bold"
       >
-        📲 Celular
+        📲 Mesa
       </button>
 
       </div>

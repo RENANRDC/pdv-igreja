@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 
-type VendaMode = "balcao" | "Celular";
+type VendaMode = "balcao" | "Mesa";
 
 export function useVendaMode() {
   const [vendaMode, setVendaMode] = useState<VendaMode>(() => {
@@ -11,7 +11,7 @@ export function useVendaMode() {
     
     try {
       const saved = localStorage.getItem("modo_venda");
-      return saved === "Celular" ? "Celular" : "balcao";
+      return saved === "Mesa" ? "Mesa" : "balcao";
     } catch {
       return "balcao";
     }
