@@ -63,7 +63,7 @@ export default function ControlePedidos() {
 
         <div className="flex justify-center">
           <h1 className="text-2xl font-bold">
-            Controle de Pedidos
+            Pedidos
           </h1>
         </div>
 
