@@ -97,10 +97,10 @@ export default function DisplayPage() {
     .slice(0, 10)
 
   return (
-    <div className="min-h-screen bg-black text-white p-6 grid grid-cols-2 gap-6">
+    <div className="min-h-screen bg-black text-white p-6 grid grid-cols-2 gap-4">
 
       {/* 🟡 EM PREPARO */}
-      <div>
+      <div className="bg-gray-800/40 rounded-2xl p-4">
         <h2 className="text-2xl font-bold text-yellow-400 mb-4 text-center">
           🟡 Em preparo
         </h2>
@@ -126,7 +126,7 @@ export default function DisplayPage() {
       </div>
 
       {/* 🟢 PRONTOS */}
-      <div>
+      <div className="bg-gray-800/40 rounded-2xl p-4">
         <h2 className="text-2xl font-bold text-green-400 mb-4 text-center">
           🟢 Prontos
         </h2>
