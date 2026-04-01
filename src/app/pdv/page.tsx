@@ -135,10 +135,10 @@ const troco =
     : 0
 
   function handlePedido() {
-    if (!nome) {
-      setErro("Digite o nome do cliente")
-      return
-    }
+if (!nome.trim()) {
+  setErro("nome")
+  return
+}
 
     if (itens.length === 0) {
       setErro("Adicione pelo menos 1 item")
@@ -290,15 +290,19 @@ return (
     📋 Ver pedidos
   </Link>
 
-  <input
-    placeholder="Nome do cliente"
-    value={nome}
-    onChange={(e) => {
-      setNome(e.target.value)
-      if (erro) setErro(null)
-    }}
-    className="w-full p-3 rounded-lg bg-gray-800 mb-4"
-  />
+    <input
+      placeholder={erro === "nome" ? "Digite o nome do cliente" : "Nome do cliente"}
+      value={nome}
+      onChange={(e) => {
+        setNome(e.target.value)
+        if (erro === "nome") setErro(null)
+      }}
+      className={`w-full p-3 rounded-lg mb-4 outline-none transition ${
+        erro === "nome"
+          ? "bg-red-900 border border-red-500 placeholder-red-300"
+          : "bg-gray-800 border border-transparent focus:border-green-500"
+      }`}
+    />
 
   {/* 🔥 LAYOUT RESPONSIVO */}
   <div className="flex flex-col lg:grid lg:grid-cols-3 gap-4">
@@ -481,7 +485,7 @@ return (
   <p className="text-green-400">{mensagem}</p>
   {erro && (
     <p className="text-red-400 font-bold mt-2">
-      {erro}
+      {/* erro tratado direto no input */}
     </p>
   )}
 
