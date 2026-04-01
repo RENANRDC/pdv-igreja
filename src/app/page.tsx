@@ -7,7 +7,7 @@ export default function MenuPage() {
     <div className="min-h-screen bg-gray-900 text-white flex flex-col items-center justify-center p-6">
 
       <h1 className="text-3xl font-bold mb-8">
-        🍔 Sistema PDV
+        Central Gourmet
       </h1>
 
       <div className="grid grid-cols-1 gap-4 w-full max-w-sm">
@@ -44,7 +44,7 @@ export default function MenuPage() {
       </div>
 
       <p className="text-sm text-gray-400 mt-8">
-        Escolha uma opção para iniciar
+        Sistema de Ponto de Venda (PDV)
       </p>
 
     </div>

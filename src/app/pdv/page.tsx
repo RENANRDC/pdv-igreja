@@ -253,7 +253,7 @@ return (
       </div>
 
       {/* DIREITA */}
-      <div className="flex justify-end items-center gap-2 min-w-[140px]">
+      <div className="flex justify-end items-center gap-2 min-w-35">
 
         {mounted && vendaMode && (
           <>
