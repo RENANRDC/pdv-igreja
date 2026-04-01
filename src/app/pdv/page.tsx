@@ -293,10 +293,13 @@ return (
     <input
       placeholder={erro === "nome" ? "Digite o nome do cliente" : "Nome do cliente"}
       value={nome}
-      onChange={(e) => {
-        setNome(e.target.value)
-        if (erro === "nome") setErro(null)
-      }}
+onChange={(e) => {
+  setNome(e.target.value)
+}}
+
+onFocus={() => {
+  if (erro === "nome") setErro(null)
+}}
       className={`w-full p-3 rounded-lg mb-4 outline-none transition ${
         erro === "nome"
           ? "bg-red-900 border border-red-500 placeholder-red-300"
