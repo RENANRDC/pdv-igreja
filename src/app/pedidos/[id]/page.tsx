@@ -141,15 +141,27 @@ export default function PedidoPage() {
   return (
     <div className="min-h-screen bg-gray-900 text-white flex flex-col items-center justify-center p-6">
 
-      {/* 🔊 BOTÃO SOM */}
-      <button
-        onClick={ativarSomManual}
-        className={`absolute top-4 right-4 px-3 py-1 rounded text-sm ${
-          somAtivo ? "bg-green-600" : "bg-blue-600"
-        }`}
-      >
-        {somAtivo ? "🔊 Som ativo" : "🔇 Ativar som"}
-      </button>
+      {/* 🔊 BOTÃO + AVISO */}
+<div className="absolute top-4 right-4 flex items-center gap-3 bg-white/5 backdrop-blur-md px-3 py-2 rounded-xl border border-white/10">
+
+  <button
+    onClick={ativarSomManual}
+    className={`px-3 py-1.5 rounded-lg text-sm font-medium transition ${
+      somAtivo
+        ? "bg-green-600"
+        : "bg-blue-600 hover:bg-blue-500"
+    }`}
+  >
+    {somAtivo ? "🔊 Som ativo" : "🔇 Ativar som"}
+  </button>
+
+  {!somAtivo && (
+    <span className="text-xs text-gray-300 leading-tight max-w-[160px]">
+      Ative o som e mantenha essa tela aberta para ser avisado quando estiver pronto.
+    </span>
+  )}
+
+</div>
 
       {/* Código */}
       <div className="text-center mb-6">
