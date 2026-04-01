@@ -108,9 +108,22 @@ export default function ProdutosPage() {
   return (
     <div className="min-h-screen bg-gray-900 text-white p-6">
 
-      <BackButton />
+<div className="grid grid-cols-3 items-center mb-6">
 
-      <h1 className="text-2xl font-bold mb-6">Produtos</h1>
+  {/* ESQUERDA */}
+  <div className="flex justify-start">
+    <BackButton href="/admin" />
+  </div>
+
+  {/* CENTRO */}
+  <div className="flex justify-center">
+    <h1 className="text-2xl font-bold">Produtos</h1>
+  </div>
+
+  {/* DIREITA (reserva futura) */}
+  <div />
+
+</div>
 
       <div className="grid md:grid-cols-3 gap-6">
 

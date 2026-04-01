@@ -1,7 +1,6 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import Link from "next/link"
 import {
   collection,
   onSnapshot,
@@ -9,6 +8,7 @@ import {
   orderBy
 } from "firebase/firestore"
 import { db } from "@/services/firebase"
+import BackButton from "@/components/BackButton"
 
 type Item = {
   nome: string
@@ -51,30 +51,34 @@ export default function ControlePedidos() {
   const pendentes = pedidos.filter(p => p.status === "pendente")
   const finalizados = pedidos.filter(p => p.status === "finalizado")
 
-  const listaAtual =
-    aba === "pendente" ? pendentes : finalizados
-
   return (
     <div className="min-h-screen bg-gray-900 text-white p-4">
 
-      {/* 🔥 TOPO */}
-      <div className="flex justify-between items-center mb-4">
-        <Link
-          href="/pdv"
-          className="bg-gray-700 hover:bg-gray-600 px-3 py-2 rounded text-sm transition"
-        >
-          ⬅️ Voltar ao PDV
-        </Link>
+      {/* HEADER */}
+      <div className="grid grid-cols-3 items-center mb-6">
 
-        <h1 className="text-2xl font-bold">📋 Controle de Pedidos</h1>
+        <div className="flex justify-start">
+          <BackButton href="/pdv" />
+        </div>
+
+        <div className="flex justify-center">
+          <h1 className="text-2xl font-bold">
+            Controle de Pedidos
+          </h1>
+        </div>
+
+        <div />
       </div>
 
-      {/* 🔥 ABAS */}
-      <div className="flex gap-2 mb-4">
+      {/* ABAS */}
+      <div className="flex gap-2 mb-5">
+
         <button
           onClick={() => setAba("pendente")}
-          className={`px-3 py-2 rounded ${
-            aba === "pendente" ? "bg-yellow-500" : "bg-gray-700"
+          className={`flex-1 h-10 rounded-lg font-semibold transition ${
+            aba === "pendente"
+              ? "bg-yellow-500 text-black"
+              : "bg-gray-800 hover:bg-gray-700"
           }`}
         >
           🟡 Pendentes ({pendentes.length})
@@ -82,46 +86,98 @@ export default function ControlePedidos() {
 
         <button
           onClick={() => setAba("finalizado")}
-          className={`px-3 py-2 rounded ${
-            aba === "finalizado" ? "bg-green-600" : "bg-gray-700"
+          className={`flex-1 h-10 rounded-lg font-semibold transition ${
+            aba === "finalizado"
+              ? "bg-green-600"
+              : "bg-gray-800 hover:bg-gray-700"
           }`}
         >
           🟢 Prontos ({finalizados.length})
         </button>
+
       </div>
 
-      {/* 🔥 LISTA */}
-      <div className="grid gap-3">
-        {listaAtual.map((p) => (
-          <div key={p.id} className="bg-gray-800 p-4 rounded-xl">
-
-            <div className="flex justify-between mb-2">
-              <span className="font-bold">#{p.codigo}</span>
-              <span className="text-sm">{p.status}</span>
-            </div>
-
-            <div className="text-sm text-gray-300 mb-2">
-              {p.nomeCliente}
-            </div>
-
-            <div className="flex justify-between items-center">
-              <span className="font-bold text-green-400">
-                R$ {p.total.toFixed(2)}
-              </span>
-
-              <button
-                onClick={() => setPedidoSelecionado(p)}
-                className="bg-blue-600 px-3 py-1 rounded text-sm"
-              >
-                Detalhes
-              </button>
-            </div>
-
+{/* LISTA com altura TOTAL fixa */}
+<div 
+  className="grid gap-3 grid-cols-2 md:grid-cols-3 xl:grid-cols-4 content-start"
+  style={{ 
+    minHeight: '600px'
+  }}
+>
+  {/* Renderiza MÁXIMO 8 cards (4 por linha em mobile, 8 em desktop) */}
+  {Array.from({ length: 8 }).map((_, index) => {
+    const itensVisiveis = aba === "pendente" ? pendentes : finalizados
+    const pedido = itensVisiveis[index]
+    
+    if (!pedido) {
+      // Skeleton para preencher espaço
+      return (
+        <div 
+          key={`skeleton-${index}-${aba}`}
+          className="bg-gray-800 p-4 rounded-xl animate-pulse h-28 flex flex-col justify-between"
+        >
+          <div className="flex justify-between items-center mb-2">
+            <div className="w-16 h-4 bg-gray-600 rounded"></div>
+            <div className="w-12 h-4 bg-gray-600 rounded"></div>
           </div>
-        ))}
-      </div>
+          <div className="w-24 h-4 bg-gray-600 rounded mb-2"></div>
+          <div className="flex justify-between items-center">
+            <div className="w-16 h-4 bg-gray-600 rounded"></div>
+            <div className="w-16 h-8 bg-gray-600 rounded"></div>
+          </div>
+        </div>
+      )
+    }
 
-      {/* 🔥 MODAL DETALHES */}
+    return (
+<div
+  key={`pedido-${pedido.id}-${aba}-${index}`}
+  className="bg-gray-800 border border-gray-700 p-4 rounded-2xl 
+             hover:bg-gray-750 hover:border-gray-600 
+             transition-all duration-200 h-28 flex flex-col justify-between gap-1"
+>
+
+  {/* TOPO */}
+  <div className="flex justify-between items-center mb-1">
+    <span className="font-bold text-white text-sm tracking-wide">
+      #{pedido.codigo}
+    </span>
+
+    <span className={`text-xs px-2 py-1 rounded-full font-semibold ${
+      pedido.status === "pendente"
+        ? "bg-yellow-500/90 text-black"
+        : "bg-green-600/90 text-white"
+    }`}>
+      {pedido.status}
+    </span>
+  </div>
+
+  {/* CLIENTE */}
+  <div className="text-sm text-gray-300 leading-tight line-clamp-2">
+    {pedido.nomeCliente}
+  </div>
+
+  {/* RODAPÉ */}
+  <div className="flex justify-between items-center">
+
+    <span className="font-bold text-green-400 text-sm">
+      R$ {pedido.total.toFixed(2)}
+    </span>
+
+    <button
+      onClick={() => setPedidoSelecionado(pedido)}
+      className="bg-blue-600 hover:bg-blue-700 px-3 py-1.5 rounded-lg text-xs font-semibold transition"
+    >
+      Detalhes
+    </button>
+
+  </div>
+</div>
+    )
+  })}
+</div>
+
+      {/* MODAL */}
       {pedidoSelecionado && (
         <div className="fixed inset-0 bg-black/70 flex items-center justify-center">
 

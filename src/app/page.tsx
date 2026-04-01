@@ -33,6 +33,14 @@ export default function MenuPage() {
           📺 Display
         </Link>
 
+        {/* 🔥 NOVO BOTÃO ADMIN */}
+        <Link
+          href="/admin"
+          className="bg-purple-600 hover:bg-purple-500 p-4 rounded-xl text-center font-semibold text-lg transition"
+        >
+          ⚙️ Admin
+        </Link>
+
       </div>
 
       <p className="text-sm text-gray-400 mt-8">
