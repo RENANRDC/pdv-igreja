@@ -269,9 +269,10 @@ return (
                 localStorage.removeItem("modo_venda")
                 setMostrarModoModal(true)
               }}
-              className="flex items-center justify-center text-sm font-semibold px-3 h-9 rounded-lg bg-gray-700 hover:bg-gray-600 transition"
+              className="flex items-center justify-center gap-1 text-xs md:text-sm px-2 md:px-3 h-8 md:h-9 rounded-lg bg-gray-700 hover:bg-gray-600 transition"
             >
-              🔄 Trocar
+              🔄
+              <span className="hidden md:inline">Trocar</span>
             </button>
           </>
         )}
