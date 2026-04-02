@@ -660,35 +660,33 @@ onFocus={() => {
             {/* AÇÕES */}
             <div className="flex flex-col gap-2 mt-4">
 
-              {/* BALCÃO */}
-              {vendaMode === "balcao" && (
-                <button
-                  onClick={() => window.print()}
-                  className="w-full bg-blue-600 text-white p-3 rounded-xl font-bold"
-                >
-                  🖨️ Imprimir
-                </button>
-              )}
-        
+{/* IMPRIMIR (só balcão) */}
+{vendaMode === "balcao" && (
+  <button
+    onClick={() => window.print()}
+    className="w-full bg-blue-600 text-white p-3 rounded-xl font-bold"
+  >
+    🖨️ Imprimir
+  </button>
+)}
 
-              {/* Mesa */}
-              {vendaMode === "Mesa" && (
-                <>
-                  <input
-                    placeholder="Número WhatsApp (ex: 44999999999)"
-                    value={whatsNumero}
-                    onChange={(e) => setWhatsNumero(e.target.value)}
-                    className="w-full p-3 border rounded"
-                  />
+{/* WHATSAPP (todos os modos) */}
+<>
+  <input
+    placeholder="Número WhatsApp (ex: 44999999999)"
+    value={whatsNumero}
+    onChange={(e) => setWhatsNumero(e.target.value)}
+    className="w-full p-3 border rounded"
+  />
 
-                  <button
-                    onClick={handleWhatsApp}
-                    className="w-full bg-green-600 text-white p-3 rounded-xl font-bold"
-                  >
-                    📲 Enviar via WhatsApp
-                  </button>
-                </>
-              )}
+  <button
+    onClick={handleWhatsApp}
+    className="w-full bg-green-600 text-white p-3 rounded-xl font-bold"
+  >
+    📲 Enviar via WhatsApp
+  </button>
+</>
+              
 
               <button
                 onClick={() => {
@@ -791,7 +789,7 @@ onFocus={() => {
 
 <button
   onClick={() => {
-    setVendaMode("Mesa")
+    setVendaMode("mesa")
     setMostrarModoModal(false) // 🔥 FECHA O MODAL
   }}
         className="bg-green-600 text-white p-4 rounded-xl font-bold"
