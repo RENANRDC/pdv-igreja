@@ -9,6 +9,7 @@ import {
 } from "firebase/firestore"
 import { db } from "@/services/firebase"
 import BackButton from "@/components/BackButton"
+import { useAuthGuard } from "@/hooks/useAuthGuard"
 
 type Item = {
   nome: string
@@ -26,6 +27,9 @@ type Pedido = {
 }
 
 export default function ControlePedidos() {
+
+  useAuthGuard()
+
   const [pedidos, setPedidos] = useState<Pedido[]>([])
   const [aba, setAba] = useState<"pendente" | "finalizado">("pendente")
   const [pedidoSelecionado, setPedidoSelecionado] = useState<Pedido | null>(null)

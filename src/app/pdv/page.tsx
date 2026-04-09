@@ -8,6 +8,7 @@ import { useVendaMode } from "@/hooks/useVendaMode"
 import { useCategorias } from "@/hooks/useCategorias"
 import { useProdutos } from "@/hooks/useProdutos"
 import BackButton from "@/components/BackButton"
+import { useAuthGuard } from "@/hooks/useAuthGuard"
 
 type Item = {
   nome: string
@@ -19,6 +20,9 @@ type Item = {
 type FormaPagamento = "pix" | "dinheiro" | "cartao"
 
 export default function Home() {
+
+  useAuthGuard()
+
   const [nome, setNome] = useState("")
   const [nomePedido, setNomePedido] = useState("") // 🔥 snapshot nome
   const [mensagem, setMensagem] = useState("")

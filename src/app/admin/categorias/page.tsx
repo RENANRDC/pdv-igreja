@@ -11,6 +11,7 @@ import {
   deleteDoc,
 } from "firebase/firestore"
 import { useCategorias } from "@/hooks/useCategorias"
+import { useAdminGuard } from "@/hooks/useAdminGuard"
 
 type Categoria = {
   id: string
@@ -19,6 +20,9 @@ type Categoria = {
 }
 
 export default function CategoriasPage() {
+
+  useAdminGuard()
+  
   const [nome, setNome] = useState("")
   const [editandoId, setEditandoId] = useState<string | null>(null)
 

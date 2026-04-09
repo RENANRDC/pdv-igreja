@@ -1,8 +1,12 @@
 "use client"
 
 import BackButton from "@/components/BackButton"
+import { useAdminGuard } from "@/hooks/useAdminGuard"
 
 export default function CredenciaisPage() {
+
+  useAdminGuard()
+
   return (
     <div className="min-h-screen bg-gray-900 text-white p-6">
 
