@@ -62,11 +62,11 @@ export default function LoginPage() {
 
         {/* LOGO */}
         <div className="flex justify-center mb-4">
-          <img src="/logo.png" alt="Logo" className="h-16 object-contain" />
+          <img src="/logo.png" alt="Logo" className="h-25 object-contain" />
         </div>
 
         <h1 className="text-white text-xl font-bold text-center">
-          Bem-vindo
+          Central Gourmet
         </h1>
 
         <p className="text-gray-400 text-center mb-6">

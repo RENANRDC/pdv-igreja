@@ -50,12 +50,12 @@ export default function MenuPage() {
           </div>
 
           {/* LOGOUT */}
-          <button
-            onClick={handleLogout}
-            className="text-xs bg-gray-800 hover:bg-gray-700 px-3 py-2 rounded-lg transition"
-          >
-            Sair
-          </button>
+        <button
+          onClick={handleLogout}
+          className="flex items-center justify-center text-sm font-semibold px-3 h-9 rounded-lg bg-gray-700 hover:bg-gray-600 transition"
+        >
+          Sair
+        </button>
 
         </div>
       </div>
