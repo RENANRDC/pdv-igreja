@@ -12,7 +12,7 @@ import {
 } from "firebase/firestore"
 import { useCategorias } from "@/hooks/useCategorias"
 import { useProdutos } from "@/hooks/useProdutos"
-import { useAdminGuard } from "@/hooks/useAdminGuard"
+
 
 type Produto = {
   id: string
@@ -24,7 +24,7 @@ type Produto = {
 
 export default function ProdutosPage() {
 
-  useAdminGuard()
+  
 
   const [nome, setNome] = useState("")
   const [precoFormatado, setPrecoFormatado] = useState("")

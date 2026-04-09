@@ -1,12 +1,9 @@
 "use client"
 
 import Link from "next/link"
-import { useAdminGuard } from "@/hooks/useAdminGuard"
 import BackButton from "@/components/BackButton"
 
 export default function AdminPage() {
-
-  useAdminGuard()
 
   return (
     <div className="min-h-screen bg-gray-900 text-white flex flex-col">

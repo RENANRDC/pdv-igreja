@@ -8,7 +8,7 @@ import { useVendaMode } from "@/hooks/useVendaMode"
 import { useCategorias } from "@/hooks/useCategorias"
 import { useProdutos } from "@/hooks/useProdutos"
 import BackButton from "@/components/BackButton"
-import { useAuthGuard } from "@/hooks/useAuthGuard"
+
 
 type Item = {
   nome: string
@@ -21,7 +21,7 @@ type FormaPagamento = "pix" | "dinheiro" | "cartao"
 
 export default function Home() {
 
-  useAuthGuard()
+  
 
   const [nome, setNome] = useState("")
   const [nomePedido, setNomePedido] = useState("") // 🔥 snapshot nome
@@ -165,7 +165,7 @@ async function handleConfirmarPagamento() {
   try {
     const res = await criarPedido(nome, itens, formaPagamento)
 
-    const url = `${window.location.origin}/pedidos/${res.id}`
+    const url = `${window.location.origin}/client/${res.id}`
 
     setNomePedido(nome)
     setItensPedido(itens)

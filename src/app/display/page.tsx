@@ -8,7 +8,7 @@ import {
   orderBy,
 } from "firebase/firestore"
 import { db } from "@/services/firebase"
-import { useAuthGuard } from "@/hooks/useAuthGuard"
+
 
 type Pedido = {
   id: string
@@ -18,7 +18,7 @@ type Pedido = {
 
 export default function DisplayPage() {
 
-  useAuthGuard()
+  
 
   const [pedidos, setPedidos] = useState<Pedido[]>([])
   const [highlightId, setHighlightId] = useState<string | null>(null)

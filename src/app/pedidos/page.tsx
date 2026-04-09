@@ -11,7 +11,7 @@ import {
 } from "firebase/firestore"
 import { db } from "@/services/firebase"
 import BackButton from "@/components/BackButton"
-import { useAuthGuard } from "@/hooks/useAuthGuard"
+
 
 type Pedido = {
   id: string
@@ -26,7 +26,7 @@ type Pedido = {
 
 export default function Cozinha() {
 
-  useAuthGuard()
+  
 
   const [pedidos, setPedidos] = useState<Pedido[]>([])
   const [pedidoSelecionado, setPedidoSelecionado] = useState<Pedido | null>(null)

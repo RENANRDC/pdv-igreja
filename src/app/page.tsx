@@ -4,19 +4,18 @@ import Link from "next/link"
 import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { logout } from "@/services/auth"
-import { useAuthGuard } from "@/hooks/useAuthGuard"
 
 export default function MenuPage() {
 
-  useAuthGuard()
-
   const router = useRouter()
-
   const [role] = useState<string | null>(() => {
-    if (typeof window !== "undefined") {
-      return localStorage.getItem("role")
-    }
-    return null
+    if (typeof document === "undefined") return null
+
+    const match = document.cookie
+      .split("; ")
+      .find(row => row.startsWith("role="))
+
+    return match ? match.split("=")[1] : null
   })
 
   async function handleLogout() {
