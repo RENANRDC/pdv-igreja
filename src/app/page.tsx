@@ -26,13 +26,12 @@ export default function MenuPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-900 text-white">
+    <div className="min-h-screen bg-gray-900 text-white flex flex-col">
 
       {/* HEADER */}
       <div className="w-full border-b border-gray-800 bg-gray-900/80 backdrop-blur sticky top-0 z-10">
         <div className="max-w-md mx-auto flex items-center justify-between p-4">
 
-          {/* LOGO + TEXTO */}
           <div className="flex items-center gap-3">
             <img
               src="/logo.png"
@@ -49,23 +48,21 @@ export default function MenuPage() {
             </div>
           </div>
 
-          {/* LOGOUT */}
-        <button
-          onClick={handleLogout}
-          className="flex items-center justify-center text-sm font-semibold px-3 h-9 rounded-lg bg-gray-700 hover:bg-gray-600 transition"
-        >
-          Sair
-        </button>
+          <button
+            onClick={handleLogout}
+            className="flex items-center justify-center text-sm font-semibold px-3 h-9 rounded-lg bg-gray-700 hover:bg-gray-600 transition"
+          >
+            Sair
+          </button>
 
         </div>
       </div>
 
       {/* CONTEÚDO */}
-      <div className="max-w-md mx-auto p-4">
+      <div className="flex-1 max-w-md mx-auto w-full p-4">
 
         <div className="grid gap-4 mt-4">
 
-          {/* PDV */}
           <Link
             href="/pdv"
             className="group bg-gray-800 hover:bg-green-600 hover:scale-[1.02] transition-all duration-200 p-6 rounded-2xl shadow flex items-center gap-4"
@@ -79,7 +76,6 @@ export default function MenuPage() {
             </div>
           </Link>
 
-          {/* COZINHA */}
           <Link
             href="/pedidos"
             className="group bg-gray-800 hover:bg-green-600 hover:scale-[1.02] transition-all duration-200 p-6 rounded-2xl shadow flex items-center gap-4"
@@ -93,7 +89,6 @@ export default function MenuPage() {
             </div>
           </Link>
 
-          {/* DISPLAY */}
           <Link
             href="/display"
             className="group bg-gray-800 hover:bg-green-600 hover:scale-[1.02] transition-all duration-200 p-6 rounded-2xl shadow flex items-center gap-4"
@@ -107,7 +102,6 @@ export default function MenuPage() {
             </div>
           </Link>
 
-          {/* ADMIN */}
           {role === "admin" && (
             <Link
               href="/admin"
@@ -125,11 +119,14 @@ export default function MenuPage() {
 
         </div>
 
-        {/* FOOTER */}
-        <p className="text-xs text-gray-500 text-center mt-8">
-          Sistema de gerenciamento da praça de alimentação
-        </p>
+      </div>
 
+      {/* RODAPÉ FIXO */}
+      <div className="text-center text-xs text-gray-500 pb-4">
+        Desenvolvido por{" "}
+        <span className="font-semibold text-gray-400">
+          R2CodeX LTDA
+        </span>
       </div>
 
     </div>

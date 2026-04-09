@@ -23,13 +23,10 @@ export default function LoginPage() {
     }
 
     try {
-      // 🔥 converte usuário → email
       const email = `${usuario}@pdv.local`
 
-      // 🔐 login firebase
       await login(email, senha)
 
-      // 🔎 busca role no firestore
       const q = query(
         collection(db, "users"),
         where("username", "==", usuario)
@@ -44,10 +41,8 @@ export default function LoginPage() {
 
       const userData = snapshot.docs[0].data()
 
-      // 💾 salva role
       localStorage.setItem("role", userData.role)
 
-      // 🚀 redireciona
       router.push("/")
 
     } catch (err) {
@@ -56,52 +51,63 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-900 p-4">
+    <div className="min-h-screen bg-gray-900 flex flex-col">
 
-      <div className="w-full max-w-sm bg-gray-800 rounded-2xl p-6 shadow-lg">
+      {/* CONTEÚDO CENTRAL */}
+      <div className="flex flex-1 items-center justify-center p-4">
 
-        {/* LOGO */}
-        <div className="flex justify-center mb-4">
-          <img src="/logo.png" alt="Logo" className="h-25 object-contain" />
+        <div className="w-full max-w-sm bg-gray-800 rounded-2xl p-6 shadow-lg">
+
+          {/* LOGO */}
+          <div className="flex justify-center mb-4">
+            <img src="/logo.png" alt="Logo" className="h-24 object-contain" />
+          </div>
+
+          <h1 className="text-white text-xl font-bold text-center">
+            Central Gourmet
+          </h1>
+
+          <p className="text-gray-400 text-center mb-6">
+            Faça login para continuar
+          </p>
+
+          <input
+            placeholder="Usuário"
+            value={usuario}
+            onChange={(e) => setUsuario(e.target.value)}
+            className="w-full p-3 mb-3 rounded-lg bg-gray-700 text-white outline-none"
+          />
+
+          <input
+            type="password"
+            placeholder="Senha"
+            value={senha}
+            onChange={(e) => setSenha(e.target.value)}
+            className="w-full p-3 mb-4 rounded-lg bg-gray-700 text-white outline-none"
+          />
+
+          <button
+            onClick={handleLogin}
+            className="w-full bg-green-600 hover:bg-green-700 transition p-3 rounded-lg font-bold text-white"
+          >
+            Entrar
+          </button>
+
+          {erro && (
+            <p className="text-red-400 text-sm mt-3 text-center">
+              {erro}
+            </p>
+          )}
+
         </div>
 
-        <h1 className="text-white text-xl font-bold text-center">
-          Central Gourmet
-        </h1>
-
-        <p className="text-gray-400 text-center mb-6">
-          Faça login para continuar
-        </p>
-
-        <input
-          placeholder="Usuário"
-          value={usuario}
-          onChange={(e) => setUsuario(e.target.value)}
-          className="w-full p-3 mb-3 rounded-lg bg-gray-700 text-white outline-none"
-        />
-
-        <input
-          type="password"
-          placeholder="Senha"
-          value={senha}
-          onChange={(e) => setSenha(e.target.value)}
-          className="w-full p-3 mb-4 rounded-lg bg-gray-700 text-white outline-none"
-        />
-
-        <button
-          onClick={handleLogin}
-          className="w-full bg-green-600 hover:bg-green-700 transition p-3 rounded-lg font-bold text-white"
-        >
-          Entrar
-        </button>
-
-        {erro && (
-          <p className="text-red-400 text-sm mt-3 text-center">
-            {erro}
-          </p>
-        )}
-
       </div>
+
+      {/* RODAPÉ */}
+      <div className="text-center text-xs text-gray-500 pb-4">
+        Desenvolvido por <span className="font-semibold text-gray-400">R2CodeX LTDA</span>
+      </div>
+
     </div>
   )
 }

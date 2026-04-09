@@ -9,13 +9,12 @@ export default function AdminPage() {
   useAdminGuard()
 
   return (
-    <div className="min-h-screen bg-gray-900 text-white">
+    <div className="min-h-screen bg-gray-900 text-white flex flex-col">
 
       {/* HEADER */}
       <div className="w-full border-b border-gray-800 bg-gray-900/80 backdrop-blur sticky top-0 z-10">
         <div className="max-w-md mx-auto flex items-center justify-between p-4">
 
-          {/* LOGO + TEXTO */}
           <div className="flex items-center gap-3">
             <img
               src="/logo.png"
@@ -32,18 +31,16 @@ export default function AdminPage() {
             </div>
           </div>
 
-          {/* VOLTAR */}
           <BackButton href="/" />
 
         </div>
       </div>
 
       {/* CONTEÚDO */}
-      <div className="max-w-md mx-auto p-4">
+      <div className="flex-1 max-w-md mx-auto w-full p-4">
 
         <div className="grid gap-4 mt-4">
 
-          {/* CATEGORIAS */}
           <Link
             href="/admin/categorias"
             className="group bg-gray-800 hover:bg-green-600 hover:scale-[1.02] transition-all duration-200 p-6 rounded-2xl shadow flex items-center gap-4"
@@ -57,7 +54,6 @@ export default function AdminPage() {
             </div>
           </Link>
 
-          {/* PRODUTOS */}
           <Link
             href="/admin/produtos"
             className="group bg-gray-800 hover:bg-green-600 hover:scale-[1.02] transition-all duration-200 p-6 rounded-2xl shadow flex items-center gap-4"
@@ -71,7 +67,6 @@ export default function AdminPage() {
             </div>
           </Link>
 
-          {/* FINANCEIRO */}
           <Link
             href="/admin/financeiro"
             className="group bg-gray-800 hover:bg-green-600 hover:scale-[1.02] transition-all duration-200 p-6 rounded-2xl shadow flex items-center gap-4"
@@ -85,7 +80,6 @@ export default function AdminPage() {
             </div>
           </Link>
 
-          {/* CREDENCIAIS */}
           <Link
             href="/admin/credenciais"
             className="group bg-gray-800 hover:bg-green-600 hover:scale-[1.02] transition-all duration-200 p-6 rounded-2xl shadow flex items-center gap-4"
@@ -101,11 +95,14 @@ export default function AdminPage() {
 
         </div>
 
-        {/* FOOTER */}
-        <p className="text-xs text-gray-500 text-center mt-8">
-          Gerencie categorias, produtos, vendas e configurações
-        </p>
+      </div>
 
+      {/* RODAPÉ FIXO */}
+      <div className="text-center text-xs text-gray-500 pb-4">
+        Desenvolvido por{" "}
+        <span className="font-semibold text-gray-400">
+          R2CodeX LTDA
+        </span>
       </div>
 
     </div>
