@@ -67,9 +67,9 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="flex flex-col flex-1 bg-gray-900">
+    <div className="min-h-screen flex items-center justify-center bg-gray-900 p-4">
 
-      <div className="flex flex-1 items-center justify-center p-4">
+      
 
         <div className="w-full max-w-sm bg-gray-800 rounded-2xl p-6 shadow-lg">
 
@@ -142,6 +142,5 @@ export default function LoginPage() {
 
       </div>
 
-    </div>
   )
 }
