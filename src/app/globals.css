@@ -75,3 +75,7 @@ body {
 .animate-blink-green {
   animation: blinkGreen 0.8s ease-in-out infinite;
 }
+
+html {
+  scrollbar-gutter: stable;
+}

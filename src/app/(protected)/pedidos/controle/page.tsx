@@ -51,171 +51,175 @@ export default function ControlePedidos() {
 
   const pendentes = pedidos.filter(p => p.status === "pendente")
   const finalizados = pedidos.filter(p => p.status === "finalizado")
+  const itensVisiveis = aba === "pendente" ? pendentes : finalizados
 
   return (
-    <div className="bg-gray-900 text-white p-4 flex flex-col flex-1">
-
-      {/* HEADER */}
-      <div className="grid grid-cols-3 items-center mb-6">
-
-        <div className="flex justify-start">
+    <div className="min-h-screen w-screen bg-gray-900 flex flex-col text-white">
+      
+      {/* HEADER - 60px EXATOS */}
+      <header style={{ height: '60px' }} className="flex-shrink-0 flex items-center px-4 border-b border-gray-800">
+        <div className="w-full grid grid-cols-3 items-center gap-4">
           <BackButton href="/pdv" />
+          <h1 style={{ fontSize: '20px' }} className="font-bold text-center mx-auto">Pedidos</h1>
+          <div />
         </div>
+      </header>
 
-        <div className="flex justify-center">
-          <h1 className="text-2xl font-bold">
-            Pedidos
-          </h1>
+      {/* ABAS - 44px EXATOS */}
+      <div style={{ height: '44px' }} className="flex-shrink-0 flex items-center px-4">
+        <div className="w-full flex gap-2">
+          <button
+            onClick={() => setAba("pendente")}
+            style={{ height: '36px' }}
+            className={`flex-1 rounded-lg font-semibold transition-all duration-200 ${
+              aba === "pendente"
+                ? "bg-yellow-500 text-black shadow-lg"
+                : "bg-gray-800 hover:bg-gray-700 border border-gray-700"
+            }`}
+          >
+            <span className="text-xs">🟡 Pendentes ({pendentes.length})</span>
+          </button>
+          <button
+            onClick={() => setAba("finalizado")}
+            style={{ height: '36px' }}
+            className={`flex-1 rounded-lg font-semibold transition-all duration-200 ${
+              aba === "finalizado"
+                ? "bg-green-600 shadow-lg"
+                : "bg-gray-800 hover:bg-gray-700 border border-gray-700"
+            }`}
+          >
+            <span className="text-xs">🟢 Prontos ({finalizados.length})</span>
+          </button>
         </div>
-
-        <div />
       </div>
 
-      {/* ABAS */}
-      <div className="flex gap-2 mb-5">
+      {/* CARDS - 100% DO RESTANTE */}
+      <main className="flex-1 overflow-hidden">
+        <div className="h-full w-full overflow-auto p-2 grid gap-2 grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 auto-rows-fr scrollbar-thin scrollbar-thumb-gray-600/50 scrollbar-track-transparent">
+          
+          {Array.from({ length: 20 }).map((_, index) => {
+            const pedido = itensVisiveis[index]
+            
+            if (!pedido) {
+              return (
+                <div 
+                  key={`skeleton-${index}`}
+                  style={{ height: '80px' }}
+                  className="bg-gray-800/50 rounded-lg border border-gray-700 p-2 flex flex-col justify-between animate-pulse shadow-sm"
+                />
+              )
+            }
 
-        <button
-          onClick={() => setAba("pendente")}
-          className={`flex-1 h-10 rounded-lg font-semibold transition ${
-            aba === "pendente"
-              ? "bg-yellow-500 text-black"
-              : "bg-gray-800 hover:bg-gray-700"
-          }`}
-        >
-          🟡 Pendentes ({pendentes.length})
-        </button>
+            return (
+              <div
+                key={`pedido-${pedido.id}`}
+                style={{ height: '80px' }}
+                className="bg-gray-800/70 hover:bg-gray-700 border border-gray-700/50 
+                           rounded-lg p-2 flex flex-col justify-between shadow-sm 
+                           hover:shadow-md hover:border-blue-500/50 transition-all duration-200 cursor-pointer"
+                onClick={() => setPedidoSelecionado(pedido)}
+              >
+                <div className="flex justify-between items-start gap-1 mb-1">
+                  <span style={{ fontSize: '11px' }} className="font-bold tracking-tight">
+                    #{pedido.codigo}
+                  </span>
+                  <span style={{ fontSize: '9px', padding: '2px 6px' }} 
+                        className={`rounded-full font-semibold ${
+                          pedido.status === "pendente"
+                            ? "bg-yellow-500/90 text-black"
+                            : "bg-green-500/90 text-black"
+                        }`}>
+                    {pedido.status}
+                  </span>
+                </div>
 
-        <button
-          onClick={() => setAba("finalizado")}
-          className={`flex-1 h-10 rounded-lg font-semibold transition ${
-            aba === "finalizado"
-              ? "bg-green-600"
-              : "bg-gray-800 hover:bg-gray-700"
-          }`}
-        >
-          🟢 Prontos ({finalizados.length})
-        </button>
+                <div style={{ fontSize: '12px', lineHeight: '1.2' }} 
+                     className="text-gray-300 line-clamp-2 flex-1 min-h-0">
+                  {pedido.nomeCliente}
+                </div>
 
-      </div>
-
-{/* LISTA com altura TOTAL fixa */}
-<div 
-  className="grid gap-3 grid-cols-2 md:grid-cols-3 xl:grid-cols-4 content-start"
->
-  {/* Renderiza MÁXIMO 8 cards (4 por linha em mobile, 8 em desktop) */}
-  {Array.from({ length: 8 }).map((_, index) => {
-    const itensVisiveis = aba === "pendente" ? pendentes : finalizados
-    const pedido = itensVisiveis[index]
-    
-    if (!pedido) {
-      // Skeleton para preencher espaço
-      return (
-        <div 
-          key={`skeleton-${index}-${aba}`}
-          className="bg-gray-800 p-4 rounded-xl animate-pulse h-28 flex flex-col justify-between"
-        >
-          <div className="flex justify-between items-center mb-2">
-            <div className="w-16 h-4 bg-gray-600 rounded"></div>
-            <div className="w-12 h-4 bg-gray-600 rounded"></div>
-          </div>
-          <div className="w-24 h-4 bg-gray-600 rounded mb-2"></div>
-          <div className="flex justify-between items-center">
-            <div className="w-16 h-4 bg-gray-600 rounded"></div>
-            <div className="w-16 h-8 bg-gray-600 rounded"></div>
-          </div>
+                <div className="flex justify-between items-center pt-1">
+                  <span style={{ fontSize: '14px' }} className="font-bold text-green-400">
+                    R${pedido.total.toFixed(2)}
+                  </span>
+                  <div className="w-2 h-2 bg-blue-400 rounded-full" />
+                </div>
+              </div>
+            )
+          })}
         </div>
-      )
-    }
-
-    return (
-<div
-  key={`pedido-${pedido.id}-${aba}-${index}`}
-  className="bg-gray-800 border border-gray-700 p-4 rounded-2xl 
-             hover:bg-gray-750 hover:border-gray-600 
-             transition-all duration-200 h-28 flex flex-col justify-between gap-1"
->
-
-  {/* TOPO */}
-  <div className="flex justify-between items-center mb-1">
-    <span className="font-bold text-white text-sm tracking-wide">
-      #{pedido.codigo}
-    </span>
-
-    <span className={`text-xs px-2 py-1 rounded-full font-semibold ${
-      pedido.status === "pendente"
-        ? "bg-yellow-500/90 text-black"
-        : "bg-green-600/90 text-white"
-    }`}>
-      {pedido.status}
-    </span>
-  </div>
-
-  {/* CLIENTE */}
-  <div className="text-sm text-gray-300 leading-tight line-clamp-2">
-    {pedido.nomeCliente}
-  </div>
-
-  {/* RODAPÉ */}
-  <div className="flex justify-between items-center">
-
-    <span className="font-bold text-green-400 text-sm">
-      R$ {pedido.total.toFixed(2)}
-    </span>
-
-    <button
-      onClick={() => setPedidoSelecionado(pedido)}
-      className="bg-blue-600 hover:bg-blue-700 px-3 py-1.5 rounded-lg text-xs font-semibold transition"
-    >
-      Detalhes
-    </button>
-
-  </div>
-</div>
-    )
-  })}
-</div>
+      </main>
 
       {/* MODAL */}
       {pedidoSelecionado && (
-        <div className="fixed inset-0 bg-black/70 flex items-center justify-center">
-
-          <div className="bg-white text-black p-6 rounded-xl w-80">
-
-            <h2 className="text-xl font-bold mb-3">
-              Pedido #{pedidoSelecionado.codigo}
-            </h2>
-
-            <p className="mb-2">
-              Cliente: {pedidoSelecionado.nomeCliente}
-            </p>
-
-            <div className="mb-4">
-              {pedidoSelecionado.itens?.map((item, i) => (
-                <div key={i} className="flex justify-between">
-                  <span>{item.nome} x{item.quantidade}</span>
-                  <span>
-                    R$ {((item.preco || 0) * item.quantidade).toFixed(2)}
-                  </span>
+        <>
+          <div 
+            className="fixed inset-0 bg-black/85 backdrop-blur-sm z-50 flex items-center justify-center p-4"
+            onClick={() => setPedidoSelecionado(null)}
+          />
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 pointer-events-none">
+            <div className="bg-white/95 backdrop-blur-xl text-black rounded-2xl w-full max-w-sm max-h-[90vh] overflow-auto shadow-2xl border-4 border-white/30 pointer-events-auto max-w-md mx-4" style={{ maxHeight: '90vh' }}>
+              <div className="sticky top-0 bg-white/80 backdrop-blur-sm p-4 border-b-2 border-gray-200 rounded-t-2xl">
+                <div className="flex justify-between items-center">
+                  <h2 style={{ fontSize: '22px' }} className="font-black">Pedido #{pedidoSelecionado.codigo}</h2>
+                  <button
+                    onClick={() => setPedidoSelecionado(null)}
+                    className="text-xl font-black text-gray-500 hover:text-black p-1 rounded-full hover:bg-gray-200 transition"
+                  >
+                    ×
+                  </button>
                 </div>
-              ))}
+              </div>
+              
+              <div className="p-5 space-y-3">
+                <div>
+                  <span className="text-sm text-gray-600 block mb-1">👤 Cliente</span>
+                  <span className="font-bold text-lg block">{pedidoSelecionado.nomeCliente}</span>
+                </div>
+                
+                <div>
+                  <span className="text-sm text-gray-600 block mb-2 font-medium">📋 Itens</span>
+                  <div className="space-y-2 max-h-40 overflow-auto">
+                    {pedidoSelecionado.itens?.map((item, i) => (
+                      <div key={i} className="flex justify-between items-center p-3 bg-gray-50/50 rounded-xl border border-gray-200">
+                        <div className="min-w-0">
+                          <p className="font-medium text-sm truncate">{item.nome}</p>
+                          <p className="text-xs text-gray-500">×{item.quantidade}</p>
+                        </div>
+                        <span className="font-bold text-green-600 text-sm">
+                          R${((item.preco || 0) * item.quantidade).toFixed(2)}
+                        </span>
+                      </div>
+                    )) || (
+                      <div className="text-center py-6 text-gray-500">
+                        <div className="text-3xl mb-1">📭</div>
+                        <p className="text-sm">Nenhum item</p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                <div className="pt-3 border-t-2 border-gray-200">
+                  <div className="text-2xl font-black text-right text-green-600 tracking-wide">
+                    R${pedidoSelecionado.total.toFixed(2)}
+                  </div>
+                </div>
+              </div>
+
+              <div className="p-4 bg-gradient-to-r from-gray-50 to-gray-100 rounded-b-2xl">
+                <button
+                  onClick={() => setPedidoSelecionado(null)}
+                  className="w-full bg-gradient-to-r from-gray-800 via-gray-900 to-black 
+                             hover:from-black hover:to-gray-900 text-white py-4 rounded-xl 
+                             font-black text-lg shadow-xl hover:shadow-2xl transition-all duration-300 border-2 border-gray-300/50"
+                >
+                  Fechar
+                </button>
+              </div>
             </div>
-
-            <div className="font-bold mb-4">
-              Total: R$ {pedidoSelecionado.total.toFixed(2)}
-            </div>
-
-            <button
-              onClick={() => setPedidoSelecionado(null)}
-              className="w-full bg-gray-700 text-white p-2 rounded"
-            >
-              Fechar
-            </button>
-
           </div>
-
-        </div>
+        </>
       )}
-
     </div>
   )
 }

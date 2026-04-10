@@ -79,18 +79,19 @@ useEffect(() => {
     setMounted(true)
   })
 }, [])
-const [mostrarModoModal, setMostrarModoModal] = useState(() => {
-  if (typeof window === "undefined") return false
-
-  const jaAbriu = sessionStorage.getItem("modo_modal_aberto")
-  return !jaAbriu
-})
+const [mostrarModoModal, setMostrarModoModal] = useState(false)
 
 useEffect(() => {
-  if (mostrarModoModal) {
+  const jaAbriu = sessionStorage.getItem("modo_modal_aberto")
+
+  if (!jaAbriu) {
+    queueMicrotask(() => {
+      setMostrarModoModal(true)
+    })
+
     sessionStorage.setItem("modo_modal_aberto", "true")
   }
-}, [mostrarModoModal])
+}, [])
 
   function adicionarItem(produto: Omit<Item, "quantidade">) {
     setItens((prev) => {
@@ -240,7 +241,7 @@ if (formaPagamento === "dinheiro") {
     }
 
 return (
-<div className="bg-gray-900 text-white p-4 flex flex-col flex-1 pb-40 lg:pb-4">
+<div className="min-h-screen bg-gray-900 text-white p-4">
 
   {/* HEADER */}
 <div className="flex items-center justify-between mb-4 gap-2">
@@ -286,10 +287,10 @@ return (
 
   </div>
 </div>
-<Link
-  href="/pedidos/controle"
-  className="self-start inline-block mb-4 bg-gray-700 px-3 py-2 rounded text-sm"
->
+  <Link
+    href="/pedidos/controle"
+    className="inline-block mb-4 bg-gray-700 px-3 py-2 rounded text-sm"
+  >
     📋 Ver pedidos
   </Link>
 
@@ -495,7 +496,7 @@ onFocus={() => {
     </p>
   )}
 
-  
+  <div className="h-32"></div>
 
   <div className="fixed bottom-0 left-0 w-full bg-gray-800 p-4 lg:hidden">
     <div className="flex justify-between text-lg font-bold mb-2">

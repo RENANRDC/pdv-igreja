@@ -5,7 +5,7 @@ import BackButton from "@/components/BackButton"
 
 export default function AdminPage() {
   return (
-    <div className="bg-gray-900 text-white flex flex-col h-full min-h-0">
+    <div className="bg-gray-900 text-white flex flex-col min-h-[calc(100vh-56px)]">
 
       {/* HEADER */}
       <div className="w-full border-b border-gray-800 bg-gray-900/80 backdrop-blur sticky top-0 z-10">
