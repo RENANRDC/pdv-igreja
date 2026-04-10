@@ -17,9 +17,5 @@ export default function AdminLayout({
     )
   }
 
-  return (
-    <div className="flex flex-col flex-1">
-      {children}
-    </div>
-  )
+  return <>{children}</>
 }

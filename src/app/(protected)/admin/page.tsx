@@ -1,13 +1,11 @@
 "use client"
 
 import Link from "next/link"
-
 import BackButton from "@/components/BackButton"
 
 export default function AdminPage() {
-
   return (
-    <div className="min-h-screen bg-gray-900 text-white flex flex-col">
+    <div className="bg-gray-900 text-white flex flex-col h-full min-h-0">
 
       {/* HEADER */}
       <div className="w-full border-b border-gray-800 bg-gray-900/80 backdrop-blur sticky top-0 z-10">
@@ -30,12 +28,11 @@ export default function AdminPage() {
           </div>
 
           <BackButton href="/" />
-
         </div>
       </div>
 
       {/* CONTEÚDO */}
-      <div className="flex-1 max-w-md mx-auto w-full p-4">
+      <div className="flex-1 min-h-0 max-w-md mx-auto w-full p-4">
 
         <div className="grid gap-4 mt-4">
 

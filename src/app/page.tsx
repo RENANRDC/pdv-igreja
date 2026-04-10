@@ -78,7 +78,7 @@ export default function MenuPage() {
       </div>
 
       {/* CONTEÚDO */}
-      <div className="flex-1 max-w-md mx-auto w-full p-4 overflow-y-auto">
+      <div className="flex-1 max-w-md mx-auto w-full p-4 overflow-y-auto pb-6">
 
         <div className="grid gap-4 mt-4">
 
