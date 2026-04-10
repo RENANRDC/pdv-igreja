@@ -13,7 +13,6 @@ import {
 import { useCategorias } from "@/hooks/useCategorias"
 import { useProdutos } from "@/hooks/useProdutos"
 
-
 type Produto = {
   id: string
   nome: string
@@ -25,7 +24,6 @@ type Produto = {
 export default function ProdutosPage() {
 
   
-
   const [nome, setNome] = useState("")
   const [precoFormatado, setPrecoFormatado] = useState("")
   const [categoriaId, setCategoriaId] = useState("")
@@ -34,6 +32,7 @@ export default function ProdutosPage() {
 
   const { categorias } = useCategorias()
   const { produtos } = useProdutos()
+
 
   // 💰 formatar real
   function formatarReal(valor: string) {

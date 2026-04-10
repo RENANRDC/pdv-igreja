@@ -21,12 +21,12 @@ type Categoria = {
 
 export default function CategoriasPage() {
 
-  
-
   const [nome, setNome] = useState("")
   const [editandoId, setEditandoId] = useState<string | null>(null)
 
   const { categorias } = useCategorias()
+
+  
 
   // ➕ criar / editar
   async function handleAdd() {

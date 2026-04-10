@@ -2,10 +2,7 @@
 
 import BackButton from "@/components/BackButton"
 
-
-export default function CredenciaisPage() {
-
-  
+export default function FinanceiroPage() {
 
   return (
     <div className="min-h-screen bg-gray-900 text-white p-6">
@@ -19,7 +16,7 @@ export default function CredenciaisPage() {
 
   {/* CENTRO */}
   <div className="flex justify-center">
-    <h1 className="text-2xl font-bold">Credenciais</h1>
+    <h1 className="text-2xl font-bold">Financeiro</h1>
   </div>
 
   {/* DIREITA (reserva futura) */}
@@ -27,7 +24,6 @@ export default function CredenciaisPage() {
 
 </div>
       <p className="text-gray-400 mt-2">Em breve...</p>
-
     </div>
   )
 }

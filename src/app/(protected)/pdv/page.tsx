@@ -1,7 +1,7 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { criarPedido } from "../../services/pedidos"
+import { criarPedido } from "@/services/pedidos"
 import { QRCodeCanvas } from "qrcode.react"
 import Link from "next/link"
 import { useVendaMode } from "@/hooks/useVendaMode"

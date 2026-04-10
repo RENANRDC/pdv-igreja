@@ -2,34 +2,26 @@ import { NextResponse } from "next/server"
 import type { NextRequest } from "next/server"
 
 export function middleware(request: NextRequest) {
-  const role = request.cookies.get("role")?.value
+  const token = request.cookies.get("session")?.value
   const { pathname } = request.nextUrl
 
-  // 🔓 liberar assets (imagens, etc)
-  if (
+  // 🔓 rotas públicas (AJUSTADO)
+  const isPublic =
+    pathname.startsWith("/login") ||
+    pathname.startsWith("/client") || // 👈 mantém isso
+    pathname.startsWith("/api/session")
+
+  const isStatic =
     pathname.startsWith("/_next") ||
     pathname.startsWith("/favicon.ico") ||
     pathname.includes(".")
-  ) {
+
+  if (isPublic || isStatic) {
     return NextResponse.next()
   }
 
-  // 🔓 rotas públicas
-  if (
-    pathname.startsWith("/login") ||
-    pathname.startsWith("/client/")
-  ) {
-    return NextResponse.next()
-  }
-
-  // 🔒 não logado
-  if (!role) {
+  if (!token) {
     return NextResponse.redirect(new URL("/login", request.url))
-  }
-
-  // 🔒 admin
-  if (pathname.startsWith("/admin") && role !== "admin") {
-    return NextResponse.redirect(new URL("/", request.url))
   }
 
   return NextResponse.next()

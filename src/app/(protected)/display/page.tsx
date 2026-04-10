@@ -9,7 +9,6 @@ import {
 } from "firebase/firestore"
 import { db } from "@/services/firebase"
 
-
 type Pedido = {
   id: string
   codigo: string
@@ -17,9 +16,6 @@ type Pedido = {
 }
 
 export default function DisplayPage() {
-
-  
-
   const [pedidos, setPedidos] = useState<Pedido[]>([])
   const [highlightId, setHighlightId] = useState<string | null>(null)
   const [audioLiberado, setAudioLiberado] = useState(false)

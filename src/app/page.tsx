@@ -1,26 +1,56 @@
 "use client"
 
 import Link from "next/link"
-import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { logout } from "@/services/auth"
-
+import { useEffect, useState } from "react"
+import { useSessionRefresh } from "@/hooks/useSessionRefresh"
 export default function MenuPage() {
-
   const router = useRouter()
-  const [role] = useState<string | null>(() => {
-    if (typeof document === "undefined") return null
+  useSessionRefresh()
+  const [role, setRole] = useState<string | null>(null)
+  const [loadingUser, setLoadingUser] = useState(true)
 
-    const match = document.cookie
-      .split("; ")
-      .find(row => row.startsWith("role="))
+useEffect(() => {
+  async function fetchUser() {
+    try {
+      const res = await fetch("/api/me")
 
-    return match ? match.split("=")[1] : null
-  })
+      if (!res.ok) {
+        setRole("user")
+        localStorage.setItem("role", "user")
+        return
+      }
+
+      const data = await res.json()
+      setRole(data.role)
+      localStorage.setItem("role", data.role)
+
+    } catch {
+      setRole("user")
+      localStorage.setItem("role", "user")
+    } finally {
+      setLoadingUser(false)
+    }
+  }
+
+  // ⚡ pega cache primeiro (instantâneo)
+  const cachedRole = localStorage.getItem("role")
+
+  if (cachedRole) {
+    setRole(cachedRole)
+    setLoadingUser(false)
+  }
+
+  // 🔄 sempre valida depois
+  fetchUser()
+
+}, [])
 
   async function handleLogout() {
+    await fetch("/api/logout", { method: "POST" })
     await logout()
-    localStorage.removeItem("role")
+
     router.push("/login")
   }
 
@@ -32,18 +62,10 @@ export default function MenuPage() {
         <div className="max-w-md mx-auto flex items-center justify-between p-4">
 
           <div className="flex items-center gap-3">
-            <img
-              src="/logo.png"
-              alt="Logo"
-              className="h-10 w-10 object-contain"
-            />
+            <img src="/logo.png" alt="Logo" className="h-10 w-10 object-contain" />
             <div>
-              <h1 className="text-base font-bold">
-                Central Gourmet
-              </h1>
-              <p className="text-xs text-gray-400">
-                Painel
-              </p>
+              <h1 className="text-base font-bold">Central Gourmet</h1>
+              <p className="text-xs text-gray-400">Painel</p>
             </div>
           </div>
 
@@ -62,46 +84,34 @@ export default function MenuPage() {
 
         <div className="grid gap-4 mt-4">
 
-          <Link
-            href="/pdv"
-            className="group bg-gray-800 hover:bg-green-600 hover:scale-[1.02] transition-all duration-200 p-6 rounded-2xl shadow flex items-center gap-4"
-          >
+          <Link href="/pdv" className="group bg-gray-800 hover:bg-green-600 hover:scale-[1.02] transition-all duration-200 p-6 rounded-2xl shadow flex items-center gap-4">
             <span className="text-3xl">🧾</span>
             <div>
               <p className="text-lg font-bold">PDV</p>
-              <p className="text-sm text-gray-400 group-hover:text-white">
-                Realizar pedidos
-              </p>
+              <p className="text-sm text-gray-400 group-hover:text-white">Realizar pedidos</p>
             </div>
           </Link>
 
-          <Link
-            href="/pedidos"
-            className="group bg-gray-800 hover:bg-green-600 hover:scale-[1.02] transition-all duration-200 p-6 rounded-2xl shadow flex items-center gap-4"
-          >
+          <Link href="/pedidos" className="group bg-gray-800 hover:bg-green-600 hover:scale-[1.02] transition-all duration-200 p-6 rounded-2xl shadow flex items-center gap-4">
             <span className="text-3xl">👨‍🍳</span>
             <div>
               <p className="text-lg font-bold">Cozinha</p>
-              <p className="text-sm text-gray-400 group-hover:text-white">
-                Gerenciar pedidos
-              </p>
+              <p className="text-sm text-gray-400 group-hover:text-white">Gerenciar pedidos</p>
             </div>
           </Link>
 
-          <Link
-            href="/display"
-            className="group bg-gray-800 hover:bg-green-600 hover:scale-[1.02] transition-all duration-200 p-6 rounded-2xl shadow flex items-center gap-4"
-          >
+          <Link href="/display" className="group bg-gray-800 hover:bg-green-600 hover:scale-[1.02] transition-all duration-200 p-6 rounded-2xl shadow flex items-center gap-4">
             <span className="text-3xl">📺</span>
             <div>
               <p className="text-lg font-bold">Display</p>
-              <p className="text-sm text-gray-400 group-hover:text-white">
-                Visualização
-              </p>
+              <p className="text-sm text-gray-400 group-hover:text-white">Visualização</p>
             </div>
           </Link>
 
-          {role === "admin" && (
+          {/* 🔐 ADMIN SEGURO */}
+          {loadingUser ? (
+          <div className="bg-gray-800 p-6 rounded-2xl animate-pulse" />
+        ) : role === "admin" && (
             <Link
               href="/admin"
               className="group bg-gray-800 hover:bg-green-600 hover:scale-[1.02] transition-all duration-200 p-6 rounded-2xl shadow flex items-center gap-4"
@@ -120,7 +130,7 @@ export default function MenuPage() {
 
       </div>
 
-      {/* RODAPÉ FIXO */}
+      {/* RODAPÉ */}
       <div className="text-center text-xs text-gray-500 pb-4">
         Desenvolvido por{" "}
         <span className="font-semibold text-gray-400">

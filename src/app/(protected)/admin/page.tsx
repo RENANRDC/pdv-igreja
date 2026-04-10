@@ -1,6 +1,7 @@
 "use client"
 
 import Link from "next/link"
+
 import BackButton from "@/components/BackButton"
 
 export default function AdminPage() {
