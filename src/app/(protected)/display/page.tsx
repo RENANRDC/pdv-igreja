@@ -81,36 +81,38 @@ export default function DisplayPage() {
   const emPreparo = pedidos.filter((p) => p.status === "pendente")
   const prontos = pedidos.filter((p) => p.status === "finalizado")
 
-  // 🔁 SCROLL AUTOMÁTICO CORRETO
+  // 🚀 SCROLL PROFISSIONAL (SEM BUG)
   useEffect(() => {
+    let frame: number
     const speed = 0.4
 
-    const interval = setInterval(() => {
+    function scroll(el: HTMLDivElement | null) {
+      if (!el) return
 
-      function handleScroll(el: HTMLDivElement | null) {
-        if (!el) return
+      const maxScroll = el.scrollHeight - el.clientHeight
 
-        // 👉 NÃO rola se não precisar
-        if (el.scrollHeight <= el.clientHeight) return
+      if (maxScroll <= 0) return
 
-        el.scrollTop += speed
+      el.scrollTop += speed
 
-        // 👉 chegou no fim → reset LIMPO (sem bug)
-        if (el.scrollTop + el.clientHeight >= el.scrollHeight - 5) {
-          el.scrollTop = 0
-        }
+      if (el.scrollTop >= maxScroll) {
+        el.scrollTop = 0
       }
+    }
 
-      handleScroll(preparoRef.current)
-      handleScroll(prontoRef.current)
+    function loop() {
+      scroll(preparoRef.current)
+      scroll(prontoRef.current)
+      frame = requestAnimationFrame(loop)
+    }
 
-    }, 16)
+    loop()
 
-    return () => clearInterval(interval)
+    return () => cancelAnimationFrame(frame)
   }, [])
 
   return (
-    <div className="flex flex-col flex-1 min-h-0 bg-gray-900 text-white">
+    <div className="h-screen flex flex-col bg-gray-900 text-white overflow-hidden">
 
       {/* HEADER */}
       <div className="flex items-center justify-between px-6 py-4 border-b border-gray-800 bg-gray-900/80 backdrop-blur">
@@ -145,14 +147,14 @@ export default function DisplayPage() {
       <div className="flex-1 grid grid-cols-1 lg:grid-cols-2 gap-6 p-6 overflow-hidden min-h-0">
 
         {/* 🟡 EM PREPARO */}
-        <div className="bg-gray-800/60 border border-gray-700 rounded-2xl p-4 flex flex-col min-h-0">
+        <div className="bg-gray-800/60 border border-gray-700 rounded-2xl p-4 flex flex-col min-h-0 overflow-visible">
           <h2 className="text-2xl font-bold text-yellow-400 mb-4 text-center">
             🟡 Em preparo
           </h2>
 
           <div
             ref={preparoRef}
-            className="flex-1 overflow-y-auto min-h-0 max-h-[70vh] scroll-hidden"
+            className="flex-1 overflow-y-auto min-h-0 scroll-hidden"
           >
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
               {emPreparo.map((pedido) => (
@@ -170,14 +172,14 @@ export default function DisplayPage() {
         </div>
 
         {/* 🟢 PRONTOS */}
-        <div className="bg-gray-800/60 border border-gray-700 rounded-2xl p-4 flex flex-col min-h-0">
+        <div className="bg-gray-800/60 border border-gray-700 rounded-2xl p-4 flex flex-col min-h-0 overflow-visible">
           <h2 className="text-2xl font-bold text-green-400 mb-4 text-center">
             🟢 Prontos
           </h2>
 
           <div
             ref={prontoRef}
-            className="flex-1 overflow-y-auto min-h-0 max-h-[70vh] scroll-hidden"
+            className="flex-1 overflow-y-auto min-h-0 scroll-hidden"
           >
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
               {prontos.map((pedido) => {
@@ -187,8 +189,8 @@ export default function DisplayPage() {
                   <div
                     key={pedido.id}
                     className={`rounded-xl p-4 flex items-center justify-center transition-all duration-300 ${
-                      isHighlight
-                        ? "bg-green-400 scale-110 animate-pulse"
+                    isHighlight
+                      ? "animate-blink-green text-white"
                         : "bg-green-500 shadow-lg"
                     }`}
                   >
