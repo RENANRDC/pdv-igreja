@@ -53,7 +53,7 @@ export default function MenuPage() {
   }
 
   return (
-    <div className="bg-gray-900 text-white min-h-screen">
+    <div className="bg-gray-900 text-white flex flex-col h-full">
 
       {/* HEADER */}
       <div className="w-full border-b border-gray-800 bg-gray-900/80 backdrop-blur sticky top-0 z-10">
@@ -78,7 +78,7 @@ export default function MenuPage() {
       </div>
 
       {/* CONTEÚDO */}
-      <div className="max-w-md mx-auto w-full p-4">
+      <div className="flex-1 max-w-md mx-auto w-full p-4 overflow-y-auto">
 
         <div className="grid gap-4 mt-4">
 
