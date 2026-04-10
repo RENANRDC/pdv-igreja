@@ -55,7 +55,7 @@ useEffect(() => {
   }
 
   return (
-    <div className="bg-gray-900 text-white flex flex-col flex-1">
+    <div className="bg-gray-900 text-white flex flex-col min-h-screen">
 
       {/* HEADER */}
       <div className="w-full border-b border-gray-800 bg-gray-900/80 backdrop-blur sticky top-0 z-10">
@@ -80,7 +80,7 @@ useEffect(() => {
       </div>
 
       {/* CONTEÚDO */}
-      <div className="flex-1 max-w-md mx-auto w-full p-4 flex flex-col">
+      <div className="flex-1 max-w-md mx-auto w-full p-4 flex flex-col overflow-y-auto">
 
         <div className="grid gap-4 mt-4">
 
@@ -107,7 +107,15 @@ useEffect(() => {
               <p className="text-sm text-gray-400 group-hover:text-white">Visualização</p>
             </div>
           </Link>
-
+<Link href="/config-display" className="group bg-gray-800 hover:bg-green-600 hover:scale-[1.02] transition-all duration-200 p-6 rounded-2xl shadow flex items-center gap-4">
+  <span className="text-3xl">🖥️</span>
+  <div>
+    <p className="text-lg font-bold">Display Config</p>
+    <p className="text-sm text-gray-400 group-hover:text-white">
+      Ajustar painel
+    </p>
+  </div>
+</Link>
           {/* 🔐 ADMIN SEGURO */}
           {loadingUser ? (
           <div className="bg-gray-800 p-6 rounded-2xl animate-pulse" />

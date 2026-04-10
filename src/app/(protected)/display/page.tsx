@@ -6,6 +6,7 @@ import {
   onSnapshot,
   query,
   orderBy,
+  doc,
 } from "firebase/firestore"
 import { db } from "@/services/firebase"
 
@@ -23,9 +24,20 @@ export default function DisplayPage() {
   const statusAnterior = useRef<Record<string, string>>({})
   const audioRef = useRef<HTMLAudioElement | null>(null)
   const audioLiberadoRef = useRef(false)
-
+  const [limiteProntos, setLimiteProntos] = useState(20)
   const preparoRef = useRef<HTMLDivElement>(null)
   const prontoRef = useRef<HTMLDivElement>(null)
+
+
+  useEffect(() => {
+  const unsubscribe = onSnapshot(doc(db, "config", "display"), (docSnap) => {
+    if (docSnap.exists()) {
+      setLimiteProntos(docSnap.data().limiteProntos || 20)
+    }
+  })
+
+  return () => unsubscribe()
+}, [])
 
   // 🔊 áudio
   useEffect(() => {
@@ -83,7 +95,7 @@ export default function DisplayPage() {
 )
   const prontos = pedidos
   .filter((p) => p.status === "finalizado")
-  .slice(0, 20)
+  .slice(0, limiteProntos)
 
   // 🚀 SCROLL PROFISSIONAL (SEM BUG)
   useEffect(() => {
