@@ -1,8 +1,8 @@
 export default function Footer() {
   return (
-    <footer className="w-full border-t border-gray-800 bg-gray-900">
+    <footer className="fixed bottom-0 left-0 w-full bg-gray-900 border-t border-gray-800 z-50 pb-safe">
 
-      <div className="max-w-md mx-auto h-14 flex items-center justify-center text-xs text-gray-400">
+      <div className="max-w-md mx-auto min-h-[56px] flex items-center justify-center text-xs text-gray-400">
         Desenvolvido por{" "}
         <span className="font-semibold text-gray-300 ml-1">
           R2CodeX

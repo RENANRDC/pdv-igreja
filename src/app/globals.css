@@ -79,3 +79,8 @@ body {
 html {
   scrollbar-gutter: stable;
 }
+
+/* 🔥 safe area (iPhone / mobile moderno) */
+.pb-safe {
+  padding-bottom: env(safe-area-inset-bottom);
+}
