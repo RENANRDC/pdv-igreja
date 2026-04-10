@@ -8,7 +8,7 @@ export function middleware(request: NextRequest) {
   // 🔓 rotas públicas (AJUSTADO)
   const isPublic =
     pathname.startsWith("/login") ||
-    pathname.startsWith("/client") || // 👈 mantém isso
+    pathname.startsWith("/client") ||
     pathname.startsWith("/api/session")
 
   const isStatic =

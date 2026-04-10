@@ -4,13 +4,14 @@ import { useState } from "react"
 import { login } from "@/services/auth"
 import { useRouter } from "next/navigation"
 import { getAuth } from "firebase/auth"
+import { Eye, EyeOff } from "lucide-react"
 
 export default function LoginPage() {
   const [usuario, setUsuario] = useState("")
   const [senha, setSenha] = useState("")
   const [erro, setErro] = useState("")
   const [loading, setLoading] = useState(false)
-
+  const [mostrarSenha, setMostrarSenha] = useState(false)
   const router = useRouter()
 
   async function handleLogin() {
@@ -103,13 +104,23 @@ export default function LoginPage() {
               className="w-full p-3 mb-3 rounded-lg bg-gray-700 text-white outline-none border border-transparent focus:border-green-500"
             />
 
-            <input
-              type="password"
-              placeholder="Senha"
-              value={senha}
-              onChange={(e) => setSenha(e.target.value)}
-              className="w-full p-3 mb-4 rounded-lg bg-gray-700 text-white outline-none border border-transparent focus:border-green-500"
-            />
+            <div className="relative mb-4">
+              <input
+                type={mostrarSenha ? "text" : "password"}
+                placeholder="Senha"
+                value={senha}
+                onChange={(e) => setSenha(e.target.value)}
+                className="w-full p-3 pr-12 rounded-lg bg-gray-700 text-white outline-none border border-transparent focus:border-green-500"
+              />
+
+            <button
+              type="button"
+              onClick={() => setMostrarSenha(!mostrarSenha)}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-white"
+            >
+              {mostrarSenha ? <EyeOff size={20} /> : <Eye size={20} />}
+            </button>
+            </div>
 
             <button
               type="submit"
