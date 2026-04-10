@@ -55,7 +55,7 @@ useEffect(() => {
   }
 
   return (
-    <div className="min-h-screen bg-gray-900 text-white flex flex-col">
+    <div className="bg-gray-900 text-white flex flex-col flex-1">
 
       {/* HEADER */}
       <div className="w-full border-b border-gray-800 bg-gray-900/80 backdrop-blur sticky top-0 z-10">
@@ -80,7 +80,7 @@ useEffect(() => {
       </div>
 
       {/* CONTEÚDO */}
-      <div className="flex-1 max-w-md mx-auto w-full p-4">
+      <div className="flex-1 max-w-md mx-auto w-full p-4 flex flex-col">
 
         <div className="grid gap-4 mt-4">
 
@@ -128,14 +128,6 @@ useEffect(() => {
 
         </div>
 
-      </div>
-
-      {/* RODAPÉ */}
-      <div className="text-center text-xs text-gray-500 pb-4">
-        Desenvolvido por{" "}
-        <span className="font-semibold text-gray-400">
-          R2CodeX
-        </span>
       </div>
 
     </div>

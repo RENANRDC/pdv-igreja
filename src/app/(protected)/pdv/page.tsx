@@ -79,19 +79,18 @@ useEffect(() => {
     setMounted(true)
   })
 }, [])
-const [mostrarModoModal, setMostrarModoModal] = useState(false)
+const [mostrarModoModal, setMostrarModoModal] = useState(() => {
+  if (typeof window === "undefined") return false
+
+  const jaAbriu = sessionStorage.getItem("modo_modal_aberto")
+  return !jaAbriu
+})
 
 useEffect(() => {
-  const jaAbriu = sessionStorage.getItem("modo_modal_aberto")
-
-  if (!jaAbriu) {
-    queueMicrotask(() => {
-      setMostrarModoModal(true)
-    })
-
+  if (mostrarModoModal) {
     sessionStorage.setItem("modo_modal_aberto", "true")
   }
-}, [])
+}, [mostrarModoModal])
 
   function adicionarItem(produto: Omit<Item, "quantidade">) {
     setItens((prev) => {
