@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react"
 import BackButton from "@/components/BackButton"
 import { fetchWithAuth } from "@/lib/fetchWithAuth"
+import { Eye, EyeOff } from "lucide-react"
 
 /* ================= TYPES ================= */
 
@@ -352,11 +353,27 @@ export default function CredenciaisPage() {
 /* ================= COMPONENTS ================= */
 
 function Input(props: React.InputHTMLAttributes<HTMLInputElement>) {
+  const isPassword = props.type === "password"
+  const [show, setShow] = useState(false)
+
   return (
-    <input
-      {...props}
-      className="w-full p-2 mb-3 bg-zinc-800 rounded-md outline-none focus:ring-2 focus:ring-green-600"
-    />
+    <div className="relative mb-3">
+      <input
+        {...props}
+        type={isPassword ? (show ? "text" : "password") : props.type}
+        className="w-full p-2 pr-10 bg-zinc-800 rounded-md outline-none focus:ring-2 focus:ring-green-600"
+      />
+
+      {isPassword && (
+        <button
+          type="button"
+          onClick={() => setShow(!show)}
+          className="absolute right-2 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-white transition"
+        >
+          {show ? <EyeOff size={18} /> : <Eye size={18} />}
+        </button>
+      )}
+    </div>
   )
 }
 
