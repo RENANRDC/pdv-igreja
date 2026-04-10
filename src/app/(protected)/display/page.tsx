@@ -12,7 +12,7 @@ import { db } from "@/services/firebase"
 type Pedido = {
   id: string
   codigo: string
-  status: "pendente" | "finalizado"
+  status: "pendente" | "em_preparo" | "finalizado"
 }
 
 export default function DisplayPage() {
@@ -78,7 +78,9 @@ export default function DisplayPage() {
     return () => unsubscribe()
   }, [])
 
-  const emPreparo = pedidos.filter((p) => p.status === "pendente")
+  const emPreparo = pedidos.filter(
+  (p) => p.status === "pendente" || p.status === "em_preparo"
+)
   const prontos = pedidos.filter((p) => p.status === "finalizado")
 
   // 🚀 SCROLL PROFISSIONAL (SEM BUG)
