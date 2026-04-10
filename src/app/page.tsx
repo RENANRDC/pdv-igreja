@@ -134,7 +134,7 @@ useEffect(() => {
       <div className="text-center text-xs text-gray-500 pb-4">
         Desenvolvido por{" "}
         <span className="font-semibold text-gray-400">
-          R2CodeX LTDA
+          R2CodeX
         </span>
       </div>
 
