@@ -240,7 +240,7 @@ if (formaPagamento === "dinheiro") {
     }
 
 return (
-<div className="min-h-screen bg-gray-900 text-white p-4">
+<div className="bg-gray-900 text-white p-4 flex flex-col flex-1 pb-40 lg:pb-4">
 
   {/* HEADER */}
 <div className="flex items-center justify-between mb-4 gap-2">
@@ -286,10 +286,10 @@ return (
 
   </div>
 </div>
-  <Link
-    href="/pedidos/controle"
-    className="inline-block mb-4 bg-gray-700 px-3 py-2 rounded text-sm"
-  >
+<Link
+  href="/pedidos/controle"
+  className="self-start inline-block mb-4 bg-gray-700 px-3 py-2 rounded text-sm"
+>
     📋 Ver pedidos
   </Link>
 
@@ -495,7 +495,7 @@ onFocus={() => {
     </p>
   )}
 
-  <div className="h-32"></div>
+  
 
   <div className="fixed bottom-0 left-0 w-full bg-gray-800 p-4 lg:hidden">
     <div className="flex justify-between text-lg font-bold mb-2">

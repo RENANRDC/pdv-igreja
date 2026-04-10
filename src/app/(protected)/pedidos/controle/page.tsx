@@ -53,7 +53,7 @@ export default function ControlePedidos() {
   const finalizados = pedidos.filter(p => p.status === "finalizado")
 
   return (
-    <div className="min-h-screen bg-gray-900 text-white p-4">
+    <div className="bg-gray-900 text-white p-4 flex flex-col flex-1">
 
       {/* HEADER */}
       <div className="grid grid-cols-3 items-center mb-6">
@@ -101,9 +101,6 @@ export default function ControlePedidos() {
 {/* LISTA com altura TOTAL fixa */}
 <div 
   className="grid gap-3 grid-cols-2 md:grid-cols-3 xl:grid-cols-4 content-start"
-  style={{ 
-    minHeight: '600px'
-  }}
 >
   {/* Renderiza MÁXIMO 8 cards (4 por linha em mobile, 8 em desktop) */}
   {Array.from({ length: 8 }).map((_, index) => {

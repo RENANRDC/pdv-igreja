@@ -112,7 +112,7 @@ export default function PedidoPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-900 text-white">
+      <div className="flex flex-1 items-center justify-center bg-gray-900 text-white">
         <p className="animate-pulse text-lg">Carregando pedido...</p>
       </div>
     )
@@ -129,7 +129,7 @@ export default function PedidoPage() {
   const isPronto = pedido.status === "finalizado"
 
   return (
-    <div className="min-h-screen bg-gray-900 text-white flex flex-col">
+    <div className="bg-gray-900 text-white flex flex-col flex-1">
 
       {/* CONTEÚDO */}
       <div className="flex-1 flex flex-col items-center justify-center p-6">
@@ -215,14 +215,6 @@ export default function PedidoPage() {
           </p>
         )}
 
-      </div>
-
-      {/* RODAPÉ */}
-      <div className="text-center text-xs text-gray-500 pb-4">
-        Desenvolvido por{" "}
-        <span className="font-semibold text-gray-400">
-          R2CodeX
-        </span>
       </div>
 
     </div>

@@ -67,7 +67,7 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-900 flex flex-col">
+    <div className="flex flex-col flex-1 bg-gray-900">
 
       <div className="flex flex-1 items-center justify-center p-4">
 
@@ -140,13 +140,6 @@ export default function LoginPage() {
 
         </div>
 
-      </div>
-
-      <div className="text-center text-xs text-gray-500 pb-4">
-        Desenvolvido por{" "}
-        <span className="font-semibold text-gray-400">
-          R2CodeX
-        </span>
       </div>
 
     </div>

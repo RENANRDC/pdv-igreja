@@ -97,7 +97,7 @@ async function voltarParaPreparo(id: string) {
   const finalizados = pedidos.filter(p => p.status === "finalizado")
 
   return (
-    <div className="min-h-screen bg-gray-900 text-white p-4">
+    <div className="bg-gray-900 text-white p-4 flex flex-col flex-1 min-h-0">
 
       {/* HEADER */}
       <div className="grid grid-cols-3 items-center mb-6">
@@ -114,15 +114,15 @@ async function voltarParaPreparo(id: string) {
         <div />
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 flex-1 min-h-0">
 
         {/* 🟡 PENDENTES */}
-        <div className="bg-yellow-500/10 border border-yellow-500/30 p-3 rounded-xl">
+        <div className="bg-yellow-500/10 border border-yellow-500/30 p-3 rounded-xl flex flex-col min-h-0">
           <h2 className="text-yellow-400 font-semibold mb-3">
             Pendentes ({pendentes.length})
           </h2>
 
-          <div className="space-y-3 max-h-[75vh] overflow-y-auto pr-1">
+          <div className="space-y-3 flex-1 overflow-y-auto pr-1 min-h-0">
             {pendentes.map((pedido) => (
               <div key={pedido.id} className="bg-gray-800 p-3 rounded-xl">
 
@@ -151,12 +151,12 @@ async function voltarParaPreparo(id: string) {
         </div>
 
         {/* 🔵 EM PREPARO */}
-        <div className="bg-blue-500/10 border border-blue-500/30 p-3 rounded-xl">
+        <div className="bg-blue-500/10 border border-blue-500/30 p-3 rounded-xl flex flex-col min-h-0">
           <h2 className="text-blue-400 font-semibold mb-3">
             Em preparo ({emPreparo.length})
           </h2>
 
-          <div className="space-y-3 max-h-[75vh] overflow-y-auto pr-1">
+          <div className="space-y-3 flex-1 overflow-y-auto pr-1 min-h-0">
             {emPreparo.map((pedido) => (
               <div key={pedido.id} className="bg-blue-900/40 p-3 rounded-xl">
 
@@ -197,12 +197,12 @@ async function voltarParaPreparo(id: string) {
         </div>
 
         {/* 🟢 FINALIZADOS */}
-        <div className="bg-green-500/10 border border-green-500/30 p-3 rounded-xl">
+        <div className="bg-green-500/10 border border-green-500/30 p-3 rounded-xl flex flex-col min-h-0">
           <h2 className="text-green-400 font-semibold mb-3">
             Prontos ({finalizados.length})
           </h2>
 
-          <div className="space-y-2 max-h-[75vh] overflow-y-auto pr-1">
+          <div className="space-y-2 flex-1 overflow-y-auto pr-1">
             {finalizados.map((pedido) => (
             <div
               key={pedido.id}
