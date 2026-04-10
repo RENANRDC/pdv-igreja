@@ -81,7 +81,9 @@ export default function DisplayPage() {
   const emPreparo = pedidos.filter(
   (p) => p.status === "pendente" || p.status === "em_preparo"
 )
-  const prontos = pedidos.filter((p) => p.status === "finalizado")
+  const prontos = pedidos
+  .filter((p) => p.status === "finalizado")
+  .slice(0, 20)
 
   // 🚀 SCROLL PROFISSIONAL (SEM BUG)
   useEffect(() => {
@@ -102,11 +104,10 @@ export default function DisplayPage() {
       }
     }
 
-    function loop() {
-      scroll(preparoRef.current)
-      scroll(prontoRef.current)
-      frame = requestAnimationFrame(loop)
-    }
+function loop() {
+  scroll(preparoRef.current)
+  frame = requestAnimationFrame(loop)
+}
 
     loop()
 
@@ -181,7 +182,7 @@ export default function DisplayPage() {
 
           <div
             ref={prontoRef}
-            className="flex-1 overflow-y-auto min-h-0 scroll-hidden"
+            className="flex-1 overflow-hidden"
           >
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
               {prontos.map((pedido) => {
