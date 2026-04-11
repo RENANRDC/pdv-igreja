@@ -9,7 +9,7 @@ import {
   getCachedUser,
   User,
 } from "@/hooks/useAdminGuard"
-
+import { clearVendaMode } from "@/hooks/useVendaMode"
 export default function MenuPage() {
   const router = useRouter()
   useSessionRefresh()
@@ -47,13 +47,14 @@ export default function MenuPage() {
     }
   }, [])
 
-  async function handleLogout() {
-    await fetch("/api/logout", { method: "POST" })
+async function handleLogout() {
+  await fetch("/api/logout", { method: "POST" })
 
-    clearUserCache() // 🔥 limpa cache global
+  clearUserCache()
+  clearVendaMode() // 🔥 ESSENCIAL
 
-    router.push("/login")
-  }
+  router.push("/login")
+}
 
   return (
     <div className="bg-gray-900 text-white flex flex-col min-h-screen">

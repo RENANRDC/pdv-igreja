@@ -1,35 +1,46 @@
 "use client"
 
-import { useState } from "react";
+import { useEffect, useState } from "react"
 
-type VendaMode = "balcao" | "mesa";
+type VendaMode = "balcao" | "mesa" | null
+
+export function clearVendaMode() {
+  try {
+    sessionStorage.removeItem("modo_venda")
+  } catch {}
+}
 
 export function useVendaMode() {
-  const [vendaMode, setVendaMode] = useState<VendaMode>(() => {
-    // ✅ Carrega do localStorage na INICIALIZAÇÃO (sem useEffect!)
-    if (typeof window === "undefined") return "balcao";
-    
-    try {
-      const saved = localStorage.getItem("modo_venda");
-      return saved === "mesa" ? "mesa" : "balcao";
-    } catch {
-      return "balcao";
-    }
-  });
+  const [vendaMode, setVendaMode] = useState<VendaMode>(null)
+  const [isLoaded, setIsLoaded] = useState(false)
 
-  // ✅ Wrapper que salva automaticamente no localStorage
-  const setVendaModeSafe = (mode: VendaMode) => {
-    setVendaMode(mode);
+  useEffect(() => {
     try {
-      localStorage.setItem("modo_venda", mode);
-    } catch {
-      // Silencia erros do localStorage
-    }
-  };
+      const saved = sessionStorage.getItem("modo_venda")
+
+      if (saved === "balcao" || saved === "mesa") {
+        setVendaMode(saved)
+      }
+    } catch {}
+
+    setIsLoaded(true)
+  }, [])
+
+  const setVendaModeSafe = (mode: VendaMode) => {
+    setVendaMode(mode)
+
+    try {
+      if (mode) {
+        sessionStorage.setItem("modo_venda", mode)
+      } else {
+        sessionStorage.removeItem("modo_venda")
+      }
+    } catch {}
+  }
 
   return {
     vendaMode,
     setVendaMode: setVendaModeSafe,
-    isLoaded: typeof window !== "undefined", // ✅ Sem estado extra!
-  };
+    isLoaded,
+  }
 }

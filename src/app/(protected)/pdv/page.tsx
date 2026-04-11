@@ -21,8 +21,6 @@ type FormaPagamento = "pix" | "dinheiro" | "cartao"
 
 export default function Home() {
 
-  
-
   const [nome, setNome] = useState("")
   const [nomePedido, setNomePedido] = useState("") // 🔥 snapshot nome
   const [mensagem, setMensagem] = useState("")
@@ -72,26 +70,9 @@ const produtosFiltrados = categoriaSelecionada
   : []
 
 
-const { vendaMode, setVendaMode } = useVendaMode()
-const [mounted, setMounted] = useState(false)
-useEffect(() => {
-  queueMicrotask(() => {
-    setMounted(true)
-  })
-}, [])
-const [mostrarModoModal, setMostrarModoModal] = useState(false)
+const { vendaMode, setVendaMode, isLoaded } = useVendaMode()
 
-useEffect(() => {
-  const jaAbriu = sessionStorage.getItem("modo_modal_aberto")
-
-  if (!jaAbriu) {
-    queueMicrotask(() => {
-      setMostrarModoModal(true)
-    })
-
-    sessionStorage.setItem("modo_modal_aberto", "true")
-  }
-}, [])
+if (!isLoaded) return null
 
   function adicionarItem(produto: Omit<Item, "quantidade">) {
     setItens((prev) => {
@@ -255,37 +236,46 @@ return (
   </h1>
 
   {/* DIREITA */}
-  <div className="flex items-center gap-2 shrink-0">
+<div className="flex items-center gap-2 shrink-0">
 
-    {mounted && vendaMode && (
+  {/* 🔥 estrutura sempre existe */}
+  <div className="flex items-center gap-1 text-xs md:text-sm font-semibold px-2 md:px-3 h-8 md:h-9 rounded-lg bg-gray-700">
+
+    {vendaMode && (
       <>
-        <div
-          className={`flex items-center gap-1 text-xs md:text-sm font-semibold px-2 md:px-3 h-8 md:h-9 rounded-lg ${
-            vendaMode === "balcao" ? "bg-blue-600" : "bg-green-600"
-          }`}
-        >
-          <span>{vendaMode === "balcao" ? "🧾" : "📲"}</span>
+<span>
+  {vendaMode === "balcao"
+    ? "🧾"
+    : vendaMode === "mesa"
+    ? "📲"
+    : ""}
+</span>
 
-          {/* 🔥 ESCONDE TEXTO SÓ NO MOBILE */}
-          <span className="hidden sm:inline">
-            {vendaMode === "balcao" ? "Balcão" : "Mesa"}
-          </span>
-        </div>
-
-        <button
-          onClick={() => {
-            localStorage.removeItem("modo_venda")
-            setMostrarModoModal(true)
-          }}
-          className="flex items-center justify-center h-8 w-8 md:h-9 md:w-auto md:px-3 rounded-lg bg-gray-700 hover:bg-gray-600 transition"
-        >
-          🔄
-          <span className="hidden md:inline ml-1">Trocar</span>
-        </button>
+<span className="hidden sm:inline">
+  {vendaMode === "balcao"
+    ? "Balcão"
+    : vendaMode === "mesa"
+    ? "Mesa"
+    : ""}
+</span>
       </>
     )}
 
   </div>
+
+  {vendaMode && (
+<button
+  onClick={() => setVendaMode(null)}
+  className={`flex items-center justify-center h-8 w-8 md:h-9 md:w-auto md:px-3 rounded-lg transition ${
+    vendaMode ? "bg-gray-700 hover:bg-gray-600" : "opacity-0 pointer-events-none"
+  }`}
+>
+  🔄
+  <span className="hidden md:inline ml-1">Trocar</span>
+</button>
+  )}
+
+</div>
 </div>
   <Link
     href="/pedidos/controle"
@@ -771,7 +761,7 @@ onFocus={() => {
 
       )}
 
-      {mostrarModoModal && (
+      {isLoaded && !vendaMode && (
   <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50">
     <div className="bg-white text-black p-6 rounded-2xl w-full max-w-sm text-center">
 
@@ -782,24 +772,18 @@ onFocus={() => {
       <div className="flex flex-col gap-3">
 
 <button
-  onClick={() => {
-    setVendaMode("balcao")
-    setMostrarModoModal(false) // 🔥 FECHA O MODAL
-  }}
-        className="bg-blue-600 text-white p-4 rounded-xl font-bold"
-      >
-        🧾 Balcão
-      </button>
+  onClick={() => setVendaMode("balcao")}
+  className="bg-blue-600 text-white p-4 rounded-xl font-bold"
+>
+  🧾 Balcão
+</button>
 
 <button
-  onClick={() => {
-    setVendaMode("mesa")
-    setMostrarModoModal(false) // 🔥 FECHA O MODAL
-  }}
-        className="bg-green-600 text-white p-4 rounded-xl font-bold"
-      >
-        📲 Mesa
-      </button>
+  onClick={() => setVendaMode("mesa")}
+  className="bg-green-600 text-white p-4 rounded-xl font-bold"
+>
+  📲 Mesa
+</button>
 
       </div>
 
