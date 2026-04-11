@@ -10,7 +10,8 @@ export async function GET(request: Request) {
       return NextResponse.json({ error: "Não autenticado" }, { status: 401 })
     }
 
-    const decoded = await adminAuth.verifyIdToken(token)
+    // ✅ CORRETO: usar session cookie
+    const decoded = await adminAuth.verifySessionCookie(token, true)
 
     const userDoc = await adminDb.collection("users").doc(decoded.uid).get()
 
@@ -25,7 +26,12 @@ export async function GET(request: Request) {
       username: userData?.username || null,
     })
 
-  } catch {
-    return NextResponse.json({ error: "Erro ao validar usuário" }, { status: 401 })
+  } catch (error) {
+    console.error("ME error:", error)
+
+    return NextResponse.json(
+      { error: "Sessão inválida" },
+      { status: 401 }
+    )
   }
 }

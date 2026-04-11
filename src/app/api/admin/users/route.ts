@@ -26,7 +26,7 @@ async function validateAdmin(request: NextRequest) {
       return { error: "Não autenticado", status: 401 }
     }
 
-    const decoded = await adminAuth.verifyIdToken(token)
+    const decoded = await adminAuth.verifySessionCookie(token, true)
     const uid = decoded.uid
 
     const userDoc = await adminDb.collection("users").doc(uid).get()

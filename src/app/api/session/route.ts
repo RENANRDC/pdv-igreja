@@ -10,7 +10,7 @@ export async function POST(req: Request) {
 
   if (!rate.success) {
     return NextResponse.json(
-      { error: "Muitas tentativas, tente novamente mais tarde" },
+      { error: "Muitas tentativas" },
       { status: 429 }
     )
   }
@@ -21,23 +21,36 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Token não enviado" }, { status: 401 })
   }
 
-  const token = authHeader.split("Bearer ")[1]
+  const idToken = authHeader.split("Bearer ")[1]
 
   try {
-    await adminAuth.verifyIdToken(token)
+    await adminAuth.verifyIdToken(idToken)
+
+    // 🔥 10 HORAS
+    const expiresIn = 60 * 60 * 10 * 1000
+
+    const sessionCookie = await adminAuth.createSessionCookie(idToken, {
+      expiresIn,
+    })
 
     const response = NextResponse.json({ success: true })
 
-    response.cookies.set("session", token, {
+    response.cookies.set("session", sessionCookie, {
       httpOnly: true,
       secure: true,
       sameSite: "strict",
       path: "/",
-      maxAge: 60 * 60 * 24,
+      // ❌ sem maxAge → logout ao fechar navegador
     })
 
     return response
-  } catch {
-    return NextResponse.json({ error: "Token inválido" }, { status: 401 })
+
+  } catch (error) {
+    console.error(error)
+
+    return NextResponse.json(
+      { error: "Token inválido" },
+      { status: 401 }
+    )
   }
 }
