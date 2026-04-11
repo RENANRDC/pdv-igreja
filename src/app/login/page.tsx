@@ -67,8 +67,13 @@ export default function LoginPage() {
     } catch (err: unknown) {
       let mensagem = "Erro ao fazer login"
 
-      if (typeof err === "object" && err !== null && "code" in err) {
-        const errorCode = (err as any).code
+if (
+  typeof err === "object" &&
+  err !== null &&
+  "code" in err &&
+  typeof (err as { code: unknown }).code === "string"
+) {
+  const errorCode = (err as { code: string }).code
 
         switch (errorCode) {
           case "auth/invalid-credential":
