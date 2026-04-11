@@ -21,6 +21,9 @@ type ToastType = {
   type: "success" | "error"
 } | null
 
+let cachedUsers: User[] | null = null
+
+
 /* ================= PAGE ================= */
 
 export default function CredenciaisPage() {
@@ -58,15 +61,23 @@ export default function CredenciaisPage() {
     return "Erro inesperado"
   }
 
-  async function loadUsers() {
-    try {
-      const data = await fetchWithAuth("/api/admin/users")
-      setUsers(Array.isArray(data?.users) ? data.users : [])
-    } catch (err) {
-      showToast(getErrorMessage(err), "error")
+async function loadUsers() {
+  try {
+    if (cachedUsers) {
+      setUsers(cachedUsers)
+      return
     }
-  }
 
+    const data = await fetchWithAuth("/api/admin/users")
+    const list = Array.isArray(data?.users) ? data.users : []
+
+    setUsers(list)
+    cachedUsers = list
+
+  } catch (err) {
+    showToast(getErrorMessage(err), "error")
+  }
+}
   async function createUser() {
     const { username, password, confirmPassword, role } = createForm
 
@@ -205,42 +216,47 @@ export default function CredenciaisPage() {
       </div>
 
       {/* LISTA */}
-      <div className="space-y-3">
-        {filteredUsers.map(user => (
-          <div key={user.username} className="bg-zinc-800 p-4 rounded-lg">
+<div className="space-y-3">
+  {users.length === 0 ? (
+    <p className="text-center text-gray-400">Carregando...</p>
+  ) : (
+    filteredUsers.map(user => (
+      <div key={user.username} className="bg-zinc-800 p-4 rounded-lg">
 
-            <div className="flex justify-between items-center mb-2">
-              <span className="font-medium">{user.username}</span>
-              <span className="text-xs text-gray-400">{user.role}</span>
-            </div>
+        <div className="flex justify-between items-center mb-2">
+          <span className="font-medium">{user.username}</span>
+          <span className="text-xs text-gray-400">{user.role}</span>
+        </div>
 
-            <div className="flex gap-2 mt-3">
-              <button
-                onClick={() => {
-                  setSelectedUser(user)
-                  setEditForm({
-                    newUsername: user.username,
-                    newPassword: "",
-                    confirmNewPassword: "",
-                    role: user.role,
-                  })
-                  setModal("edit")
-                }}
-                className="flex-1 bg-blue-600/20 text-blue-400 p-2 rounded"
-              >
-                Editar
-              </button>
+        <div className="flex gap-2 mt-3">
+          <button
+            onClick={() => {
+              setSelectedUser(user)
+              setEditForm({
+                newUsername: user.username,
+                newPassword: "",
+                confirmNewPassword: "",
+                role: user.role,
+              })
+              setModal("edit")
+            }}
+            className="flex-1 bg-blue-600/20 text-blue-400 p-2 rounded"
+          >
+            Editar
+          </button>
 
-              <button
-                onClick={() => setDeleteModal(user)}
-                className="flex-1 bg-red-600/20 text-red-400 p-2 rounded"
-              >
-                Excluir
-              </button>
-            </div>
-          </div>
-        ))}
+          <button
+            onClick={() => setDeleteModal(user)}
+            className="flex-1 bg-red-600/20 text-red-400 p-2 rounded"
+          >
+            Excluir
+          </button>
+        </div>
+
       </div>
+    ))
+  )}
+</div>
 
       {/* MODAIS */}
       {modal && (

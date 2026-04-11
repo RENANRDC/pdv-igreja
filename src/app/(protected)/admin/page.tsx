@@ -76,7 +76,13 @@ export default function AdminPage() {
           </Link>
 
           <Link
-            href="/admin/credenciais"
+              href="/admin/credenciais"
+  onMouseEnter={() => {
+    fetch("/api/admin/users")
+  }}
+  onTouchStart={() => {
+    fetch("/api/admin/users")
+  }}
             className="group bg-gray-800 hover:bg-green-600 hover:scale-[1.02] transition-all duration-200 p-6 rounded-2xl shadow flex items-center gap-4"
           >
             <span className="text-3xl">🔐</span>
