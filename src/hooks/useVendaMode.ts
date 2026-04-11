@@ -14,7 +14,8 @@ export function useVendaMode() {
   const [vendaMode, setVendaMode] = useState<VendaMode>(null)
   const [isLoaded, setIsLoaded] = useState(false)
 
-  useEffect(() => {
+useEffect(() => {
+  const load = () => {
     try {
       const saved = sessionStorage.getItem("modo_venda")
 
@@ -24,7 +25,10 @@ export function useVendaMode() {
     } catch {}
 
     setIsLoaded(true)
-  }, [])
+  }
+
+  load()
+}, [])
 
   const setVendaModeSafe = (mode: VendaMode) => {
     setVendaMode(mode)
