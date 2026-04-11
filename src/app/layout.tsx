@@ -28,15 +28,15 @@ export default function RootLayout({
       lang="pt-BR"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
-<body className="min-h-screen h-dvh flex flex-col bg-gray-900 text-white overflow-hidden">
+<body className="min-h-screen flex flex-col bg-gray-900 text-white">
 
-  <main className="flex-1 overflow-y-auto pb-20">
+  <main className="flex-1">
     {children}
   </main>
 
-        {/* FOOTER SEMPRE FIXO NO FINAL */}
-        <FooterWrapper />
-      </body>
+  <FooterWrapper />
+
+</body>
     </html>
   );
 }

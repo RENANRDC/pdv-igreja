@@ -97,7 +97,7 @@ async function voltarParaPreparo(id: string) {
   const finalizados = pedidos.filter(p => p.status === "finalizado")
 
   return (
-    <div className="bg-gray-900 text-white p-4">
+    <div className="bg-gray-900 text-white p-4 min-h-[100vh]">
 
       {/* HEADER */}
       <div className="grid grid-cols-3 items-center mb-6">
