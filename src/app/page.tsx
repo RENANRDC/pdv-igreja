@@ -2,16 +2,21 @@
 
 import Link from "next/link"
 import { useRouter } from "next/navigation"
-import { logout } from "@/services/auth"
 import { useEffect, useState } from "react"
 import { useSessionRefresh } from "@/hooks/useSessionRefresh"
+import {
+  clearUserCache,
+  getCachedUser,
+  User,
+} from "@/hooks/useAdminGuard"
 
 export default function MenuPage() {
   const router = useRouter()
   useSessionRefresh()
 
-  const [role, setRole] = useState<string | null>(null)
-  const [loadingUser, setLoadingUser] = useState(true)
+  // 🔥 usa cache imediatamente
+  const [user, setUser] = useState<User | null>(() => getCachedUser())
+  const [loadingUser, setLoadingUser] = useState(!getCachedUser())
 
   useEffect(() => {
     async function fetchUser() {
@@ -19,36 +24,34 @@ export default function MenuPage() {
         const res = await fetch("/api/me")
 
         if (!res.ok) {
-          setRole("user")
-          localStorage.setItem("role", "user")
+          setUser({ role: "user", username: null })
           return
         }
 
-        const data = await res.json()
-        setRole(data.role)
-        localStorage.setItem("role", data.role)
+        const data: User = await res.json()
+
+        setUser(data)
 
       } catch {
-        setRole("user")
-        localStorage.setItem("role", "user")
+        setUser({ role: "user", username: null })
       } finally {
         setLoadingUser(false)
       }
     }
 
-    const cachedRole = localStorage.getItem("role")
-
-    if (cachedRole) {
-      setRole(cachedRole)
+    // 🔥 só chama API se NÃO tiver cache
+    if (!user) {
+      fetchUser()
+    } else {
       setLoadingUser(false)
     }
-
-    fetchUser()
   }, [])
 
   async function handleLogout() {
     await fetch("/api/logout", { method: "POST" })
-    await logout()
+
+    clearUserCache() // 🔥 limpa cache global
+
     router.push("/login")
   }
 
@@ -106,7 +109,6 @@ export default function MenuPage() {
             </div>
           </Link>
 
-          {/* 🔥 NOVO BOTÃO */}
           <Link href="/config-display" className="group bg-gray-800 hover:bg-green-600 hover:scale-[1.02] transition-all duration-200 p-6 rounded-2xl shadow flex items-center gap-4">
             <span className="text-3xl">🖥️</span>
             <div>
@@ -117,10 +119,8 @@ export default function MenuPage() {
             </div>
           </Link>
 
-          {/* 🔐 ADMIN */}
-          {loadingUser ? (
-            <div className="bg-gray-800 p-6 rounded-2xl animate-pulse" />
-          ) : role === "admin" && (
+          {/* 🔥 ADMIN SEM DELAY */}
+          {user?.role === "admin" && (
             <Link
               href="/admin"
               className="group bg-gray-800 hover:bg-green-600 hover:scale-[1.02] transition-all duration-200 p-6 rounded-2xl shadow flex items-center gap-4"
