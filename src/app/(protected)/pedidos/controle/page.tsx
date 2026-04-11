@@ -60,7 +60,7 @@ export default function ControlePedidos() {
       {/* HEADER (PADRÃO COZINHA) */}
       <div className="grid grid-cols-3 items-center mb-6">
         <div className="flex justify-start">
-          <BackButton href="/" />
+          <BackButton href="/pdv" />
         </div>
 
         <div className="flex justify-center">
