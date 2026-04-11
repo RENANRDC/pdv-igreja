@@ -5,7 +5,7 @@ import { login } from "@/services/auth"
 import { useRouter } from "next/navigation"
 import { getAuth } from "firebase/auth"
 import { Eye, EyeOff } from "lucide-react"
-import { setCachedUser } from "@/hooks/useAdminGuard" // 🔥 IMPORTANTE
+import { setCachedUser } from "@/hooks/useAdminGuard"
 
 export default function LoginPage() {
   const [usuario, setUsuario] = useState("")
@@ -53,23 +53,44 @@ export default function LoginPage() {
         throw new Error("Erro ao criar sessão")
       }
 
-      // 🔥 BUSCA USER E SALVA NO CACHE (ESSENCIAL)
+      // 🔥 BUSCA USER E SALVA NO CACHE
       const meRes = await fetch("/api/me")
 
       if (meRes.ok) {
         const data = await meRes.json()
-        setCachedUser(data) // 🔥 remove delay
+        setCachedUser(data)
       }
 
       // ✅ redireciona
       router.push("/")
 
     } catch (err: unknown) {
-      if (err instanceof Error) {
-        setErro(err.message)
-      } else {
-        setErro("Usuário ou senha inválidos")
+      let mensagem = "Erro ao fazer login"
+
+      if (typeof err === "object" && err !== null && "code" in err) {
+        const errorCode = (err as any).code
+
+        switch (errorCode) {
+          case "auth/invalid-credential":
+          case "auth/wrong-password":
+          case "auth/user-not-found":
+            mensagem = "Usuário ou senha inválidos"
+            break
+
+          case "auth/too-many-requests":
+            mensagem = "Muitas tentativas. Tente novamente mais tarde"
+            break
+
+          case "auth/network-request-failed":
+            mensagem = "Erro de conexão. Verifique sua internet"
+            break
+
+          default:
+            mensagem = "Erro ao autenticar. Tente novamente"
+        }
       }
+
+      setErro(mensagem)
     } finally {
       setLoading(false)
     }
@@ -107,7 +128,10 @@ export default function LoginPage() {
             autoFocus
             placeholder="Usuário"
             value={usuario}
-            onChange={(e) => setUsuario(e.target.value)}
+            onChange={(e) => {
+              setUsuario(e.target.value)
+              setErro("")
+            }}
             className="w-full p-3 mb-3 rounded-lg bg-gray-700 text-white outline-none border border-transparent focus:border-green-500"
           />
 
@@ -116,7 +140,10 @@ export default function LoginPage() {
               type={mostrarSenha ? "text" : "password"}
               placeholder="Senha"
               value={senha}
-              onChange={(e) => setSenha(e.target.value)}
+              onChange={(e) => {
+                setSenha(e.target.value)
+                setErro("")
+              }}
               className="w-full p-3 pr-12 rounded-lg bg-gray-700 text-white outline-none border border-transparent focus:border-green-500"
             />
 
