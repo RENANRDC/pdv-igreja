@@ -12,7 +12,6 @@ export function useSessionRefresh() {
 
         if (!user) return
 
-        // força pegar token novo
         const token = await user.getIdToken(true)
 
         await fetch("/api/refresh", {
@@ -25,7 +24,7 @@ export function useSessionRefresh() {
       } catch (error) {
         console.error("Erro ao renovar sessão:", error)
       }
-    }, 1000 * 60 * 10) // a cada 10 minutos
+    }, 1000 * 60 * 30) // 🔥 muda pra 30 minutos
 
     return () => clearInterval(interval)
   }, [])

@@ -5,6 +5,7 @@ import { login } from "@/services/auth"
 import { useRouter } from "next/navigation"
 import { getAuth } from "firebase/auth"
 import { Eye, EyeOff } from "lucide-react"
+import { setCachedUser } from "@/hooks/useAdminGuard" // 🔥 IMPORTANTE
 
 export default function LoginPage() {
   const [usuario, setUsuario] = useState("")
@@ -40,7 +41,7 @@ export default function LoginPage() {
       // 🔐 pega token seguro
       const token = await user.getIdToken()
 
-      // 🔐 envia para backend criar sessão httpOnly
+      // 🔐 cria sessão no backend
       const res = await fetch("/api/session", {
         method: "POST",
         headers: {
@@ -52,7 +53,15 @@ export default function LoginPage() {
         throw new Error("Erro ao criar sessão")
       }
 
-      // ✅ sucesso → redireciona
+      // 🔥 BUSCA USER E SALVA NO CACHE (ESSENCIAL)
+      const meRes = await fetch("/api/me")
+
+      if (meRes.ok) {
+        const data = await meRes.json()
+        setCachedUser(data) // 🔥 remove delay
+      }
+
+      // ✅ redireciona
       router.push("/")
 
     } catch (err: unknown) {
@@ -69,49 +78,47 @@ export default function LoginPage() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-900 p-4">
 
-      
+      <div className="w-full max-w-sm bg-gray-800 rounded-2xl p-6 shadow-lg">
 
-        <div className="w-full max-w-sm bg-gray-800 rounded-2xl p-6 shadow-lg">
+        <div className="flex justify-center mb-4">
+          <img
+            src="/logo.png"
+            alt="Logo"
+            className="h-24 object-contain"
+          />
+        </div>
 
-          <div className="flex justify-center mb-4">
-            <img
-              src="/logo.png"
-              alt="Logo"
-              className="h-24 object-contain"
-            />
-          </div>
+        <h1 className="text-white text-xl font-bold text-center">
+          Central Gourmet
+        </h1>
 
-          <h1 className="text-white text-xl font-bold text-center">
-            Central Gourmet
-          </h1>
+        <p className="text-gray-400 text-center mb-6">
+          Faça login para continuar
+        </p>
 
-          <p className="text-gray-400 text-center mb-6">
-            Faça login para continuar
-          </p>
+        <form
+          onSubmit={(e) => {
+            e.preventDefault()
+            if (!loading) handleLogin()
+          }}
+        >
 
-          <form
-            onSubmit={(e) => {
-              e.preventDefault()
-              if (!loading) handleLogin()
-            }}
-          >
+          <input
+            autoFocus
+            placeholder="Usuário"
+            value={usuario}
+            onChange={(e) => setUsuario(e.target.value)}
+            className="w-full p-3 mb-3 rounded-lg bg-gray-700 text-white outline-none border border-transparent focus:border-green-500"
+          />
 
+          <div className="relative mb-4">
             <input
-              autoFocus
-              placeholder="Usuário"
-              value={usuario}
-              onChange={(e) => setUsuario(e.target.value)}
-              className="w-full p-3 mb-3 rounded-lg bg-gray-700 text-white outline-none border border-transparent focus:border-green-500"
+              type={mostrarSenha ? "text" : "password"}
+              placeholder="Senha"
+              value={senha}
+              onChange={(e) => setSenha(e.target.value)}
+              className="w-full p-3 pr-12 rounded-lg bg-gray-700 text-white outline-none border border-transparent focus:border-green-500"
             />
-
-            <div className="relative mb-4">
-              <input
-                type={mostrarSenha ? "text" : "password"}
-                placeholder="Senha"
-                value={senha}
-                onChange={(e) => setSenha(e.target.value)}
-                className="w-full p-3 pr-12 rounded-lg bg-gray-700 text-white outline-none border border-transparent focus:border-green-500"
-              />
 
             <button
               type="button"
@@ -120,27 +127,26 @@ export default function LoginPage() {
             >
               {mostrarSenha ? <EyeOff size={20} /> : <Eye size={20} />}
             </button>
-            </div>
+          </div>
 
-            <button
-              type="submit"
-              disabled={loading}
-              className="w-full bg-green-600 hover:bg-green-700 transition p-3 rounded-lg font-bold text-white disabled:opacity-50"
-            >
-              {loading ? "Entrando..." : "Entrar"}
-            </button>
+          <button
+            type="submit"
+            disabled={loading}
+            className="w-full bg-green-600 hover:bg-green-700 transition p-3 rounded-lg font-bold text-white disabled:opacity-50"
+          >
+            {loading ? "Entrando..." : "Entrar"}
+          </button>
 
-          </form>
+        </form>
 
-          {erro && (
-            <p className="text-red-400 text-sm mt-3 text-center">
-              {erro}
-            </p>
-          )}
-
-        </div>
+        {erro && (
+          <p className="text-red-400 text-sm mt-3 text-center">
+            {erro}
+          </p>
+        )}
 
       </div>
 
+    </div>
   )
 }

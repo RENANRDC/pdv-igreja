@@ -11,14 +11,19 @@ export type User = {
 // 🔥 cache global
 let cachedUser: User | null = null
 
-// ✅ limpar cache (logout)
+// ✅ limpar cache
 export function clearUserCache() {
   cachedUser = null
 }
 
-// ✅ pegar cache (usado no Menu)
+// ✅ pegar cache
 export function getCachedUser() {
   return cachedUser
+}
+
+// 🔥 ADICIONAR ISSO (ESSENCIAL)
+export function setCachedUser(user: User) {
+  cachedUser = user
 }
 
 export function useAdminGuard() {
@@ -28,7 +33,6 @@ export function useAdminGuard() {
   useEffect(() => {
     async function check() {
       try {
-        // 🔥 usa cache
         if (cachedUser) {
           if (cachedUser.role !== "admin") {
             router.replace("/login")
