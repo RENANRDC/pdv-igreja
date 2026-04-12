@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation"
 import { getAuth } from "firebase/auth"
 import { Eye, EyeOff } from "lucide-react"
 import { setCachedUser } from "@/hooks/useAdminGuard"
+import { fetchWithAuth } from "@/lib/fetchWithAuth"
 
 export default function LoginPage() {
   const [usuario, setUsuario] = useState("")
@@ -61,6 +62,9 @@ export default function LoginPage() {
         setCachedUser(data)
       }
 
+      // PRELOAD CREDENCIAIS
+      await fetchWithAuth("/api/admin/users")
+      
       // ✅ redireciona
       router.push("/")
 
