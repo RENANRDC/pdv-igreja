@@ -25,12 +25,14 @@ export default function PedidoPage() {
 
   const [pedido, setPedido] = useState<Pedido | null>(null)
   const [loading, setLoading] = useState(true)
+  const [showLoading, setShowLoading] = useState(false)
   const [destacar, setDestacar] = useState(false)
   const [somAtivo, setSomAtivo] = useState(false)
 
   const statusAnterior = useRef<string | null>(null)
   const somRef = useRef<HTMLAudioElement | null>(null)
 
+  // 🔊 preload som
   useEffect(() => {
     const audio = new Audio("/sounds/pronto.wav")
     audio.preload = "auto"
@@ -65,6 +67,16 @@ export default function PedidoPage() {
     }
   }, [tocarSom])
 
+  // delay inteligente loading
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      if (loading) setShowLoading(true)
+    }, 300)
+
+    return () => clearTimeout(timer)
+  }, [loading])
+
+  // realtime pedido
   useEffect(() => {
     if (!id) return
 
@@ -110,33 +122,34 @@ export default function PedidoPage() {
       .catch(() => {})
   }
 
-  if (loading) {
-    return (
-      <div className="flex flex-1 items-center justify-center bg-gray-900 text-white">
-        <p className="animate-pulse text-lg">Carregando pedido...</p>
-      </div>
-    )
-  }
+  // loading inteligente
+if (loading) {
+  return (
+    <div className="flex min-h-screen items-center justify-center bg-gray-900 text-white transition-opacity duration-300">
+      <p className="animate-pulse text-lg opacity-80">
+        Carregando pedido...
+      </p>
+    </div>
+  )
+}
 
-  if (!pedido) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-900 text-red-400">
-        Pedido não encontrado
-      </div>
-    )
-  }
+// pedido não encontrado
+if (!pedido) {
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-gray-900 text-red-400">
+      Pedido não encontrado
+    </div>
+  )
+}
 
-  const isPronto = pedido.status === "finalizado"
+const isPronto = pedido.status === "finalizado"
 
   return (
-    <div className="bg-gray-900 text-white flex flex-col flex-1">
-
-      {/* CONTEÚDO */}
+    <div className="min-h-screen bg-gray-900 text-white flex flex-col">
       <div className="flex-1 flex flex-col items-center justify-center p-6">
 
-        {/* 🔊 SOM */}
+        {/* SOM */}
         <div className="absolute top-4 right-4 flex items-center gap-3 bg-white/5 backdrop-blur-md px-3 py-2 rounded-xl border border-white/10">
-
           <button
             onClick={ativarSomManual}
             className={`px-3 py-1.5 rounded-lg text-sm font-medium transition ${
@@ -147,13 +160,6 @@ export default function PedidoPage() {
           >
             {somAtivo ? "🔊 Som ativo" : "🔇 Ativar som"}
           </button>
-
-          {!somAtivo && (
-            <span className="text-xs text-gray-300 leading-tight max-w-40">
-              Ative o som e mantenha essa tela aberta para ser avisado quando estiver pronto.
-            </span>
-          )}
-
         </div>
 
         {/* CÓDIGO */}
@@ -181,10 +187,7 @@ export default function PedidoPage() {
 
         {/* CLIENTE */}
         <p className="mt-6 text-gray-300">
-          Cliente:{" "}
-          <span className="font-semibold">
-            {pedido.nomeCliente}
-          </span>
+          Cliente: <span className="font-semibold">{pedido.nomeCliente}</span>
         </p>
 
         {/* ITENS */}
@@ -216,7 +219,6 @@ export default function PedidoPage() {
         )}
 
       </div>
-
     </div>
   )
 }
