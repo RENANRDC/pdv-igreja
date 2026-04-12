@@ -9,6 +9,7 @@ export default function ProtectedLayout({
   children: React.ReactNode
 }) {
   useEffect(() => {
+    // 🔥 preload só para páginas protegidas
     Promise.all([
       fetchWithAuth("/api/pedidos"),
       fetchWithAuth("/api/produtos"),
