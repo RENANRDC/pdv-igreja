@@ -10,33 +10,31 @@ export default function ConfigDisplayPage() {
   const key = "config-display"
 
   // 🔥 garante valor inicial no cache
-  if (typeof cache[key] !== "number") {
-    cache[key] = 20
-  }
+const valorInicial =
+  typeof cache[key] === "number" ? cache[key] : 20
 
-  const [limite, setLimite] = useState<number>(cache[key])
-  const [loading, setLoading] = useState(false)
+const [limite, setLimite] = useState<number>(valorInicial)
+
+
   const [showModal, setShowModal] = useState(false)
   const [saving, setSaving] = useState(false)
 
   // 🔥 realtime (sem delay visual)
-  useEffect(() => {
-    const ref = doc(db, "config", "display")
+useEffect(() => {
+  const ref = doc(db, "config", "display")
 
-    const unsub = onSnapshot(ref, (snap) => {
-      const valor = snap.exists()
-        ? snap.data().limiteProntos || 20
-        : 20
+  const unsub = onSnapshot(ref, (snap) => {
+    const valor = snap.exists()
+      ? snap.data().limiteProntos || 20
+      : 20
 
-      // evita render desnecessário
-      if (valor !== cache[key]) {
-        cache[key] = valor
-        setLimite(valor)
-      }
-    })
+    cache[key] = valor // ✅ permitido aqui
 
-    return () => unsub()
-  }, [])
+    setLimite(valor)
+  })
+
+  return () => unsub()
+}, [])
 
   // 💾 salvar
   async function confirmarSalvar() {
