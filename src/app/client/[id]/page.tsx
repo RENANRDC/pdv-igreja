@@ -158,7 +158,7 @@ queueMicrotask(() => {
       <div className="flex-1 flex flex-col items-center justify-center p-6">
 
         {/* SOM */}
-        <div className="absolute top-4 right-4 flex items-center gap-3 bg-white/5 backdrop-blur-md px-3 py-2 rounded-xl border border-white/10">
+          <div className="fixed top-4 right-4 z-50 flex items-center gap-3 bg-white/5 backdrop-blur-md px-3 py-2 rounded-xl border border-white/10">
           <button
             onClick={ativarSomManual}
             className={`px-3 py-1.5 rounded-lg text-sm font-medium ${
