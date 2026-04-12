@@ -7,7 +7,6 @@ import { getAuth } from "firebase/auth"
 import { Eye, EyeOff } from "lucide-react"
 import { setCachedUser } from "@/hooks/useAdminGuard"
 import { fetchWithAuth } from "@/lib/fetchWithAuth"
-
 export default function LoginPage() {
   const [usuario, setUsuario] = useState("")
   const [senha, setSenha] = useState("")

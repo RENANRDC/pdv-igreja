@@ -1,6 +1,17 @@
-import { auth } from "@/services/auth" // ✅ IMPORT CERTO
+import { auth } from "@/services/auth"
+import { cache } from "@/lib/cache"
 
-export async function fetchWithAuth(url: string, options: RequestInit = {}) {
+export async function fetchWithAuth(
+  url: string,
+  options: RequestInit = {}
+) {
+  // 🔥 usa cache apenas para GET
+  if (!options.method || options.method === "GET") {
+    if (cache[url]) {
+      return cache[url]
+    }
+  }
+
   const user = auth.currentUser
 
   if (!user) {
@@ -24,6 +35,11 @@ export async function fetchWithAuth(url: string, options: RequestInit = {}) {
 
   if (!response.ok) {
     throw new Error(data?.error || "Erro na requisição")
+  }
+
+  // 🔥 salva no cache (GET only)
+  if (!options.method || options.method === "GET") {
+    cache[url] = data
   }
 
   return data

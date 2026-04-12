@@ -97,34 +97,6 @@ export default function DisplayPage() {
   .filter((p) => p.status === "finalizado")
   .slice(0, limiteProntos)
 
-  // 🚀 SCROLL PROFISSIONAL (SEM BUG)
-  useEffect(() => {
-    let frame: number
-    const speed = 0.4
-
-    function scroll(el: HTMLDivElement | null) {
-      if (!el) return
-
-      const maxScroll = el.scrollHeight - el.clientHeight
-
-      if (maxScroll <= 0) return
-
-      el.scrollTop += speed
-
-      if (el.scrollTop >= maxScroll) {
-        el.scrollTop = 0
-      }
-    }
-
-function loop() {
-  scroll(preparoRef.current)
-  frame = requestAnimationFrame(loop)
-}
-
-    loop()
-
-    return () => cancelAnimationFrame(frame)
-  }, [])
 
   return (
     <div className="h-screen flex flex-col bg-gray-900 text-white overflow-hidden">
@@ -135,13 +107,16 @@ function loop() {
           <img src="/logo.png" className="h-10" />
           <div>
             <h1 className="font-bold">Central Gourmet</h1>
-            <p className="text-xs text-gray-400">Display</p>
+            <p className="text-xs text-gray-400">Painel ao vivo</p>
           </div>
         </div>
 
-        <div className="text-sm text-gray-400">
-          Painel ao vivo
-        </div>
+<div className="text-xs text-gray-400 flex items-center">
+  Desenvolvido por
+  <span className="font-semibold text-gray-300 ml-1">
+    R2CodeX
+  </span>
+</div>
       </div>
 
       {/* BOTÃO SOM */}
@@ -168,13 +143,12 @@ function loop() {
           </h2>
 
           <div
-            ref={preparoRef}
-            className="flex-1 overflow-y-auto min-h-0 scroll-hidden"
+className="flex-1 overflow-hidden min-h-0"
           >
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-              {emPreparo.map((pedido) => (
+            <div className="animate-scroll grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+              {[...emPreparo, ...emPreparo].map((pedido, index) => (
                 <div
-                  key={pedido.id}
+                  key={index}
                   className="bg-yellow-400 text-black rounded-xl p-4 flex items-center justify-center shadow-lg"
                 >
                   <span className="text-4xl lg:text-5xl font-bold">

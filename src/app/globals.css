@@ -23,8 +23,10 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
+  overflow-x: hidden; /* 🔥 evita corte lateral */
 }
 
+/* 🔥 SCROLL INFINITO SUAVE */
 @keyframes scrollVertical {
   0% {
     transform: translateY(0%);
@@ -35,13 +37,15 @@ body {
 }
 
 .animate-scroll {
-  animation: scrollVertical 25s linear infinite;
+  animation: scrollVertical 40s linear infinite; /* 🔥 controla velocidade aqui */
+  will-change: transform;
 }
 
-/* fade bonito */
+/* 🔥 fade profissional nas bordas (opcional usar) */
 .mask-fade {
   mask-image: linear-gradient(to bottom, transparent, black 10%, black 90%, transparent);
 }
+
 /* 🔥 esconder scrollbar */
 .scroll-hidden::-webkit-scrollbar {
   display: none;
@@ -52,6 +56,7 @@ body {
   scrollbar-width: none;
 }
 
+/* 🔥 animações */
 @keyframes pulseSoft {
   0%, 100% {
     transform: scale(1);
@@ -76,11 +81,12 @@ body {
   animation: blinkGreen 0.8s ease-in-out infinite;
 }
 
-html {
+/* ❌ REMOVE ISSO (causa espaço lateral) */
+/* html {
   scrollbar-gutter: stable;
-}
+} */
 
-/* 🔥 safe area (iPhone / mobile moderno) */
+/* 🔥 safe area */
 .pb-safe {
   padding-bottom: env(safe-area-inset-bottom);
 }

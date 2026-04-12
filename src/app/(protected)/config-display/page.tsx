@@ -4,7 +4,7 @@ import { useEffect, useState } from "react"
 import BackButton from "@/components/BackButton"
 import { db } from "@/services/firebase"
 import { doc, getDoc, setDoc } from "firebase/firestore"
-
+import { cache, clearCacheKey } from "@/lib/cache"
 export default function ConfigDisplayPage() {
   const [limite, setLimite] = useState(20)
   const [loading, setLoading] = useState(true)
@@ -12,28 +12,44 @@ export default function ConfigDisplayPage() {
   const [saving, setSaving] = useState(false)
 
   // 🔥 carregar config
-  useEffect(() => {
-    async function load() {
-      const ref = doc(db, "config", "display")
-      const snap = await getDoc(ref)
 
-      if (snap.exists()) {
-        setLimite(snap.data().limiteProntos || 20)
-      }
+useEffect(() => {
+  async function load() {
+    const key = "config-display"
 
-      setLoading(false)
+if (typeof cache[key] === "number") {
+  setLimite(cache[key])
+  setLoading(false)
+  return
+}
+
+    const ref = doc(db, "config", "display")
+    const snap = await getDoc(ref)
+
+    let valor = 20
+
+    if (snap.exists()) {
+      valor = snap.data().limiteProntos || 20
     }
 
-    load()
-  }, [])
+    cache[key] = valor
+
+    setLimite(valor)
+    setLoading(false)
+  }
+
+  load()
+}, [])
 
   // 💾 salvar
   async function confirmarSalvar() {
     setSaving(true)
 
-    await setDoc(doc(db, "config", "display"), {
-      limiteProntos: limite,
-    })
+await setDoc(doc(db, "config", "display"), {
+  limiteProntos: limite,
+})
+
+clearCacheKey("config-display")
 
     setSaving(false)
     setShowModal(false)

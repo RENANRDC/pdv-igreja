@@ -5,6 +5,7 @@ import BackButton from "@/components/BackButton"
 import { fetchWithAuth } from "@/lib/fetchWithAuth"
 import { Eye, EyeOff } from "lucide-react"
 import { getAuth, signOut } from "firebase/auth"
+import { cache } from "@/lib/cache"
 
 /* ================= TYPES ================= */
 
@@ -22,7 +23,6 @@ type ToastType = {
   type: "success" | "error"
 } | null
 
-let cachedUsers: User[] | null = null
 
 
 /* ================= PAGE ================= */
@@ -64,16 +64,19 @@ export default function CredenciaisPage() {
 
 async function loadUsers() {
   try {
-    if (cachedUsers) {
-      setUsers(cachedUsers)
+    const key = "/api/admin/users"
+
+    // 🔥 usa cache global
+    if (cache[key]) {
+      const cached = cache[key] as { users?: User[] }
+      setUsers(cached.users || [])
       return
     }
 
-    const data = await fetchWithAuth("/api/admin/users")
+    const data = await fetchWithAuth(key)
     const list = Array.isArray(data?.users) ? data.users : []
 
     setUsers(list)
-    cachedUsers = list
 
   } catch (err) {
     showToast(getErrorMessage(err), "error")
@@ -160,7 +163,6 @@ if (currentUser && selectedUser.username === currentUser.email?.split("@")[0]) {
 setModal(null)
 setSelectedUser(null)
 
-cachedUsers = null
 loadUsers()
 
 } catch (err) {
