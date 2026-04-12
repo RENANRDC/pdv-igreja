@@ -70,19 +70,20 @@ export default function PedidoPage() {
     if (!id) return
 
     // ⚡ tenta cache memória primeiro
-    if (pedidoCache[id]) {
-      setPedido(pedidoCache[id])
+queueMicrotask(() => {
+  if (pedidoCache[id]) {
+    setPedido(pedidoCache[id])
+    setLoading(false)
+  } else {
+    const local = localStorage.getItem(`pedido-${id}`)
+    if (local) {
+      const parsed = JSON.parse(local)
+      pedidoCache[id] = parsed
+      setPedido(parsed)
       setLoading(false)
-    } else {
-      // ⚡ tenta localStorage (client only)
-      const local = localStorage.getItem(`pedido-${id}`)
-      if (local) {
-        const parsed = JSON.parse(local)
-        pedidoCache[id] = parsed
-        setPedido(parsed)
-        setLoading(false)
-      }
     }
+  }
+})
 
     const ref = doc(db, "pedidos", id)
 
