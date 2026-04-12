@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react"
 import BackButton from "@/components/BackButton"
 import { fetchWithAuth } from "@/lib/fetchWithAuth"
 import { Eye, EyeOff } from "lucide-react"
+import { getAuth, signOut } from "firebase/auth"
 
 /* ================= TYPES ================= */
 
@@ -145,18 +146,29 @@ async function loadUsers() {
         }),
       })
 
-      showToast("Usuário atualizado", "success")
-      setModal(null)
-      setSelectedUser(null)
+showToast("Usuário atualizado. Faça login novamente.", "success")
 
-      loadUsers()
-    } catch (err) {
-      showToast(getErrorMessage(err), "error")
-    } finally {
-      setIsLoading(false)
-    }
+const auth = getAuth()
+const currentUser = auth.currentUser
+
+if (currentUser && selectedUser.username === currentUser.email?.split("@")[0]) {
+  await signOut(auth)
+  window.location.href = "/login"
+  return
+}
+
+setModal(null)
+setSelectedUser(null)
+
+cachedUsers = null
+loadUsers()
+
+} catch (err) {
+  showToast(getErrorMessage(err), "error")
+} finally {
+  setIsLoading(false)
+}
   }
-
   async function confirmDelete() {
     if (!deleteModal) return
 
