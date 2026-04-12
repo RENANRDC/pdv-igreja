@@ -3,53 +3,50 @@
 import { useEffect, useState } from "react"
 import BackButton from "@/components/BackButton"
 import { db } from "@/services/firebase"
-import { doc, getDoc, setDoc } from "firebase/firestore"
+import { doc, setDoc, onSnapshot } from "firebase/firestore"
 import { cache, clearCacheKey } from "@/lib/cache"
+
 export default function ConfigDisplayPage() {
-  const [limite, setLimite] = useState(20)
-  const [loading, setLoading] = useState(true)
+  const key = "config-display"
+
+  // 🔥 garante valor inicial no cache
+  if (typeof cache[key] !== "number") {
+    cache[key] = 20
+  }
+
+  const [limite, setLimite] = useState<number>(cache[key])
+  const [loading, setLoading] = useState(false)
   const [showModal, setShowModal] = useState(false)
   const [saving, setSaving] = useState(false)
 
-  // 🔥 carregar config
-
-useEffect(() => {
-  async function load() {
-    const key = "config-display"
-
-if (typeof cache[key] === "number") {
-  setLimite(cache[key])
-  setLoading(false)
-  return
-}
-
+  // 🔥 realtime (sem delay visual)
+  useEffect(() => {
     const ref = doc(db, "config", "display")
-    const snap = await getDoc(ref)
 
-    let valor = 20
+    const unsub = onSnapshot(ref, (snap) => {
+      const valor = snap.exists()
+        ? snap.data().limiteProntos || 20
+        : 20
 
-    if (snap.exists()) {
-      valor = snap.data().limiteProntos || 20
-    }
+      // evita render desnecessário
+      if (valor !== cache[key]) {
+        cache[key] = valor
+        setLimite(valor)
+      }
+    })
 
-    cache[key] = valor
-
-    setLimite(valor)
-    setLoading(false)
-  }
-
-  load()
-}, [])
+    return () => unsub()
+  }, [])
 
   // 💾 salvar
   async function confirmarSalvar() {
     setSaving(true)
 
-await setDoc(doc(db, "config", "display"), {
-  limiteProntos: limite,
-})
+    await setDoc(doc(db, "config", "display"), {
+      limiteProntos: limite,
+    })
 
-clearCacheKey("config-display")
+    clearCacheKey(key)
 
     setSaving(false)
     setShowModal(false)
@@ -80,29 +77,24 @@ clearCacheKey("config-display")
             Configuração
           </h2>
 
-          {loading ? (
-            <div className="animate-pulse h-10 bg-gray-700 rounded" />
-          ) : (
-            <>
-              <label className="text-sm text-gray-400">
-                Quantidade de pedidos prontos
-              </label>
+          <label className="text-sm text-gray-400">
+            Quantidade de pedidos prontos
+          </label>
 
-              <input
-                type="number"
-                value={limite}
-                onChange={(e) => setLimite(Number(e.target.value))}
-                className="w-full p-3 rounded bg-gray-700 outline-none"
-              />
+          <input
+            type="number"
+            value={limite}
+            onChange={(e) => setLimite(Number(e.target.value))}
+            className="w-full p-3 rounded bg-gray-700 outline-none"
+          />
 
-              <button
-                onClick={() => setShowModal(true)}
-                className="bg-green-600 w-full p-3 rounded font-semibold"
-              >
-                Salvar
-              </button>
-            </>
-          )}
+          <button
+            onClick={() => setShowModal(true)}
+            className="bg-green-600 w-full p-3 rounded font-semibold"
+          >
+            Salvar
+          </button>
+
         </div>
 
         {/* INFO */}
@@ -117,7 +109,7 @@ clearCacheKey("config-display")
 
       </div>
 
-      {/* 🔥 MODAL */}
+      {/* MODAL */}
       {showModal && (
         <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50">
 
