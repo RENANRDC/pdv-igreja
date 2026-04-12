@@ -22,33 +22,12 @@ type Pedido = {
 // 🔥 CACHE GLOBAL
 const pedidoCache: Record<string, Pedido> = {}
 
-function getPedidoInicial(id?: string) {
-  if (!id) return null
-
-  // memória
-  if (pedidoCache[id]) return pedidoCache[id]
-
-  // localStorage
-  if (typeof window !== "undefined") {
-    const local = localStorage.getItem(`pedido-${id}`)
-    if (local) {
-      const parsed = JSON.parse(local)
-      pedidoCache[id] = parsed
-      return parsed
-    }
-  }
-
-  return null
-}
-
 export default function PedidoPage() {
   const params = useParams()
   const id = Array.isArray(params?.id) ? params.id[0] : params?.id
 
-  const initialPedido = getPedidoInicial(id)
-
-  const [pedido, setPedido] = useState<Pedido | null>(initialPedido)
-  const [loading, setLoading] = useState(!initialPedido)
+  const [pedido, setPedido] = useState<Pedido | null>(null)
+  const [loading, setLoading] = useState(true)
 
   const [destacar, setDestacar] = useState(false)
   const [somAtivo, setSomAtivo] = useState(false)
@@ -86,9 +65,24 @@ export default function PedidoPage() {
     }
   }, [tocarSom])
 
-  // 🔥 realtime + cache + localStorage
+  // 🔥 carregamento inteligente (sem hydration error)
   useEffect(() => {
     if (!id) return
+
+    // ⚡ tenta cache memória primeiro
+    if (pedidoCache[id]) {
+      setPedido(pedidoCache[id])
+      setLoading(false)
+    } else {
+      // ⚡ tenta localStorage (client only)
+      const local = localStorage.getItem(`pedido-${id}`)
+      if (local) {
+        const parsed = JSON.parse(local)
+        pedidoCache[id] = parsed
+        setPedido(parsed)
+        setLoading(false)
+      }
+    }
 
     const ref = doc(db, "pedidos", id)
 
@@ -101,13 +95,11 @@ export default function PedidoPage() {
 
       const data = snapshot.data() as Pedido
 
-      // memória
+      // cache memória
       pedidoCache[id] = data
 
-      // localStorage
-      if (typeof window !== "undefined") {
-        localStorage.setItem(`pedido-${id}`, JSON.stringify(data))
-      }
+      // cache localStorage
+      localStorage.setItem(`pedido-${id}`, JSON.stringify(data))
 
       if (
         statusAnterior.current &&
@@ -138,7 +130,7 @@ export default function PedidoPage() {
       .catch(() => {})
   }
 
-  // loading (só se não tiver cache nenhum)
+  // loading
   if (loading) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-gray-900 text-white">
@@ -188,7 +180,7 @@ export default function PedidoPage() {
 
         {/* STATUS */}
         <div
-          className={`w-full max-w-sm rounded-2xl p-6 text-center shadow-xl transition-all duration-500 ${
+          className={`w-full max-w-sm rounded-2xl p-6 text-center shadow-xl ${
             isPronto
               ? destacar
                 ? "bg-green-500 scale-110 animate-bounce"
