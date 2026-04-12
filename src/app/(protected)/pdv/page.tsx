@@ -33,6 +33,7 @@ export default function Home() {
     useState<FormaPagamento>("pix")
 
   const [valorRecebido, setValorRecebido] = useState("")
+const [erroWhats, setErroWhats] = useState(false)
 
   function formatarReal(valor: string) {
   const numero = valor.replace(/\D/g, "")
@@ -176,10 +177,10 @@ async function handleConfirmarPagamento() {
     function handleWhatsApp() {
       if (!codigoPedido || !qrUrl) return
 
-      if (!whatsNumero) {
-        alert("Digite o número do WhatsApp")
-        return
-      }
+if (!whatsNumero.trim()) {
+  setErroWhats(true)
+  return
+}
 
       const numero = whatsNumero.replace(/\D/g, "")
 
@@ -666,12 +667,21 @@ onFocus={() => {
 
 {/* WHATSAPP (todos os modos) */}
 <>
-  <input
-    placeholder="Número WhatsApp (ex: 44999999999)"
-    value={whatsNumero}
-    onChange={(e) => setWhatsNumero(e.target.value)}
-    className="w-full p-3 border rounded"
-  />
+<input
+  placeholder={
+    erroWhats
+      ? "Digite o número do WhatsApp"
+      : "Número WhatsApp (ex: 44999999999)"
+  }
+  value={whatsNumero}
+  onChange={(e) => {
+    setWhatsNumero(e.target.value)
+    if (erroWhats) setErroWhats(false)
+  }}
+  className={`w-full p-3 border rounded ${
+    erroWhats ? "border-red-500 bg-red-100" : ""
+  }`}
+/>
 
   <button
     onClick={handleWhatsApp}
