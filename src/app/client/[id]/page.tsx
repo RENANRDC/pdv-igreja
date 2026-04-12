@@ -19,13 +19,37 @@ type Pedido = {
   total: number
 }
 
+// 🔥 CACHE GLOBAL
+const pedidoCache: Record<string, Pedido> = {}
+
+function getPedidoInicial(id?: string) {
+  if (!id) return null
+
+  // memória
+  if (pedidoCache[id]) return pedidoCache[id]
+
+  // localStorage
+  if (typeof window !== "undefined") {
+    const local = localStorage.getItem(`pedido-${id}`)
+    if (local) {
+      const parsed = JSON.parse(local)
+      pedidoCache[id] = parsed
+      return parsed
+    }
+  }
+
+  return null
+}
+
 export default function PedidoPage() {
   const params = useParams()
   const id = Array.isArray(params?.id) ? params.id[0] : params?.id
 
-  const [pedido, setPedido] = useState<Pedido | null>(null)
-  const [loading, setLoading] = useState(true)
-  const [showLoading, setShowLoading] = useState(false)
+  const initialPedido = getPedidoInicial(id)
+
+  const [pedido, setPedido] = useState<Pedido | null>(initialPedido)
+  const [loading, setLoading] = useState(!initialPedido)
+
   const [destacar, setDestacar] = useState(false)
   const [somAtivo, setSomAtivo] = useState(false)
 
@@ -41,15 +65,12 @@ export default function PedidoPage() {
 
   const tocarSom = useCallback(() => {
     if (!somAtivo) return
-
     const audio = somRef.current
     if (!audio) return
 
     try {
       audio.pause()
-      if (audio.readyState >= 1) {
-        audio.currentTime = 0
-      }
+      audio.currentTime = 0
       audio.play()
     } catch {}
   }, [somAtivo])
@@ -58,25 +79,14 @@ export default function PedidoPage() {
     setDestacar(true)
     tocarSom()
 
-    setTimeout(() => {
-      setDestacar(false)
-    }, 4000)
+    setTimeout(() => setDestacar(false), 4000)
 
     if (typeof window !== "undefined" && "vibrate" in navigator) {
       navigator.vibrate([200, 100, 200])
     }
   }, [tocarSom])
 
-  // delay inteligente loading
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      if (loading) setShowLoading(true)
-    }, 300)
-
-    return () => clearTimeout(timer)
-  }, [loading])
-
-  // realtime pedido
+  // 🔥 realtime + cache + localStorage
   useEffect(() => {
     if (!id) return
 
@@ -90,6 +100,14 @@ export default function PedidoPage() {
       }
 
       const data = snapshot.data() as Pedido
+
+      // memória
+      pedidoCache[id] = data
+
+      // localStorage
+      if (typeof window !== "undefined") {
+        localStorage.setItem(`pedido-${id}`, JSON.stringify(data))
+      }
 
       if (
         statusAnterior.current &&
@@ -114,35 +132,33 @@ export default function PedidoPage() {
     audio.play()
       .then(() => {
         audio.pause()
-        if (audio.readyState >= 1) {
-          audio.currentTime = 0
-        }
+        audio.currentTime = 0
         setSomAtivo(true)
       })
       .catch(() => {})
   }
 
-  // loading inteligente
-if (loading) {
-  return (
-    <div className="flex min-h-screen items-center justify-center bg-gray-900 text-white transition-opacity duration-300">
-      <p className="animate-pulse text-lg opacity-80">
-        Carregando pedido...
-      </p>
-    </div>
-  )
-}
+  // loading (só se não tiver cache nenhum)
+  if (loading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-gray-900 text-white">
+        <p className="animate-pulse text-lg opacity-80">
+          Carregando pedido...
+        </p>
+      </div>
+    )
+  }
 
-// pedido não encontrado
-if (!pedido) {
-  return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-900 text-red-400">
-      Pedido não encontrado
-    </div>
-  )
-}
+  // não encontrado
+  if (!pedido) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gray-900 text-red-400">
+        Pedido não encontrado
+      </div>
+    )
+  }
 
-const isPronto = pedido.status === "finalizado"
+  const isPronto = pedido.status === "finalizado"
 
   return (
     <div className="min-h-screen bg-gray-900 text-white flex flex-col">
@@ -152,7 +168,7 @@ const isPronto = pedido.status === "finalizado"
         <div className="absolute top-4 right-4 flex items-center gap-3 bg-white/5 backdrop-blur-md px-3 py-2 rounded-xl border border-white/10">
           <button
             onClick={ativarSomManual}
-            className={`px-3 py-1.5 rounded-lg text-sm font-medium transition ${
+            className={`px-3 py-1.5 rounded-lg text-sm font-medium ${
               somAtivo
                 ? "bg-green-600"
                 : "bg-blue-600 hover:bg-blue-500"
