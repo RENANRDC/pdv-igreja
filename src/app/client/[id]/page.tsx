@@ -118,10 +118,12 @@ queueMicrotask(() => {
     return () => unsub()
   }, [id, ativarCelebracao])
 
-  function ativarSomManual() {
-    const audio = somRef.current
-    if (!audio) return
+function toggleSom() {
+  const audio = somRef.current
+  if (!audio) return
 
+  if (!somAtivo) {
+    // ativa (libera autoplay no navegador)
     audio.play()
       .then(() => {
         audio.pause()
@@ -129,7 +131,11 @@ queueMicrotask(() => {
         setSomAtivo(true)
       })
       .catch(() => {})
+  } else {
+    // desativa
+    setSomAtivo(false)
   }
+}
 
   // loading
   if (loading) {
@@ -160,7 +166,7 @@ queueMicrotask(() => {
         {/* SOM */}
           <div className="fixed top-4 right-4 z-50 flex items-center gap-3 bg-white/5 backdrop-blur-md px-3 py-2 rounded-xl border border-white/10">
           <button
-            onClick={ativarSomManual}
+            onClick={toggleSom}
             className={`px-3 py-1.5 rounded-lg text-sm font-medium ${
               somAtivo
                 ? "bg-green-600"
