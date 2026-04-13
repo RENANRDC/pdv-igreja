@@ -20,15 +20,30 @@ type Pedido = {
   id: string
   nomeCliente: string
   codigo: string
-  status: "pendente" | "finalizado"
-  total: number
+  status: "pendente" | "em_preparo" | "finalizado"
+  total?: number
+  valor?: number
   itens?: Item[]
+}
+
+// 🔥 FORMATAÇÃO DE STATUS
+function getStatusInfo(status: string) {
+  switch (status) {
+    case "pendente":
+      return { label: "Pendente", color: "bg-yellow-500 text-black" }
+    case "em_preparo":
+      return { label: "Em preparo", color: "bg-blue-600" }
+    case "finalizado":
+      return { label: "Pronto", color: "bg-green-600" }
+    default:
+      return { label: status, color: "bg-gray-600" }
+  }
 }
 
 export default function ControlePedidos() {
 
   const [pedidos, setPedidos] = useState<Pedido[]>([])
-  const [aba, setAba] = useState<"pendente" | "finalizado">("pendente")
+  const [aba, setAba] = useState<"pendente" | "em_preparo" | "finalizado">("pendente")
   const [pedidoSelecionado, setPedidoSelecionado] = useState<Pedido | null>(null)
 
   useEffect(() => {
@@ -50,14 +65,24 @@ export default function ControlePedidos() {
   }, [])
 
   const pendentes = pedidos.filter(p => p.status === "pendente")
+  const emPreparo = pedidos.filter(p => p.status === "em_preparo")
   const finalizados = pedidos.filter(p => p.status === "finalizado")
 
-  const lista = aba === "pendente" ? pendentes : finalizados
+  const lista =
+    aba === "pendente"
+      ? pendentes
+      : aba === "em_preparo"
+      ? emPreparo
+      : finalizados
+
+  // 🔥 proteção total
+  const getTotal = (pedido: Pedido) => {
+    return (pedido.total ?? pedido.valor ?? 0)
+  }
 
   return (
     <div className="bg-gray-900 text-white p-4 min-h-[100vh]">
 
-      {/* HEADER (PADRÃO COZINHA) */}
       <div className="grid grid-cols-3 items-center mb-6">
         <div className="flex justify-start">
           <BackButton href="/pdv" />
@@ -86,6 +111,17 @@ export default function ControlePedidos() {
         </button>
 
         <button
+          onClick={() => setAba("em_preparo")}
+          className={`flex-1 p-2 rounded font-semibold text-sm ${
+            aba === "em_preparo"
+              ? "bg-blue-600"
+              : "bg-gray-800"
+          }`}
+        >
+          Em preparo ({emPreparo.length})
+        </button>
+
+        <button
           onClick={() => setAba("finalizado")}
           className={`flex-1 p-2 rounded font-semibold text-sm ${
             aba === "finalizado"
@@ -97,46 +133,42 @@ export default function ControlePedidos() {
         </button>
       </div>
 
-      {/* GRID DE CARDS */}
+      {/* GRID */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
 
-        {lista.map((pedido) => (
-          <div
-            key={pedido.id}
-            onClick={() => setPedidoSelecionado(pedido)}
-            className="bg-gray-800 p-4 rounded-xl flex flex-col justify-between min-h-[120px] cursor-pointer hover:bg-gray-700 transition"
-          >
+        {lista.map((pedido) => {
+          const statusInfo = getStatusInfo(pedido.status)
 
-            {/* TOPO */}
-            <div className="flex justify-between items-center mb-2">
-              <span className="text-sm font-semibold">
-                #{pedido.codigo}
-              </span>
+          return (
+            <div
+              key={pedido.id}
+              onClick={() => setPedidoSelecionado(pedido)}
+              className="bg-gray-800 p-4 rounded-xl flex flex-col justify-between min-h-[120px] cursor-pointer hover:bg-gray-700 transition"
+            >
 
-              <span className="text-xs text-gray-300 truncate max-w-[120px]">
-                {pedido.nomeCliente}
-              </span>
+              <div className="flex justify-between items-center mb-2">
+                <span className="text-sm font-semibold">
+                  #{pedido.codigo}
+                </span>
+
+                <span className="text-xs text-gray-300 truncate max-w-[120px]">
+                  {pedido.nomeCliente}
+                </span>
+              </div>
+
+              <div className="flex justify-between items-center mt-auto">
+                <span className="text-sm font-bold text-green-400">
+                  R${getTotal(pedido).toFixed(2)}
+                </span>
+
+                <span className={`text-xs px-2 py-1 rounded ${statusInfo.color}`}>
+                  {statusInfo.label}
+                </span>
+              </div>
+
             </div>
-
-            {/* RODAPÉ DO CARD */}
-            <div className="flex justify-between items-center mt-auto">
-              <span className="text-sm font-bold text-green-400">
-                R${pedido.total.toFixed(2)}
-              </span>
-
-              <span
-                className={`text-xs px-2 py-1 rounded ${
-                  pedido.status === "pendente"
-                    ? "bg-yellow-500 text-black"
-                    : "bg-green-600"
-                }`}
-              >
-                {pedido.status}
-              </span>
-            </div>
-
-          </div>
-        ))}
+          )
+        })}
 
       </div>
 
@@ -165,7 +197,7 @@ export default function ControlePedidos() {
 
             <div className="text-right mb-4">
               <span className="text-lg font-bold text-green-400">
-                R${pedidoSelecionado.total.toFixed(2)}
+                R${getTotal(pedidoSelecionado).toFixed(2)}
               </span>
             </div>
 

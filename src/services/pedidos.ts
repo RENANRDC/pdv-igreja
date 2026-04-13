@@ -17,7 +17,7 @@ function gerarCodigo(): string {
 export async function criarPedido(
   nome: string,
   itens: Item[],
-  formaPagamento: FormaPagamento = "pix" // 👈 evita erro em chamadas antigas
+  formaPagamento: FormaPagamento = "pix"
 ) {
   if (!nome || !itens.length) {
     throw new Error("Dados inválidos")
@@ -34,11 +34,13 @@ export async function criarPedido(
     nomeCliente: nome,
     codigo,
     status: "pendente",
+
+    // ✅ CORREÇÃO AQUI
+    total: total,
+
     barracaId: "geral",
     itens,
-    total,
 
-    // 🔥 NOVO
     pago: true,
     formaPagamento,
 

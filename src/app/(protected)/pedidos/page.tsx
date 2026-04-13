@@ -11,7 +11,7 @@ import {
 } from "firebase/firestore"
 import { db } from "@/services/firebase"
 import BackButton from "@/components/BackButton"
-import { cache } from "@/lib/cache" // 🔥 NOVO
+import { cache } from "@/lib/cache"
 
 type Pedido = {
   id: string
@@ -28,19 +28,26 @@ export default function Cozinha() {
 
   const key = "cozinha-pedidos"
 
-  // 🔥 inicia com cache (evita delay)
-const [pedidos, setPedidos] = useState<Pedido[]>(() => {
-  if (typeof window !== "undefined") {
-    const local = localStorage.getItem(key)
-    if (local) return JSON.parse(local)
-  }
-
-  return (cache[key] as Pedido[]) || []
-})
+  const [pedidos, setPedidos] = useState<Pedido[]>([])
   const [pedidoSelecionado, setPedidoSelecionado] = useState<Pedido | null>(null)
 
   const somNovoRef = useRef<HTMLAudioElement | null>(null)
   const idsRef = useRef<string[]>([])
+
+  // 🔥 carrega cache SEM quebrar hydration
+  useEffect(() => {
+    const load = () => {
+      const local = localStorage.getItem(key)
+
+      if (local) {
+        setPedidos(JSON.parse(local) as Pedido[])
+      } else if (cache[key]) {
+        setPedidos(cache[key] as Pedido[])
+      }
+    }
+
+    queueMicrotask(load)
+  }, [])
 
   useEffect(() => {
     somNovoRef.current = new Audio("/sounds/novo.wav")
@@ -58,19 +65,19 @@ const [pedidos, setPedidos] = useState<Pedido[]>(() => {
         ...doc.data(),
       })) as Pedido[]
 
-      // 🔥 salva no cache
       cache[key] = lista
+      localStorage.setItem(key, JSON.stringify(lista))
 
       const novosIds = snapshot.docs.map((doc) => doc.id)
 
       if (idsRef.current.length > 0) {
         const temNovo = novosIds.some(id => !idsRef.current.includes(id))
-        if (temNovo) somNovoRef.current?.play().catch(() => {})
+        if (temNovo) {
+          somNovoRef.current?.play().catch(() => {})
+        }
       }
 
       idsRef.current = novosIds
-      cache[key] = lista
-      localStorage.setItem(key, JSON.stringify(lista))
       setPedidos(lista)
     })
 
@@ -112,7 +119,6 @@ const [pedidos, setPedidos] = useState<Pedido[]>(() => {
   return (
     <div className="bg-gray-900 text-white p-4 min-h-[100vh]">
 
-      {/* HEADER */}
       <div className="grid grid-cols-3 items-center mb-6">
         <div className="flex justify-start">
           <BackButton href="/" />
@@ -129,7 +135,7 @@ const [pedidos, setPedidos] = useState<Pedido[]>(() => {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
 
-        {/* 🟡 PENDENTES */}
+        {/* PENDENTES */}
         <div className="bg-yellow-500/10 border border-yellow-500/30 p-3 rounded-xl">
           <h2 className="text-yellow-400 font-semibold mb-3">
             Pendentes ({pendentes.length})
@@ -161,7 +167,7 @@ const [pedidos, setPedidos] = useState<Pedido[]>(() => {
           </div>
         </div>
 
-        {/* 🔵 EM PREPARO */}
+        {/* EM PREPARO */}
         <div className="bg-blue-500/10 border border-blue-500/30 p-3 rounded-xl">
           <h2 className="text-blue-400 font-semibold mb-3">
             Em preparo ({emPreparo.length})
@@ -206,7 +212,7 @@ const [pedidos, setPedidos] = useState<Pedido[]>(() => {
           </div>
         </div>
 
-        {/* 🟢 FINALIZADOS */}
+        {/* FINALIZADOS */}
         <div className="bg-green-500/10 border border-green-500/30 p-3 rounded-xl">
           <h2 className="text-green-400 font-semibold mb-3">
             Prontos ({finalizados.length})
