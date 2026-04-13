@@ -15,36 +15,17 @@ export default function MenuPage() {
   const router = useRouter()
   useSessionRefresh()
 
-  const [user, setUser] = useState<User | null>(() => getCachedUser())
-  const [loadingUser, setLoadingUser] = useState(!getCachedUser())
+  const [user, setUser] = useState<User | null>(null)
+  const [loadingUser, setLoadingUser] = useState(true)
 
   useEffect(() => {
-    async function fetchUser() {
-      try {
-        const res = await fetch("/api/me", {
-          credentials: "include",
-        })
+    const cached = getCachedUser()
 
-        if (!res.ok) {
-          setUser({ role: "user", username: null })
-          return
-        }
+    // 🔥 UM ÚNICO setState (resolve warning)
+    const finalUser = cached || { role: "user", username: null }
 
-        const data: User = await res.json()
-        setUser(data)
-
-      } catch {
-        setUser({ role: "user", username: null })
-      } finally {
-        setLoadingUser(false)
-      }
-    }
-
-    if (!user) {
-      fetchUser()
-    } else {
-      setLoadingUser(false)
-    }
+    setUser(finalUser)
+    setLoadingUser(false)
   }, [])
 
   async function handleLogout() {
@@ -59,7 +40,6 @@ export default function MenuPage() {
     router.push("/login")
   }
 
-  // 🔥 CORREÇÃO PRINCIPAL (REMOVE PISCADA)
   if (loadingUser) {
     return null
   }
@@ -67,7 +47,6 @@ export default function MenuPage() {
   return (
     <div className="bg-gray-900 text-white flex flex-col min-h-screen">
 
-      {/* HEADER */}
       <div className="w-full border-b border-gray-800 bg-gray-900/80 backdrop-blur sticky top-0 z-10">
         <div className="max-w-md mx-auto flex items-center justify-between p-4">
 
@@ -89,7 +68,6 @@ export default function MenuPage() {
         </div>
       </div>
 
-      {/* CONTEÚDO */}
       <div className="flex-1 max-w-md mx-auto w-full p-4 pb-6">
 
         <div className="grid gap-4 mt-4">
