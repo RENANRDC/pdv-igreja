@@ -10,6 +10,9 @@ import {
 } from "firebase/firestore"
 import { db } from "@/services/firebase"
 
+import DisplayHeader from "@/components/display/DisplayHeader"
+import DisplayColumn from "@/components/display/DisplayColumn"
+
 type Pedido = {
   id: string
   codigo: string
@@ -21,7 +24,6 @@ export default function DisplayPage() {
   const [highlightId, setHighlightId] = useState<string | null>(null)
   const [audioLiberado, setAudioLiberado] = useState(false)
   const [limiteProntos, setLimiteProntos] = useState(20)
-
   const [precisaScroll, setPrecisaScroll] = useState(false)
 
   const containerRef = useRef<HTMLDivElement>(null)
@@ -96,13 +98,11 @@ export default function DisplayPage() {
     .filter((p) => p.status === "finalizado")
     .slice(0, limiteProntos)
 
-  // 🔥 DETECÇÃO REAL (ESSA É A CORREÇÃO)
   useEffect(() => {
     const check = () => {
       if (containerRef.current && contentRef.current) {
         const containerHeight = containerRef.current.offsetHeight
         const contentHeight = contentRef.current.scrollHeight
-
         setPrecisaScroll(contentHeight > containerHeight)
       }
     }
@@ -110,7 +110,6 @@ export default function DisplayPage() {
     check()
 
     const observer = new ResizeObserver(check)
-
     if (contentRef.current) observer.observe(contentRef.current)
 
     return () => observer.disconnect()
@@ -119,22 +118,8 @@ export default function DisplayPage() {
   return (
     <div className="h-screen flex flex-col bg-gray-900 text-white overflow-hidden">
 
-      {/* HEADER */}
-      <div className="flex items-center justify-between px-6 py-4 border-b border-gray-800 bg-gray-900/80 backdrop-blur">
-        <div className="flex items-center gap-3">
-          <img src="/logo.png" className="h-10" />
-          <div>
-            <h1 className="font-bold">Central Gourmet</h1>
-            <p className="text-xs text-gray-400">Painel ao vivo</p>
-          </div>
-        </div>
+      <DisplayHeader />
 
-        <div className="text-xs text-gray-400">
-          Desenvolvido por <span className="font-semibold">R2CodeX</span>
-        </div>
-      </div>
-
-      {/* BOTÃO SOM */}
       {!audioLiberado && (
         <button
           onClick={() => {
@@ -148,69 +133,28 @@ export default function DisplayPage() {
         </button>
       )}
 
-      {/* CONTEÚDO */}
       <div className="flex-1 grid grid-cols-1 lg:grid-cols-2 gap-6 p-6 overflow-hidden min-h-0">
 
-        {/* EM PREPARO */}
-        <div className="bg-gray-800/60 border border-gray-700 rounded-2xl p-4 flex flex-col overflow-hidden">
-          <h2 className="text-2xl font-bold text-yellow-400 mb-4 text-center">
-            🟡 Em preparo
-          </h2>
+        <DisplayColumn
+          title="🟡 Em preparo"
+          color="yellow"
+          pedidos={
+            precisaScroll ? [...emPreparo, ...emPreparo] : emPreparo
+          }
+          scroll={precisaScroll}
+          containerRef={containerRef}
+          contentRef={contentRef}
+        />
 
-          <div ref={containerRef} className="flex-1 overflow-hidden">
-            <div
-              ref={contentRef}
-              className={`grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 ${
-                precisaScroll ? "animate-scroll" : ""
-              }`}
-            >
-              {(precisaScroll ? [...emPreparo, ...emPreparo] : emPreparo).map(
-                (pedido, index) => (
-                  <div
-                    key={index}
-                    className="bg-yellow-400 text-black rounded-xl p-4 flex items-center justify-center"
-                  >
-                    <span className="text-4xl lg:text-5xl font-bold">
-                      {pedido.codigo}
-                    </span>
-                  </div>
-                )
-              )}
-            </div>
-          </div>
-        </div>
-
-        {/* PRONTOS */}
-        <div className="bg-gray-800/60 border border-gray-700 rounded-2xl p-4 flex flex-col overflow-hidden">
-          <h2 className="text-2xl font-bold text-green-400 mb-4 text-center">
-            🟢 Prontos
-          </h2>
-
-          <div className="flex-1 overflow-hidden">
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-              {prontos.map((pedido) => {
-                const isHighlight = pedido.id === highlightId
-
-                return (
-                  <div
-                    key={pedido.id}
-                    className={`rounded-xl p-4 flex items-center justify-center ${
-                      isHighlight
-                        ? "animate-blink-green text-white"
-                        : "bg-green-500"
-                    }`}
-                  >
-                    <span className="text-4xl lg:text-5xl font-bold">
-                      {pedido.codigo}
-                    </span>
-                  </div>
-                )
-              })}
-            </div>
-          </div>
-        </div>
+        <DisplayColumn
+          title="🟢 Prontos"
+          color="green"
+          pedidos={prontos}
+          highlightId={highlightId}
+        />
 
       </div>
+
     </div>
   )
 }
