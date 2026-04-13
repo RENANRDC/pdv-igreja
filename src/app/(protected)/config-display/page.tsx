@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import BackButton from "@/components/BackButton"
+import BackButton from "@/components/ui/BackButton"
 import { db } from "@/services/firebase"
 import { doc, setDoc, onSnapshot } from "firebase/firestore"
 import { cache, clearCacheKey } from "@/lib/cache"

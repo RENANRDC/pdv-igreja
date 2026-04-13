@@ -1,6 +1,6 @@
 "use client"
 
-import BackButton from "./BackButton"
+import BackButton from "./ui/BackButton"
 
 type Props = {
   title: string

@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useMemo, useState } from "react"
-import BackButton from "@/components/BackButton"
+import BackButton from "@/components/ui/BackButton"
 import { fetchWithAuth } from "@/lib/fetchWithAuth"
 import { Eye, EyeOff } from "lucide-react"
 import { getAuth, signOut } from "firebase/auth"

@@ -7,7 +7,7 @@ import Link from "next/link"
 import { useVendaMode } from "@/hooks/useVendaMode"
 import { useCategorias } from "@/hooks/useCategorias"
 import { useProdutos } from "@/hooks/useProdutos"
-import BackButton from "@/components/BackButton"
+import BackButton from "@/components/ui/BackButton"
 
 
 type Item = {

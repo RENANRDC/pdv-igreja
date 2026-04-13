@@ -10,7 +10,7 @@ import {
   updateDoc,
 } from "firebase/firestore"
 import { db } from "@/services/firebase"
-import BackButton from "@/components/BackButton"
+import BackButton from "@/components/ui/BackButton"
 import { cache } from "@/lib/cache"
 
 type Pedido = {
