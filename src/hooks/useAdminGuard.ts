@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect } from "react"
 import { useRouter } from "next/navigation"
 
 export type User = {
@@ -8,27 +8,35 @@ export type User = {
   username: string | null
 }
 
-// 🔥 cache global
 let cachedUser: User | null = null
 
 export function clearUserCache() {
   cachedUser = null
+  localStorage.removeItem("user")
 }
 
 export function getCachedUser() {
-  return cachedUser
+  if (cachedUser) return cachedUser
+
+  const stored = localStorage.getItem("user")
+  if (stored) {
+    cachedUser = JSON.parse(stored)
+    return cachedUser
+  }
+
+  return null
 }
 
 export function setCachedUser(user: User) {
   cachedUser = user
+  localStorage.setItem("user", JSON.stringify(user))
 }
 
 export function useAdminGuard() {
   const router = useRouter()
-  const [loading, setLoading] = useState(false)
 
   useEffect(() => {
-    const user = cachedUser
+    const user = getCachedUser()
 
     if (!user) {
       router.replace("/login")
@@ -39,9 +47,5 @@ export function useAdminGuard() {
       router.replace("/")
       return
     }
-
-    setLoading(false)
   }, [router])
-
-  return { loading }
 }

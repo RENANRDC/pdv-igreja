@@ -40,48 +40,43 @@ export default function LoginPage() {
         throw new Error("Erro ao autenticar")
       }
 
-      // 🔐 pega token seguro
+      // 🔐 token
       const token = await user.getIdToken()
 
-      // 🔐 cria sessão no backend (CORRIGIDO)
+      // 🔐 cria session cookie
       const res = await fetch("/api/session", {
         method: "POST",
         headers: {
           Authorization: `Bearer ${token}`,
         },
-        credentials: "include", // 🔥 ESSENCIAL
+        credentials: "include",
       })
 
       if (!res.ok) {
         throw new Error("Erro ao criar sessão")
       }
 
-      // 🔥 BUSCA USER E SALVA NO CACHE
-      const meRes = await fetch("/api/me", {
-        credentials: "include", // 🔥 garante uso do cookie
+      // ✅ CACHE DIRETO (SEM /api/me)
+      setCachedUser({
+        role: "admin", // ajuste se quiser lógica depois
+        username: usuario,
       })
 
-      if (meRes.ok) {
-        const data = await meRes.json()
-        setCachedUser(data)
-      }
+      // 🔥 preload cozinha
+      try {
+        const pedidos = await fetchWithAuth("/api/pedidos")
 
-      // 🔥 PRELOAD COZINHA (INSTANTÂNEO)
-// 🔥 PRELOAD COZINHA (SE DER ERRO, IGNORA)
-try {
-  const pedidos = await fetchWithAuth("/api/pedidos")
+        if (Array.isArray(pedidos)) {
+          cache["cozinha-pedidos"] = pedidos
+        } else if (Array.isArray(pedidos?.pedidos)) {
+          cache["cozinha-pedidos"] = pedidos.pedidos
+        }
+      } catch {}
 
-  if (Array.isArray(pedidos)) {
-    cache["cozinha-pedidos"] = pedidos
-  } else if (Array.isArray(pedidos?.pedidos)) {
-    cache["cozinha-pedidos"] = pedidos.pedidos
-  }
-} catch {}
-
-      // PRELOAD CREDENCIAIS
+      // 🔥 preload credenciais
       await fetchWithAuth("/api/admin/users")
 
-      // ✅ redireciona
+      // ✅ redirect
       router.push("/")
 
     } catch (err: unknown) {
@@ -116,6 +111,7 @@ try {
       }
 
       setErro(mensagem)
+
     } finally {
       setLoading(false)
     }
@@ -127,11 +123,7 @@ try {
       <div className="w-full max-w-sm bg-gray-800 rounded-2xl p-6 shadow-lg">
 
         <div className="flex justify-center mb-4">
-          <img
-            src="/logo.png"
-            alt="Logo"
-            className="h-24 object-contain"
-          />
+          <img src="/logo.png" alt="Logo" className="h-24 object-contain" />
         </div>
 
         <h1 className="text-white text-xl font-bold text-center">
