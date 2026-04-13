@@ -49,7 +49,7 @@ export default function FinanceiroPage() {
   useEffect(() => {
     const local = localStorage.getItem(key)
     if (local) setPedidos(JSON.parse(local))
-    else if (cache[key]) setPedidos(cache[key])
+    else if (cache[key]) setPedidos(cache[key] as Pedido[])
   }, [])
 
   useEffect(() => {
@@ -116,19 +116,27 @@ const pedidosData = ativosOrdenados.map(p => ({
 }))
 
   // 📦 ITENS (DETALHADO)
-  const itensData: any[] = []
+type ItemExport = {
+  Pedido?: string
+  Produto: string
+  Quantidade: number
+  Preco: number
+  Total: number
+}
 
-  ativosOrdenados.forEach(p => {
-    p.itens?.forEach(item => {
-      itensData.push({
-        Pedido: p.codigo,
-        Produto: item.nome,
-        Quantidade: item.quantidade,
-        Preco: item.preco || 0,
-        Total: (item.preco || 0) * item.quantidade,
-      })
+const itensData: ItemExport[] = []
+
+ativosOrdenados.forEach(p => {
+  p.itens?.forEach(item => {
+    itensData.push({
+      Pedido: p.codigo,
+      Produto: item.nome,
+      Quantidade: item.quantidade,
+      Preco: item.preco || 0,
+      Total: (item.preco || 0) * item.quantidade,
     })
   })
+})
 
   // 🧾 PRODUTOS (RESUMO)
   const produtosData = rankingProdutos.map(p => ({
