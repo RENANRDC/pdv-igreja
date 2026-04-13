@@ -186,7 +186,7 @@ try {
             disabled={loading}
             className="w-full bg-green-600 hover:bg-green-700 transition p-3 rounded-lg font-bold text-white disabled:opacity-50"
           >
-            {loading ? "Entrando..." : "Entrar"}
+            {loading ? "Carregando..." : "Entrar"}
           </button>
 
         </form>
