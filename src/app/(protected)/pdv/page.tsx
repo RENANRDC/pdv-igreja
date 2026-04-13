@@ -225,59 +225,58 @@ if (formaPagamento === "dinheiro") {
 return (
 <div className="min-h-[100dvh] bg-gray-900 text-white p-4">
 
-  {/* HEADER */}
-<div className="flex items-center justify-between mb-4 gap-2">
+  {/* HEADER PADRÃO */}
+  <div className="grid grid-cols-3 items-center mb-6">
 
-  {/* ESQUERDA */}
-  <BackButton href="/" />
+    <div className="flex justify-start">
+      <BackButton href="/" />
+    </div>
 
-  {/* CENTRO */}
-  <h1 className="text-lg md:text-xl font-bold whitespace-nowrap">
-    PDV
-  </h1>
+    <div className="flex justify-center">
+      <h1 className="text-2xl font-bold">
+        PDV
+      </h1>
+    </div>
 
-  {/* DIREITA */}
-<div className="flex items-center gap-2 shrink-0">
+    <div className="flex justify-end items-center gap-2">
 
-  {/* 🔥 estrutura sempre existe */}
-  <div className="flex items-center gap-1 text-xs md:text-sm font-semibold px-2 md:px-3 h-8 md:h-9 rounded-lg bg-gray-700">
+      <div className="flex items-center gap-1 text-xs md:text-sm font-semibold px-2 md:px-3 h-8 md:h-9 rounded-lg bg-gray-700">
 
-    {vendaMode && (
-      <>
-<span>
-  {vendaMode === "balcao"
-    ? "🧾"
-    : vendaMode === "mesa"
-    ? "📲"
-    : ""}
-</span>
+        {vendaMode && (
+          <>
+            <span>
+              {vendaMode === "balcao"
+                ? "🧾"
+                : vendaMode === "mesa"
+                ? "📲"
+                : ""}
+            </span>
 
-<span className="hidden sm:inline">
-  {vendaMode === "balcao"
-    ? "Balcão"
-    : vendaMode === "mesa"
-    ? "Mesa"
-    : ""}
-</span>
-      </>
-    )}
+            <span className="hidden sm:inline">
+              {vendaMode === "balcao"
+                ? "Balcão"
+                : vendaMode === "mesa"
+                ? "Mesa"
+                : ""}
+            </span>
+          </>
+        )}
+
+      </div>
+
+      {vendaMode && (
+        <button
+          onClick={() => setVendaMode(null)}
+          className="flex items-center justify-center h-8 w-8 md:h-9 md:w-auto md:px-3 rounded-lg bg-gray-700 hover:bg-gray-600"
+        >
+          🔄
+          <span className="hidden md:inline ml-1">Trocar</span>
+        </button>
+      )}
+
+    </div>
 
   </div>
-
-  {vendaMode && (
-<button
-  onClick={() => setVendaMode(null)}
-  className={`flex items-center justify-center h-8 w-8 md:h-9 md:w-auto md:px-3 rounded-lg transition ${
-    vendaMode ? "bg-gray-700 hover:bg-gray-600" : "opacity-0 pointer-events-none"
-  }`}
->
-  🔄
-  <span className="hidden md:inline ml-1">Trocar</span>
-</button>
-  )}
-
-</div>
-</div>
   <Link
     href="/pedidos/controle"
     className="inline-block mb-4 bg-gray-700 px-3 py-2 rounded text-sm"

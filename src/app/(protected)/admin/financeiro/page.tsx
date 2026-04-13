@@ -180,7 +180,7 @@ ativosOrdenados.forEach(p => {
   }
 
   return (
-    <div className="min-h-[100dvh] bg-gray-900 text-white p-6">
+    <div className="min-h-[100dvh] bg-gray-900 text-white p-4">
 
       {/* HEADER */}
       <div className="grid grid-cols-3 items-center mb-6">

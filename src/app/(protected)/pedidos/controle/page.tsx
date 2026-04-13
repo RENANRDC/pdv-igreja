@@ -26,25 +26,11 @@ type Pedido = {
   itens?: Item[]
 }
 
-// 🔥 FORMATAÇÃO DE STATUS
-function getStatusInfo(status: string) {
-  switch (status) {
-    case "pendente":
-      return { label: "Pendente", color: "bg-yellow-500 text-black" }
-    case "em_preparo":
-      return { label: "Em preparo", color: "bg-blue-600" }
-    case "finalizado":
-      return { label: "Pronto", color: "bg-green-600" }
-    default:
-      return { label: status, color: "bg-gray-600" }
-  }
-}
-
 export default function ControlePedidos() {
 
   const [pedidos, setPedidos] = useState<Pedido[]>([])
-  const [aba, setAba] = useState<"pendente" | "em_preparo" | "finalizado">("pendente")
   const [pedidoSelecionado, setPedidoSelecionado] = useState<Pedido | null>(null)
+  const [aba, setAba] = useState<"pendente" | "em_preparo" | "finalizado">("pendente")
 
   useEffect(() => {
     const q = query(
@@ -75,7 +61,6 @@ export default function ControlePedidos() {
       ? emPreparo
       : finalizados
 
-  // 🔥 proteção total
   const getTotal = (pedido: Pedido) => {
     return (pedido.total ?? pedido.valor ?? 0)
   }
@@ -83,28 +68,28 @@ export default function ControlePedidos() {
   return (
     <div className="bg-gray-900 text-white p-4 min-h-[100vh]">
 
-      <div className="grid grid-cols-3 items-center mb-6">
-        <div className="flex justify-start">
-          <BackButton href="/pdv" />
-        </div>
+<div className="grid grid-cols-3 items-center mb-6">
 
-        <div className="flex justify-center">
-          <h1 className="text-2xl font-bold">
-            Pedidos
-          </h1>
-        </div>
+  <div className="flex justify-start">
+    <BackButton href="/pdv" />
+  </div>
 
-        <div />
-      </div>
+  <div className="flex justify-center">
+    <h1 className="text-2xl font-bold">
+      Pedidos
+    </h1>
+  </div>
 
-      {/* ABAS */}
-      <div className="flex gap-2 mb-4">
+  <div />
+
+</div>
+
+      {/* MOBILE - ABAS */}
+      <div className="flex gap-2 mb-4 lg:hidden">
         <button
           onClick={() => setAba("pendente")}
-          className={`flex-1 p-2 rounded font-semibold text-sm ${
-            aba === "pendente"
-              ? "bg-yellow-500 text-black"
-              : "bg-gray-800"
+          className={`flex-1 p-2 rounded text-sm font-semibold ${
+            aba === "pendente" ? "bg-yellow-500 text-black" : "bg-gray-800"
           }`}
         >
           Pendentes ({pendentes.length})
@@ -112,63 +97,140 @@ export default function ControlePedidos() {
 
         <button
           onClick={() => setAba("em_preparo")}
-          className={`flex-1 p-2 rounded font-semibold text-sm ${
-            aba === "em_preparo"
-              ? "bg-blue-600"
-              : "bg-gray-800"
+          className={`flex-1 p-2 rounded text-sm font-semibold ${
+            aba === "em_preparo" ? "bg-blue-600" : "bg-gray-800"
           }`}
         >
-          Em preparo ({emPreparo.length})
+          Preparo ({emPreparo.length})
         </button>
 
         <button
           onClick={() => setAba("finalizado")}
-          className={`flex-1 p-2 rounded font-semibold text-sm ${
-            aba === "finalizado"
-              ? "bg-green-600"
-              : "bg-gray-800"
+          className={`flex-1 p-2 rounded text-sm font-semibold ${
+            aba === "finalizado" ? "bg-green-600" : "bg-gray-800"
           }`}
         >
           Prontos ({finalizados.length})
         </button>
       </div>
 
-      {/* GRID */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+      {/* MOBILE LISTA */}
+      <div className="space-y-3 lg:hidden">
+        {lista.map((pedido) => (
+          <div key={pedido.id} className="bg-gray-800 p-3 rounded-xl">
 
-        {lista.map((pedido) => {
-          const statusInfo = getStatusInfo(pedido.status)
+            <div className="flex justify-between mb-2">
+              <span className="font-bold">#{pedido.codigo}</span>
+              <span className="text-xs text-gray-300 truncate max-w-[120px]">
+                {pedido.nomeCliente}
+              </span>
+            </div>
 
-          return (
-            <div
-              key={pedido.id}
-              onClick={() => setPedidoSelecionado(pedido)}
-              className="bg-gray-800 p-4 rounded-xl flex flex-col justify-between min-h-[120px] cursor-pointer hover:bg-gray-700 transition"
-            >
+            <div className="flex justify-between items-center">
+              <span className="text-sm font-bold text-green-400">
+                R${getTotal(pedido).toFixed(2)}
+              </span>
 
-              <div className="flex justify-between items-center mb-2">
-                <span className="text-sm font-semibold">
-                  #{pedido.codigo}
-                </span>
+              <span className={`text-xs px-2 py-1 rounded ${
+                pedido.status === "pendente"
+                  ? "bg-yellow-500 text-black"
+                  : pedido.status === "em_preparo"
+                  ? "bg-blue-600"
+                  : "bg-green-600"
+              }`}>
+                {pedido.status === "pendente"
+                  ? "Pendente"
+                  : pedido.status === "em_preparo"
+                  ? "Em preparo"
+                  : "Pronto"}
+              </span>
+            </div>
 
-                <span className="text-xs text-gray-300 truncate max-w-[120px]">
-                  {pedido.nomeCliente}
-                </span>
-              </div>
+          </div>
+        ))}
+      </div>
 
-              <div className="flex justify-between items-center mt-auto">
+      {/* DESKTOP - COLUNAS IGUAL COZINHA */}
+      <div className="hidden lg:grid grid-cols-3 gap-4">
+
+        {/* PENDENTES */}
+        <div className="bg-yellow-500/10 border border-yellow-500/30 p-3 rounded-xl">
+          <h2 className="text-yellow-400 font-semibold mb-3">
+            Pendentes ({pendentes.length})
+          </h2>
+
+          <div className="space-y-3 max-h-[75vh] overflow-y-auto pr-1">
+            {pendentes.map((pedido) => (
+              <div
+                key={pedido.id}
+                onClick={() => setPedidoSelecionado(pedido)}
+                className="bg-gray-800 p-3 rounded-xl cursor-pointer"
+              >
+                <div className="flex justify-between mb-2">
+                  <span className="font-bold">#{pedido.codigo}</span>
+                  <span className="text-xs text-gray-300 truncate max-w-[120px]">
+                    {pedido.nomeCliente}
+                  </span>
+                </div>
+
                 <span className="text-sm font-bold text-green-400">
                   R${getTotal(pedido).toFixed(2)}
                 </span>
+              </div>
+            ))}
+          </div>
+        </div>
 
-                <span className={`text-xs px-2 py-1 rounded ${statusInfo.color}`}>
-                  {statusInfo.label}
+        {/* EM PREPARO */}
+        <div className="bg-blue-500/10 border border-blue-500/30 p-3 rounded-xl">
+          <h2 className="text-blue-400 font-semibold mb-3">
+            Em preparo ({emPreparo.length})
+          </h2>
+
+          <div className="space-y-3 max-h-[75vh] overflow-y-auto pr-1">
+            {emPreparo.map((pedido) => (
+              <div
+                key={pedido.id}
+                onClick={() => setPedidoSelecionado(pedido)}
+                className="bg-blue-900/40 p-3 rounded-xl cursor-pointer"
+              >
+                <div className="flex justify-between mb-2">
+                  <span className="font-bold">#{pedido.codigo}</span>
+                  <span className="text-xs text-gray-300 truncate max-w-[120px]">
+                    {pedido.nomeCliente}
+                  </span>
+                </div>
+
+                <span className="text-sm font-bold text-green-400">
+                  R${getTotal(pedido).toFixed(2)}
                 </span>
               </div>
+            ))}
+          </div>
+        </div>
 
-            </div>
-          )
-        })}
+        {/* FINALIZADOS */}
+        <div className="bg-green-500/10 border border-green-500/30 p-3 rounded-xl">
+          <h2 className="text-green-400 font-semibold mb-3">
+            Prontos ({finalizados.length})
+          </h2>
+
+          <div className="space-y-2 max-h-[75vh] overflow-y-auto pr-1">
+            {finalizados.map((pedido) => (
+              <div
+                key={pedido.id}
+                onClick={() => setPedidoSelecionado(pedido)}
+                className="bg-green-900/60 p-2 rounded flex justify-between items-center cursor-pointer"
+              >
+                <span>#{pedido.codigo}</span>
+
+                <span className="text-sm font-bold text-green-300">
+                  R${getTotal(pedido).toFixed(2)}
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
 
       </div>
 

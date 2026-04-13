@@ -30,20 +30,15 @@ export default function LoginPage() {
 
       const email = `${usuario}@pdv.local`
 
-      // 🔐 login firebase
       await login(email, senha)
 
       const auth = getAuth()
       const user = auth.currentUser
 
-      if (!user) {
-        throw new Error("Erro ao autenticar")
-      }
+      if (!user) throw new Error("Erro ao autenticar")
 
-      // 🔐 token
       const token = await user.getIdToken()
 
-      // 🔐 cria session cookie
       const res = await fetch("/api/session", {
         method: "POST",
         headers: {
@@ -52,17 +47,13 @@ export default function LoginPage() {
         credentials: "include",
       })
 
-      if (!res.ok) {
-        throw new Error("Erro ao criar sessão")
-      }
+      if (!res.ok) throw new Error("Erro ao criar sessão")
 
-      // ✅ CACHE DIRETO (SEM /api/me)
       setCachedUser({
-        role: "admin", // ajuste se quiser lógica depois
+        role: "admin",
         username: usuario,
       })
 
-      // 🔥 preload cozinha
       try {
         const pedidos = await fetchWithAuth("/api/pedidos")
 
@@ -73,10 +64,8 @@ export default function LoginPage() {
         }
       } catch {}
 
-      // 🔥 preload credenciais
       await fetchWithAuth("/api/admin/users")
 
-      // ✅ redirect
       router.push("/")
 
     } catch (err: unknown) {
@@ -96,15 +85,12 @@ export default function LoginPage() {
           case "auth/user-not-found":
             mensagem = "Usuário ou senha inválidos"
             break
-
           case "auth/too-many-requests":
             mensagem = "Muitas tentativas. Tente novamente mais tarde"
             break
-
           case "auth/network-request-failed":
             mensagem = "Erro de conexão. Verifique sua internet"
             break
-
           default:
             mensagem = "Erro ao autenticar. Tente novamente"
         }
@@ -118,20 +104,29 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-[100dvh] flex items-center justify-center bg-gray-900 p-4">
+    <div className="min-h-[100dvh] flex items-center justify-center bg-gray-900 p-6">
 
-      <div className="w-full max-w-sm bg-gray-800 rounded-2xl p-6 shadow-lg">
+      {/* CARD 3D */}
+      <div className="w-full max-w-sm p-6 rounded-2xl 
+        bg-gradient-to-br from-gray-800 to-gray-900
+        border border-gray-700
+        shadow-[0_10px_30px_rgba(0,0,0,0.8),inset_0_1px_0_rgba(255,255,255,0.05)]">
 
+        {/* LOGO */}
         <div className="flex justify-center mb-4">
-          <img src="/logo.png" alt="Logo" className="h-24 object-contain" />
+          <div className="p-4 rounded-2xl 
+            bg-gradient-to-br from-gray-700 to-gray-800
+            shadow-[inset_0_1px_2px_rgba(255,255,255,0.1),0_6px_20px_rgba(0,0,0,0.6)]">
+            <img src="/logo.png" alt="Logo" className="h-16 object-contain" />
+          </div>
         </div>
 
-        <h1 className="text-white text-xl font-bold text-center">
+        <h1 className="text-white text-xl font-semibold text-center">
           Central Gourmet
         </h1>
 
         <p className="text-gray-400 text-center mb-6">
-          Gestão de Pedidos em Tempo Real
+          Gestão de Pedidos
         </p>
 
         <form
@@ -141,6 +136,7 @@ export default function LoginPage() {
           }}
         >
 
+          {/* INPUT USUARIO */}
           <input
             autoFocus
             placeholder="Usuário"
@@ -149,9 +145,13 @@ export default function LoginPage() {
               setUsuario(e.target.value)
               setErro("")
             }}
-            className="w-full p-3 mb-3 rounded-lg bg-gray-700 text-white outline-none border border-transparent focus:border-green-500"
+            className="w-full p-3 mb-3 rounded-xl 
+            bg-gray-800 border border-gray-700 
+            focus:border-green-500 outline-none
+            shadow-inner"
           />
 
+          {/* INPUT SENHA */}
           <div className="relative mb-4">
             <input
               type={mostrarSenha ? "text" : "password"}
@@ -161,7 +161,10 @@ export default function LoginPage() {
                 setSenha(e.target.value)
                 setErro("")
               }}
-              className="w-full p-3 pr-12 rounded-lg bg-gray-700 text-white outline-none border border-transparent focus:border-green-500"
+              className="w-full p-3 pr-12 rounded-xl 
+              bg-gray-800 border border-gray-700 
+              focus:border-green-500 outline-none
+              shadow-inner"
             />
 
             <button
@@ -173,10 +176,14 @@ export default function LoginPage() {
             </button>
           </div>
 
+          {/* BOTÃO */}
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-green-600 hover:bg-green-700 transition p-3 rounded-lg font-bold text-white disabled:opacity-50"
+            className="w-full p-3 rounded-xl font-semibold
+            bg-green-600 hover:bg-green-700
+            shadow-[0_6px_20px_rgba(0,0,0,0.6)]
+            transition disabled:opacity-50"
           >
             {loading ? "Carregando..." : "Entrar"}
           </button>

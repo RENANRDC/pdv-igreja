@@ -237,21 +237,31 @@ setUsers(prev =>
   }, [users, search])
 
   return (
-    <div className="min-h-[100dvh] bg-gray-900 text-white p-4 sm:p-6">
+    <div className="min-h-[100dvh] bg-gray-900 text-white p-4">
 
       {/* HEADER */}
-      <div className="flex flex-col sm:flex-row gap-3 sm:items-center sm:justify-between mb-6">
-        <BackButton href="/admin" />
-        <h1 className="text-lg sm:text-xl font-semibold">Credenciais</h1>
+<div className="grid grid-cols-3 items-center mb-6">
 
-        <button
-          onClick={() => setModal("create")}
-          className="bg-green-600 hover:bg-green-700 px-4 py-2 rounded-lg text-sm w-full sm:w-auto"
-        >
-          + Novo usuário
-        </button>
-      </div>
+  <div className="flex justify-start">
+    <BackButton href="/admin" />
+  </div>
 
+  <div className="flex justify-center">
+    <h1 className="text-2xl font-bold">
+      Credenciais
+    </h1>
+  </div>
+
+  <div className="flex justify-end">
+    <button
+      onClick={() => setModal("create")}
+      className="bg-green-600 hover:bg-green-700 px-4 py-2 rounded-lg text-sm"
+    >
+      + Novo usuário
+    </button>
+  </div>
+
+</div>
       {/* SEARCH */}
       <div className="relative mb-4">
         <input
