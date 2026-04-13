@@ -11,62 +11,36 @@ export type User = {
 // 🔥 cache global
 let cachedUser: User | null = null
 
-// ✅ limpar cache
 export function clearUserCache() {
   cachedUser = null
 }
 
-// ✅ pegar cache
 export function getCachedUser() {
   return cachedUser
 }
 
-// 🔥 ADICIONAR ISSO (ESSENCIAL)
 export function setCachedUser(user: User) {
   cachedUser = user
 }
 
 export function useAdminGuard() {
   const router = useRouter()
-  const [loading, setLoading] = useState(!cachedUser)
+  const [loading, setLoading] = useState(false)
 
   useEffect(() => {
-    async function check() {
-      try {
-        if (cachedUser) {
-          if (cachedUser.role !== "admin") {
-            router.replace("/login")
-            return
-          }
+    const user = cachedUser
 
-          setLoading(false)
-          return
-        }
-
-        const res = await fetch("/api/me")
-
-        if (!res.ok) {
-          router.replace("/login")
-          return
-        }
-
-        const data: User = await res.json()
-
-        cachedUser = data
-
-        if (data.role !== "admin") {
-          router.replace("/login")
-          return
-        }
-
-        setLoading(false)
-
-      } catch {
-        router.replace("/login")
-      }
+    if (!user) {
+      router.replace("/login")
+      return
     }
 
-    check()
+    if (user.role !== "admin") {
+      router.replace("/")
+      return
+    }
+
+    setLoading(false)
   }, [router])
 
   return { loading }
