@@ -13,8 +13,8 @@ type Props = {
   pedidos: Pedido[]
   highlightId?: string | null
   scroll?: boolean
-  containerRef?: RefObject<HTMLDivElement>
-  contentRef?: RefObject<HTMLDivElement>
+containerRef?: RefObject<HTMLDivElement | null>
+contentRef?: RefObject<HTMLDivElement | null>
 }
 
 export default function DisplayColumn({
