@@ -10,9 +10,6 @@ import {
 } from "firebase/firestore"
 import { db } from "@/services/firebase"
 
-import DisplayHeader from "@/components/display/DisplayHeader"
-import DisplayColumn from "@/components/display/DisplayColumn"
-
 type Pedido = {
   id: string
   codigo: string
@@ -116,45 +113,110 @@ export default function DisplayPage() {
   }, [emPreparo])
 
   return (
-    <div className="h-screen flex flex-col bg-gray-900 text-white overflow-hidden">
+    <div className="h-screen bg-gray-900 text-white overflow-hidden">
 
-      <DisplayHeader />
+      <div className="p-4 flex flex-col h-full">
 
-      {!audioLiberado && (
-        <button
-          onClick={() => {
-            audioRef.current?.play().catch(() => {})
-            setAudioLiberado(true)
-            audioLiberadoRef.current = true
-          }}
-          className="fixed top-4 left-1/2 -translate-x-1/2 bg-gray-800 px-4 py-2 rounded-lg z-50"
-        >
-          🔊 Ativar som
-        </button>
-      )}
+        {/* HEADER PADRÃO */}
+        <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center gap-3">
+            <img src="/logo.png" className="h-10 w-10" />
+            <div>
+              <h1 className="text-base font-bold">
+                Central Gourmet
+              </h1>
+              <p className="text-xs text-gray-400">
+                Display
+              </p>
+            </div>
+          </div>
 
-      <div className="flex-1 grid grid-cols-1 lg:grid-cols-2 gap-6 p-6 overflow-hidden min-h-0">
+          <div className="text-xs text-gray-400">
+            Desenvolvido por{" "}
+            <span className="font-semibold text-white">
+              R2CodeX
+            </span>
+          </div>
+        </div>
 
-        <DisplayColumn
-          title="🟡 Em preparo"
-          color="yellow"
-          pedidos={
-            precisaScroll ? [...emPreparo, ...emPreparo] : emPreparo
-          }
-          scroll={precisaScroll}
-          containerRef={containerRef}
-          contentRef={contentRef}
-        />
+        {/* BOTÃO SOM */}
+        {!audioLiberado && (
+          <button
+            onClick={() => {
+              audioRef.current?.play().catch(() => {})
+              setAudioLiberado(true)
+              audioLiberadoRef.current = true
+            }}
+            className="fixed top-4 left-1/2 -translate-x-1/2 bg-gray-800 px-4 py-2 rounded-lg z-50"
+          >
+            🔊 Ativar som
+          </button>
+        )}
 
-        <DisplayColumn
-          title="🟢 Prontos"
-          color="green"
-          pedidos={prontos}
-          highlightId={highlightId}
-        />
+        {/* CONTEÚDO */}
+        <div className="flex-1 grid grid-cols-1 lg:grid-cols-2 gap-6 overflow-hidden min-h-0">
 
+          {/* EM PREPARO */}
+          <div className="bg-gray-800/60 border border-gray-700 rounded-2xl p-4 flex flex-col overflow-hidden">
+            <h2 className="text-2xl font-bold text-yellow-400 mb-4 text-center">
+              🟡 Em preparo
+            </h2>
+
+            <div ref={containerRef} className="flex-1 overflow-hidden">
+              <div
+                ref={contentRef}
+                className={`grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 ${
+                  precisaScroll ? "animate-scroll" : ""
+                }`}
+              >
+                {(precisaScroll ? [...emPreparo, ...emPreparo] : emPreparo).map(
+                  (pedido, index) => (
+                    <div
+                      key={index}
+                      className="bg-yellow-400 text-black rounded-xl p-4 flex items-center justify-center"
+                    >
+                      <span className="text-4xl lg:text-5xl font-bold">
+                        {pedido.codigo}
+                      </span>
+                    </div>
+                  )
+                )}
+              </div>
+            </div>
+          </div>
+
+          {/* PRONTOS */}
+          <div className="bg-gray-800/60 border border-gray-700 rounded-2xl p-4 flex flex-col overflow-hidden">
+            <h2 className="text-2xl font-bold text-green-400 mb-4 text-center">
+              🟢 Prontos
+            </h2>
+
+            <div className="flex-1 overflow-hidden">
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+                {prontos.map((pedido) => {
+                  const isHighlight = pedido.id === highlightId
+
+                  return (
+                    <div
+                      key={pedido.id}
+                      className={`rounded-xl p-4 flex items-center justify-center ${
+                        isHighlight
+                          ? "animate-blink-green text-white"
+                          : "bg-green-500"
+                      }`}
+                    >
+                      <span className="text-4xl lg:text-5xl font-bold">
+                        {pedido.codigo}
+                      </span>
+                    </div>
+                  )
+                })}
+              </div>
+            </div>
+          </div>
+
+        </div>
       </div>
-
     </div>
   )
 }
