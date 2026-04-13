@@ -120,11 +120,7 @@ export default function ControlePedidos() {
       {/* MOBILE LISTA */}
       <div className="space-y-3 lg:hidden">
         {lista.map((pedido) => (
-          <div
-  key={pedido.id}
-  onClick={() => setPedidoSelecionado(pedido)}
-  className="bg-gray-800 p-3 rounded-xl cursor-pointer"
->
+          <div key={pedido.id} className="bg-gray-800 p-3 rounded-xl">
 
             <div className="flex justify-between mb-2">
               <span className="font-bold">#{pedido.codigo}</span>

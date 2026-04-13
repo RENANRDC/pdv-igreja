@@ -8,7 +8,15 @@ import { useVendaMode } from "@/hooks/useVendaMode"
 import { useCategorias } from "@/hooks/useCategorias"
 import { useProdutos } from "@/hooks/useProdutos"
 import BackButton from "@/components/ui/BackButton"
-
+import {
+  Receipt,
+  Smartphone,
+  RefreshCw,
+  ClipboardList,
+  Printer,
+  Send
+} from "lucide-react"
+import PageContainer from "@/components/ui/PageContainer"
 
 type Item = {
   nome: string
@@ -223,66 +231,67 @@ if (formaPagamento === "dinheiro") {
     }
 
 return (
-<div className="min-h-[100dvh] bg-gray-900 text-white p-4">
+<PageContainer>
 
   {/* HEADER PADRÃO */}
-  <div className="grid grid-cols-3 items-center mb-6">
+<div className="flex items-center justify-between mb-6">
 
-    <div className="flex justify-start">
-      <BackButton href="/" />
-    </div>
-
-    <div className="flex justify-center">
-      <h1 className="text-2xl font-bold">
-        PDV
+  <div className="flex items-center gap-3">
+    <img src="/logo.png" className="h-10 w-10" />
+    <div>
+      <h1 className="text-base font-bold">
+        Central Gourmet
       </h1>
+      <p className="text-xs text-gray-400">
+        PDV
+      </p>
     </div>
-
-    <div className="flex justify-end items-center gap-2">
-
-      <div className="flex items-center gap-1 text-xs md:text-sm font-semibold px-2 md:px-3 h-8 md:h-9 rounded-lg bg-gray-700">
-
-        {vendaMode && (
-          <>
-            <span>
-              {vendaMode === "balcao"
-                ? "🧾"
-                : vendaMode === "mesa"
-                ? "📲"
-                : ""}
-            </span>
-
-            <span className="hidden sm:inline">
-              {vendaMode === "balcao"
-                ? "Balcão"
-                : vendaMode === "mesa"
-                ? "Mesa"
-                : ""}
-            </span>
-          </>
-        )}
-
-      </div>
-
-      {vendaMode && (
-        <button
-          onClick={() => setVendaMode(null)}
-          className="flex items-center justify-center h-8 w-8 md:h-9 md:w-auto md:px-3 rounded-lg bg-gray-700 hover:bg-gray-600"
-        >
-          🔄
-          <span className="hidden md:inline ml-1">Trocar</span>
-        </button>
-      )}
-
-    </div>
-
   </div>
+
+  <BackButton href="/" />
+
+</div>
+
+<div className="flex items-center justify-between mb-4">
+
+  {/* ESQUERDA → NAVEGAÇÃO */}
   <Link
     href="/pedidos/controle"
-    className="inline-block mb-4 bg-gray-700 px-3 py-2 rounded text-sm"
+    className="flex items-center gap-2 px-4 h-10 rounded-xl bg-gray-800 hover:bg-gray-700 text-sm font-semibold"
   >
-    📋 Ver pedidos
+    <ClipboardList size={16} />
+    Pedidos
   </Link>
+
+  {/* DIREITA → MODO */}
+  <div className="flex items-center gap-2">
+
+    <button
+      onClick={() => setVendaMode(null)}
+      className="flex items-center justify-center h-10 w-10 rounded-xl bg-gray-800 hover:bg-gray-700"
+    >
+      <RefreshCw size={16} />
+    </button>
+
+    {vendaMode && (
+      <div className="flex items-center gap-2 px-4 h-10 rounded-xl bg-green-600 text-white font-semibold">
+        {vendaMode === "balcao" ? (
+          <>
+            <Receipt size={16} />
+            Balcão
+          </>
+        ) : (
+          <>
+            <Smartphone size={16} />
+            Mesa
+          </>
+        )}
+      </div>
+    )}
+
+  </div>
+
+</div>
 
     <input
       placeholder={erro === "nome" ? "Digite o nome do cliente" : "Nome do cliente"}
@@ -656,12 +665,13 @@ onFocus={() => {
 
 {/* IMPRIMIR (só balcão) */}
 {vendaMode === "balcao" && (
-  <button
-    onClick={() => window.print()}
-    className="w-full bg-blue-600 text-white p-3 rounded-xl font-bold"
-  >
-    🖨️ Imprimir
-  </button>
+<button
+  onClick={() => window.print()}
+  className="w-full bg-blue-600 text-white p-3 rounded-xl font-bold flex items-center justify-center gap-2"
+>
+  <Printer size={18} />
+  Imprimir
+</button>
 )}
 
 {/* WHATSAPP (todos os modos) */}
@@ -682,12 +692,13 @@ onFocus={() => {
   }`}
 />
 
-  <button
-    onClick={handleWhatsApp}
-    className="w-full bg-green-600 text-white p-3 rounded-xl font-bold"
-  >
-    📲 Enviar via WhatsApp
-  </button>
+<button
+  onClick={handleWhatsApp}
+  className="w-full bg-green-600 text-white p-3 rounded-xl font-bold flex items-center justify-center gap-2"
+>
+  <Send size={18} />
+  Enviar via WhatsApp
+</button>
 </>
               
 
@@ -782,24 +793,25 @@ onFocus={() => {
 
 <button
   onClick={() => setVendaMode("balcao")}
-  className="bg-blue-600 text-white p-4 rounded-xl font-bold"
+  className="bg-blue-600 text-white p-4 rounded-xl font-bold flex items-center justify-center gap-2"
 >
-  🧾 Balcão
+  <Receipt size={18} />
+  Balcão
 </button>
 
 <button
   onClick={() => setVendaMode("mesa")}
-  className="bg-green-600 text-white p-4 rounded-xl font-bold"
+  className="bg-green-600 text-white p-4 rounded-xl font-bold flex items-center justify-center gap-2"
 >
-  📲 Mesa
+  <Smartphone size={18} />
+  Mesa
 </button>
-
       </div>
 
     </div>
   </div>
 )}
 
-    </div>
+</PageContainer>
   )
 }
