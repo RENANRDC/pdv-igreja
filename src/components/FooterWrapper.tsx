@@ -10,7 +10,7 @@ export default function FooterWrapper() {
   const hiddenRoutes = [
     "/pdv",
     "/config-display",
-    "/display",
+    "/client/display",
     "/pedidos",
     "/admin/categorias",
     "/admin/credenciais",

@@ -10,6 +10,7 @@ import {
   User,
 } from "@/hooks/useAdminGuard"
 import { clearVendaMode } from "@/hooks/useVendaMode"
+
 export default function MenuPage() {
   const router = useRouter()
   useSessionRefresh()
@@ -21,7 +22,9 @@ export default function MenuPage() {
   useEffect(() => {
     async function fetchUser() {
       try {
-        const res = await fetch("/api/me")
+        const res = await fetch("/api/me", {
+          credentials: "include", // 🔥 ESSENCIAL
+        })
 
         if (!res.ok) {
           setUser({ role: "user", username: null })
@@ -29,7 +32,6 @@ export default function MenuPage() {
         }
 
         const data: User = await res.json()
-
         setUser(data)
 
       } catch {
@@ -47,14 +49,17 @@ export default function MenuPage() {
     }
   }, [])
 
-async function handleLogout() {
-  await fetch("/api/logout", { method: "POST" })
+  async function handleLogout() {
+    await fetch("/api/logout", {
+      method: "POST",
+      credentials: "include", // 🔥 ESSENCIAL
+    })
 
-  clearUserCache()
-  clearVendaMode() // 🔥 ESSENCIAL
+    clearUserCache()
+    clearVendaMode()
 
-  router.push("/login")
-}
+    router.push("/login")
+  }
 
   return (
     <div className="bg-gray-900 text-white flex flex-col min-h-screen">
@@ -102,7 +107,7 @@ async function handleLogout() {
             </div>
           </Link>
 
-          <Link href="/display" className="group bg-gray-800 hover:bg-green-600 hover:scale-[1.02] transition-all duration-200 p-6 rounded-2xl shadow flex items-center gap-4">
+          <Link href="/client/display" className="group bg-gray-800 hover:bg-green-600 hover:scale-[1.02] transition-all duration-200 p-6 rounded-2xl shadow flex items-center gap-4">
             <span className="text-3xl">📺</span>
             <div>
               <p className="text-lg font-bold">Display</p>
@@ -120,7 +125,7 @@ async function handleLogout() {
             </div>
           </Link>
 
-          {/* 🔥 ADMIN SEM DELAY */}
+          {/* ADMIN */}
           {user?.role === "admin" && (
             <Link
               href="/admin"

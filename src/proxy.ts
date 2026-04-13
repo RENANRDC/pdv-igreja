@@ -9,6 +9,7 @@ export function proxy(request: NextRequest) {
   const isPublic =
     pathname.startsWith("/login") ||
     pathname.startsWith("/client") ||
+    pathname.startsWith("/display") ||
     pathname.startsWith("/api/session")
 
   const isStatic =

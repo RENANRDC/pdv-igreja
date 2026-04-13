@@ -75,10 +75,6 @@ useEffect(() => {
             Configuração
           </h2>
 
-          <label className="text-sm text-gray-400">
-            Quantidade de pedidos prontos
-          </label>
-
           <input
             type="number"
             value={limite}
@@ -100,7 +96,7 @@ useEffect(() => {
           <div className="bg-gray-800 p-4 rounded">
             <p className="font-semibold">Como funciona</p>
             <p className="text-sm text-gray-400 mt-1">
-              Define quantos pedidos aparecem na tela de Prontos.
+              Define quantos pedidos prontos serão exibidos no display, conforme o espaço disponível na tela do dispositivo.
             </p>
           </div>
         </div>

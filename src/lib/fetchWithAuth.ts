@@ -1,22 +1,31 @@
 import { auth } from "@/services/auth"
 import { cache } from "@/lib/cache"
+import { onAuthStateChanged, User } from "firebase/auth"
+
+function getUser(): Promise<User> {
+  return new Promise((resolve, reject) => {
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      unsubscribe()
+
+      if (user) resolve(user)
+      else reject(new Error("Usuário não autenticado"))
+    })
+  })
+}
 
 export async function fetchWithAuth(
   url: string,
   options: RequestInit = {}
 ) {
-  // 🔥 usa cache apenas para GET
+  // 🔥 cache GET
   if (!options.method || options.method === "GET") {
     if (cache[url]) {
       return cache[url]
     }
   }
 
-  const user = auth.currentUser
-
-  if (!user) {
-    throw new Error("Usuário não autenticado")
-  }
+  // 🔥 AGORA ESPERA O FIREBASE
+  const user = await getUser()
 
   const token = await user.getIdToken()
 
@@ -37,7 +46,6 @@ export async function fetchWithAuth(
     throw new Error(data?.error || "Erro na requisição")
   }
 
-  // 🔥 salva no cache (GET only)
   if (!options.method || options.method === "GET") {
     cache[url] = data
   }
