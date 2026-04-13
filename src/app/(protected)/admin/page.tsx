@@ -2,8 +2,57 @@
 
 import Link from "next/link"
 import BackButton from "@/components/BackButton"
+import { useEffect, useState } from "react"
+import { useRouter } from "next/navigation"
+import { getCachedUser, User } from "@/hooks/useAdminGuard"
 
 export default function AdminPage() {
+  const router = useRouter()
+
+  const [user, setUser] = useState<User | null>(() => getCachedUser())
+  const [loadingUser, setLoadingUser] = useState(!getCachedUser())
+
+  useEffect(() => {
+    async function fetchUser() {
+      try {
+        const res = await fetch("/api/me", {
+          credentials: "include",
+        })
+
+        if (!res.ok) {
+          router.push("/login")
+          return
+        }
+
+        const data: User = await res.json()
+
+        // 🔥 BLOQUEIA SE NÃO FOR ADMIN
+        if (data.role !== "admin") {
+          router.push("/")
+          return
+        }
+
+        setUser(data)
+
+      } catch {
+        router.push("/login")
+      } finally {
+        setLoadingUser(false)
+      }
+    }
+
+    if (!user) {
+      fetchUser()
+    } else {
+      setLoadingUser(false)
+    }
+  }, [])
+
+  // 🔥 EVITA “validando acesso”
+  if (loadingUser) {
+    return null
+  }
+
   return (
     <div className="bg-gray-900 text-white flex flex-col min-h-[calc(100vh-56px)]">
 
@@ -76,13 +125,13 @@ export default function AdminPage() {
           </Link>
 
           <Link
-              href="/admin/credenciais"
-  onMouseEnter={() => {
-    fetch("/api/admin/users")
-  }}
-  onTouchStart={() => {
-    fetch("/api/admin/users")
-  }}
+            href="/admin/credenciais"
+            onMouseEnter={() => {
+              fetch("/api/admin/users")
+            }}
+            onTouchStart={() => {
+              fetch("/api/admin/users")
+            }}
             className="group bg-gray-800 hover:bg-green-600 hover:scale-[1.02] transition-all duration-200 p-6 rounded-2xl shadow flex items-center gap-4"
           >
             <span className="text-3xl">🔐</span>
