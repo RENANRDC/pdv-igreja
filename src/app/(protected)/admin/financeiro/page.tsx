@@ -1,10 +1,9 @@
 "use client"
 
 import BackButton from "@/components/BackButton"
-import { useEffect, useState } from "react"
+import { useState } from "react"
 import {
   collection,
-  onSnapshot,
   getDocs,
   updateDoc,
   doc,
@@ -12,9 +11,8 @@ import {
   serverTimestamp,
 } from "firebase/firestore"
 import { db } from "@/services/firebase"
-import { cache } from "@/lib/cache"
 import * as XLSX from "xlsx"
-
+import { usePedidos } from "@/hooks/usePedidos"
 type Item = {
   nome: string
   quantidade: number
@@ -35,9 +33,7 @@ type Pedido = {
 
 export default function FinanceiroPage() {
 
-  const key = "financeiro-pedidos"
-
-  const [pedidos, setPedidos] = useState<Pedido[]>([])
+const { pedidos } = usePedidos()
   const [limite, setLimite] = useState(50)
   const [exportado, setExportado] = useState(false)
 
@@ -45,27 +41,6 @@ export default function FinanceiroPage() {
   const [successModal, setSuccessModal] = useState(false)
   const [erroModal, setErroModal] = useState(false)
   const [loading, setLoading] = useState(false)
-
-  useEffect(() => {
-    const local = localStorage.getItem(key)
-    if (local) setPedidos(JSON.parse(local))
-    else if (cache[key]) setPedidos(cache[key] as Pedido[])
-  }, [])
-
-  useEffect(() => {
-    const unsubscribe = onSnapshot(collection(db, "pedidos"), (snapshot) => {
-      const lista = snapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data(),
-      })) as Pedido[]
-
-      cache[key] = lista
-      localStorage.setItem(key, JSON.stringify(lista))
-      setPedidos(lista)
-    })
-
-    return () => unsubscribe()
-  }, [])
 
   const getTotal = (p: Pedido) => p.total ?? p.valor ?? 0
 
@@ -85,7 +60,7 @@ export default function FinanceiroPage() {
   const produtos: Record<string, { qtd: number; total: number }> = {}
 
   ativos.forEach(p => {
-    p.itens?.forEach(item => {
+    p.itens?.forEach((item: Item) => {
       if (!produtos[item.nome]) {
         produtos[item.nome] = { qtd: 0, total: 0 }
       }
@@ -127,7 +102,7 @@ type ItemExport = {
 const itensData: ItemExport[] = []
 
 ativosOrdenados.forEach(p => {
-  p.itens?.forEach(item => {
+  p.itens?.forEach((item: Item) => {
     itensData.push({
       Pedido: p.codigo,
       Produto: item.nome,
