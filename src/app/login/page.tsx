@@ -131,7 +131,7 @@ export default function LoginPage() {
         </h1>
 
         <p className="text-gray-400 text-center mb-6">
-          Faça login para continuar
+          Gestão de Pedidos em Tempo Real
         </p>
 
         <form
