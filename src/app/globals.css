@@ -19,11 +19,17 @@
   }
 }
 
-body {
+/* 🔥 CORREÇÃO DO FUNDO NO SCROLL (ESSENCIAL) */
+html, body {
   background: var(--background);
   color: var(--foreground);
+}
+
+/* 🔥 AJUSTES GERAIS */
+body {
   font-family: Arial, Helvetica, sans-serif;
-  overflow-x: hidden; /* 🔥 evita corte lateral */
+  overflow-x: hidden;
+  overscroll-behavior-y: contain; /* scroll mais suave */
 }
 
 /* 🔥 SCROLL INFINITO SUAVE */
@@ -40,12 +46,12 @@ body {
   animation: scrollVertical 40s linear infinite;
 }
 
-/* 🔥 fade profissional nas bordas (opcional usar) */
+/* 🔥 FADE NAS BORDAS */
 .mask-fade {
   mask-image: linear-gradient(to bottom, transparent, black 10%, black 90%, transparent);
 }
 
-/* 🔥 esconder scrollbar */
+/* 🔥 ESCONDER SCROLLBAR */
 .scroll-hidden::-webkit-scrollbar {
   display: none;
 }
@@ -55,7 +61,7 @@ body {
   scrollbar-width: none;
 }
 
-/* 🔥 animações */
+/* 🔥 ANIMAÇÕES */
 @keyframes pulseSoft {
   0%, 100% {
     transform: scale(1);
@@ -80,12 +86,7 @@ body {
   animation: blinkGreen 0.8s ease-in-out infinite;
 }
 
-/* ❌ REMOVE ISSO (causa espaço lateral) */
-/* html {
-  scrollbar-gutter: stable;
-} */
-
-/* 🔥 safe area */
+/* 🔥 SAFE AREA (iPhone) */
 .pb-safe {
   padding-bottom: env(safe-area-inset-bottom);
 }
