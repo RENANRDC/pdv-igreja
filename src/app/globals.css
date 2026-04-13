@@ -1,8 +1,8 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #111827; /* gray-900 */
+  --foreground: #ededed;
 }
 
 @theme inline {
@@ -12,34 +12,30 @@
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
+/* ❌ REMOVIDO dark mode automático (causava inconsistência) */
 
-/* 🔥 CORREÇÃO DO FUNDO NO SCROLL (ESSENCIAL) */
+/* 🔥 FUNDO GLOBAL (ESSENCIAL) */
 html, body {
   background: var(--background);
   color: var(--foreground);
 }
 
-/* 🔥 AJUSTES GERAIS */
+/* 🔥 BASE */
 body {
   font-family: Arial, Helvetica, sans-serif;
   overflow-x: hidden;
-  overscroll-behavior-y: contain; /* scroll mais suave */
+  overscroll-behavior-y: contain;
   min-height: 100dvh;
 }
 
+/* 🔥 GARANTE ALTURA GLOBAL */
 main {
   flex: 1;
   display: flex;
   flex-direction: column;
 }
 
-/* 🔥 SCROLL INFINITO SUAVE */
+/* 🔥 SCROLL INFINITO */
 @keyframes scrollVertical {
   0% {
     transform: translateY(0%);
@@ -53,12 +49,12 @@ main {
   animation: scrollVertical 40s linear infinite;
 }
 
-/* 🔥 FADE NAS BORDAS */
+/* 🔥 FADE */
 .mask-fade {
   mask-image: linear-gradient(to bottom, transparent, black 10%, black 90%, transparent);
 }
 
-/* 🔥 ESCONDER SCROLLBAR */
+/* 🔥 SCROLLBAR */
 .scroll-hidden::-webkit-scrollbar {
   display: none;
 }
@@ -93,7 +89,7 @@ main {
   animation: blinkGreen 0.8s ease-in-out infinite;
 }
 
-/* 🔥 SAFE AREA (iPhone) */
+/* 🔥 SAFE AREA */
 .pb-safe {
   padding-bottom: env(safe-area-inset-bottom);
 }
