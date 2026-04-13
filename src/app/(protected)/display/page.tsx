@@ -20,26 +20,26 @@ export default function DisplayPage() {
   const [pedidos, setPedidos] = useState<Pedido[]>([])
   const [highlightId, setHighlightId] = useState<string | null>(null)
   const [audioLiberado, setAudioLiberado] = useState(false)
+  const [limiteProntos, setLimiteProntos] = useState(20)
+
+  const [precisaScroll, setPrecisaScroll] = useState(false)
+
+  const containerRef = useRef<HTMLDivElement>(null)
+  const contentRef = useRef<HTMLDivElement>(null)
 
   const statusAnterior = useRef<Record<string, string>>({})
   const audioRef = useRef<HTMLAudioElement | null>(null)
   const audioLiberadoRef = useRef(false)
-  const [limiteProntos, setLimiteProntos] = useState(20)
-  const preparoRef = useRef<HTMLDivElement>(null)
-  const prontoRef = useRef<HTMLDivElement>(null)
-
 
   useEffect(() => {
-  const unsubscribe = onSnapshot(doc(db, "config", "display"), (docSnap) => {
-    if (docSnap.exists()) {
-      setLimiteProntos(docSnap.data().limiteProntos || 20)
-    }
-  })
+    const unsubscribe = onSnapshot(doc(db, "config", "display"), (docSnap) => {
+      if (docSnap.exists()) {
+        setLimiteProntos(docSnap.data().limiteProntos || 20)
+      }
+    })
+    return () => unsubscribe()
+  }, [])
 
-  return () => unsubscribe()
-}, [])
-
-  // 🔊 áudio
   useEffect(() => {
     const audio = new Audio("/sounds/pronto.wav")
     audio.volume = 1
@@ -48,7 +48,6 @@ export default function DisplayPage() {
 
   function ativarAlerta(id: string) {
     setHighlightId(id)
-
     setTimeout(() => setHighlightId(null), 4000)
 
     if (audioRef.current && audioLiberadoRef.current) {
@@ -57,7 +56,6 @@ export default function DisplayPage() {
     }
   }
 
-  // 🔥 realtime
   useEffect(() => {
     const q = query(
       collection(db, "pedidos"),
@@ -91,12 +89,32 @@ export default function DisplayPage() {
   }, [])
 
   const emPreparo = pedidos.filter(
-  (p) => p.status === "pendente" || p.status === "em_preparo"
-)
-  const prontos = pedidos
-  .filter((p) => p.status === "finalizado")
-  .slice(0, limiteProntos)
+    (p) => p.status === "pendente" || p.status === "em_preparo"
+  )
 
+  const prontos = pedidos
+    .filter((p) => p.status === "finalizado")
+    .slice(0, limiteProntos)
+
+  // 🔥 DETECÇÃO REAL (ESSA É A CORREÇÃO)
+  useEffect(() => {
+    const check = () => {
+      if (containerRef.current && contentRef.current) {
+        const containerHeight = containerRef.current.offsetHeight
+        const contentHeight = contentRef.current.scrollHeight
+
+        setPrecisaScroll(contentHeight > containerHeight)
+      }
+    }
+
+    check()
+
+    const observer = new ResizeObserver(check)
+
+    if (contentRef.current) observer.observe(contentRef.current)
+
+    return () => observer.disconnect()
+  }, [emPreparo])
 
   return (
     <div className="h-screen flex flex-col bg-gray-900 text-white overflow-hidden">
@@ -111,12 +129,9 @@ export default function DisplayPage() {
           </div>
         </div>
 
-<div className="text-xs text-gray-400 flex items-center">
-  Desenvolvido por
-  <span className="font-semibold text-gray-300 ml-1">
-    R2CodeX
-  </span>
-</div>
+        <div className="text-xs text-gray-400">
+          Desenvolvido por <span className="font-semibold">R2CodeX</span>
+        </div>
       </div>
 
       {/* BOTÃO SOM */}
@@ -127,7 +142,7 @@ export default function DisplayPage() {
             setAudioLiberado(true)
             audioLiberadoRef.current = true
           }}
-          className="fixed top-4 left-1/2 -translate-x-1/2 bg-gray-800 text-white border border-gray-600 px-4 py-2 rounded-lg shadow-lg z-50"
+          className="fixed top-4 left-1/2 -translate-x-1/2 bg-gray-800 px-4 py-2 rounded-lg z-50"
         >
           🔊 Ativar som
         </button>
@@ -136,40 +151,42 @@ export default function DisplayPage() {
       {/* CONTEÚDO */}
       <div className="flex-1 grid grid-cols-1 lg:grid-cols-2 gap-6 p-6 overflow-hidden min-h-0">
 
-        {/* 🟡 EM PREPARO */}
-        <div className="bg-gray-800/60 border border-gray-700 rounded-2xl p-4 flex flex-col min-h-0 overflow-visible">
+        {/* EM PREPARO */}
+        <div className="bg-gray-800/60 border border-gray-700 rounded-2xl p-4 flex flex-col overflow-hidden">
           <h2 className="text-2xl font-bold text-yellow-400 mb-4 text-center">
             🟡 Em preparo
           </h2>
 
-          <div
-className="flex-1 overflow-hidden min-h-0"
-          >
-            <div className="animate-scroll grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-              {[...emPreparo, ...emPreparo].map((pedido, index) => (
-                <div
-                  key={index}
-                  className="bg-yellow-400 text-black rounded-xl p-4 flex items-center justify-center shadow-lg"
-                >
-                  <span className="text-4xl lg:text-5xl font-bold">
-                    {pedido.codigo}
-                  </span>
-                </div>
-              ))}
+          <div ref={containerRef} className="flex-1 overflow-hidden">
+            <div
+              ref={contentRef}
+              className={`grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 ${
+                precisaScroll ? "animate-scroll" : ""
+              }`}
+            >
+              {(precisaScroll ? [...emPreparo, ...emPreparo] : emPreparo).map(
+                (pedido, index) => (
+                  <div
+                    key={index}
+                    className="bg-yellow-400 text-black rounded-xl p-4 flex items-center justify-center"
+                  >
+                    <span className="text-4xl lg:text-5xl font-bold">
+                      {pedido.codigo}
+                    </span>
+                  </div>
+                )
+              )}
             </div>
           </div>
         </div>
 
-        {/* 🟢 PRONTOS */}
-        <div className="bg-gray-800/60 border border-gray-700 rounded-2xl p-4 flex flex-col min-h-0 overflow-visible">
+        {/* PRONTOS */}
+        <div className="bg-gray-800/60 border border-gray-700 rounded-2xl p-4 flex flex-col overflow-hidden">
           <h2 className="text-2xl font-bold text-green-400 mb-4 text-center">
             🟢 Prontos
           </h2>
 
-          <div
-            ref={prontoRef}
-            className="flex-1 overflow-hidden"
-          >
+          <div className="flex-1 overflow-hidden">
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
               {prontos.map((pedido) => {
                 const isHighlight = pedido.id === highlightId
@@ -177,10 +194,10 @@ className="flex-1 overflow-hidden min-h-0"
                 return (
                   <div
                     key={pedido.id}
-                    className={`rounded-xl p-4 flex items-center justify-center transition-all duration-300 ${
-                    isHighlight
-                      ? "animate-blink-green text-white"
-                        : "bg-green-500 shadow-lg"
+                    className={`rounded-xl p-4 flex items-center justify-center ${
+                      isHighlight
+                        ? "animate-blink-green text-white"
+                        : "bg-green-500"
                     }`}
                   >
                     <span className="text-4xl lg:text-5xl font-bold">

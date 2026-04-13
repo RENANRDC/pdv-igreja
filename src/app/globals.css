@@ -37,8 +37,7 @@ body {
 }
 
 .animate-scroll {
-  animation: scrollVertical 40s linear infinite; /* 🔥 controla velocidade aqui */
-  will-change: transform;
+  animation: scrollVertical 40s linear infinite;
 }
 
 /* 🔥 fade profissional nas bordas (opcional usar) */
