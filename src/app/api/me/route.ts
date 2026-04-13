@@ -11,7 +11,7 @@ export async function GET(request: Request) {
     }
 
     // ✅ CORRETO: usar session cookie
-    const decoded = await adminAuth.verifySessionCookie(token, true)
+    const decoded = await adminAuth.verifySessionCookie(token, false)
 
     const userDoc = await adminDb.collection("users").doc(decoded.uid).get()
 
