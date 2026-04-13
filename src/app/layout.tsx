@@ -14,12 +14,12 @@ const geistMono = Geist_Mono({
 })
 
 export const metadata: Metadata = {
-  title: "Central Gourmet",
-  description: "Sistema de pedidos e gestão da Central Gourmet",
+  title: "Central Gourmet | Sistema de Pedidos",
+  description: "Sistema de pedidos em tempo real integrado entre atendimento, cozinha e cliente.",
 
   openGraph: {
-    title: "Central Gourmet",
-    description: "Sistema de pedidos e gestão da Central Gourmet",
+    title: "Central Gourmet | Sistema de Pedidos",
+    description: "Sistema de pedidos em tempo real integrado entre atendimento, cozinha e cliente.",
     url: "https://pdv-igreja.vercel.app",
     siteName: "Central Gourmet",
     images: [
@@ -35,8 +35,8 @@ export const metadata: Metadata = {
 
   twitter: {
     card: "summary_large_image",
-    title: "Central Gourmet",
-    description: "Sistema de pedidos e gestão da Central Gourmet",
+    title: "Central Gourmet | Sistema de Pedidos",
+    description: "Sistema de pedidos em tempo real integrado entre atendimento, cozinha e cliente.",
     images: ["https://pdv-igreja.vercel.app/logo2.png"],
   },
 }
