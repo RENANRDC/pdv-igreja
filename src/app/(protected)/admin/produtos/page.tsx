@@ -1,7 +1,6 @@
 "use client"
 
 import { useState } from "react"
-import BackButton from "@/components/ui/BackButton"
 import { db } from "@/services/firebase"
 import {
   collection,
@@ -12,6 +11,8 @@ import {
 } from "firebase/firestore"
 import { useCategorias } from "@/hooks/useCategorias"
 import { useProdutos } from "@/hooks/useProdutos"
+import PageContainer from "@/components/ui/PageContainer"
+import BackButton from "@/components/ui/BackButton"
 
 type Produto = {
   id: string
@@ -22,8 +23,6 @@ type Produto = {
 }
 
 export default function ProdutosPage() {
-
-  
   const [nome, setNome] = useState("")
   const [precoFormatado, setPrecoFormatado] = useState("")
   const [categoriaId, setCategoriaId] = useState("")
@@ -33,8 +32,6 @@ export default function ProdutosPage() {
   const { categorias } = useCategorias()
   const { produtos } = useProdutos()
 
-
-  // 💰 formatar real
   function formatarReal(valor: string) {
     const numero = valor.replace(/\D/g, "")
     return (Number(numero) / 100).toLocaleString("pt-BR", {
@@ -47,7 +44,6 @@ export default function ProdutosPage() {
     return Number(precoFormatado.replace(/\D/g, "")) / 100
   }
 
-  // ➕ criar / editar
   async function handleAdd() {
     if (!nome || !precoFormatado || !categoriaId) return
 
@@ -74,7 +70,6 @@ export default function ProdutosPage() {
     setCategoriaId("")
   }
 
-  // ✏️ editar
   function handleEdit(prod: Produto) {
     setNome(prod.nome)
     setPrecoFormatado(
@@ -87,13 +82,11 @@ export default function ProdutosPage() {
     setEditandoId(prod.id)
   }
 
-  // ❌ excluir
   async function handleDelete(id: string) {
     if (!confirm("Deseja excluir este produto?")) return
     await deleteDoc(doc(db, "produtos", id))
   }
 
-  // 🔄 toggle ativo
   async function toggleProduto(prod: Produto) {
     await updateDoc(doc(db, "produtos", prod.id), {
       ativo: !prod.ativo,
@@ -109,28 +102,27 @@ export default function ProdutosPage() {
     : produtos
 
   return (
-    <div className="min-h-[100dvh] bg-gray-900 text-white p-4">
+    <PageContainer>
 
-<div className="grid grid-cols-3 items-center mb-6">
+      {/* HEADER PADRÃO */}
+      <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center gap-3">
+          <img src="/logo.png" className="h-10 w-10" />
+          <div>
+            <h1 className="text-base font-bold">
+              Central Gourmet
+            </h1>
+            <p className="text-xs text-gray-400">
+              Produtos
+            </p>
+          </div>
+        </div>
 
-  {/* ESQUERDA */}
-  <div className="flex justify-start">
-    <BackButton href="/admin" />
-  </div>
-
-  {/* CENTRO */}
-  <div className="flex justify-center">
-    <h1 className="text-2xl font-bold">Produtos</h1>
-  </div>
-
-  {/* DIREITA (reserva futura) */}
-  <div />
-
-</div>
+        <BackButton href="/admin" />
+      </div>
 
       <div className="grid md:grid-cols-3 gap-6">
 
-        {/* 🧾 CADASTRO */}
         <div className="bg-gray-800 p-4 rounded-xl space-y-3 self-start sticky top-6">
 
           <h2 className="font-semibold text-lg">
@@ -172,10 +164,8 @@ export default function ProdutosPage() {
           </button>
         </div>
 
-        {/* 📋 LISTA */}
         <div className="md:col-span-2 space-y-4">
 
-          {/* 🔍 FILTRO */}
           <select
             value={categoriaFiltro}
             onChange={(e) => setCategoriaFiltro(e.target.value)}
@@ -189,9 +179,8 @@ export default function ProdutosPage() {
             ))}
           </select>
 
-          {/* 📦 LISTA */}
           <div className="space-y-2">
-            {produtosFiltrados.map((prod) => (
+            {produtosFiltrados.map((prod: Produto) => (
               <div
                 key={prod.id}
                 className="bg-gray-800 p-4 rounded flex justify-between items-center"
@@ -244,6 +233,6 @@ export default function ProdutosPage() {
         </div>
 
       </div>
-    </div>
+    </PageContainer>
   )
 }

@@ -30,7 +30,7 @@ export default function AdminPage() {
 
           <div>
             <h1 className="text-base font-bold">
-              Admin
+              Central Gourmet
             </h1>
             <p className="text-xs text-gray-400">
               Configurações

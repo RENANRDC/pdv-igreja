@@ -9,6 +9,7 @@ import {
 } from "firebase/firestore"
 import { db } from "@/services/firebase"
 import BackButton from "@/components/ui/BackButton"
+import PageContainer from "@/components/ui/PageContainer"
 
 type Item = {
   nome: string
@@ -66,21 +67,23 @@ export default function ControlePedidos() {
   }
 
   return (
-    <div className="bg-gray-900 text-white p-4 min-h-[100vh]">
+    <PageContainer>
 
-<div className="grid grid-cols-3 items-center mb-6">
+<div className="flex items-center justify-between mb-6">
 
-  <div className="flex justify-start">
-    <BackButton href="/pdv" />
+  <div className="flex items-center gap-3">
+    <img src="/logo.png" className="h-10 w-10" />
+    <div>
+      <h1 className="text-base font-bold">
+        Central Gourmet
+      </h1>
+      <p className="text-xs text-gray-400">
+        Pedidos
+      </p>
+    </div>
   </div>
 
-  <div className="flex justify-center">
-    <h1 className="text-2xl font-bold">
-      Pedidos
-    </h1>
-  </div>
-
-  <div />
+  <BackButton href="/pdv" />
 
 </div>
 
@@ -275,6 +278,6 @@ export default function ControlePedidos() {
         </div>
       )}
 
-    </div>
+</PageContainer>
   )
 }

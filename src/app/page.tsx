@@ -20,6 +20,7 @@ import {
 import Card3D from "@/components/ui/Card3D"
 import PageContainer from "@/components/ui/PageContainer"
 import Button from "@/components/ui/Button"
+import { LogOut } from "lucide-react"
 
 export default function MenuPage() {
   const router = useRouter()
@@ -67,9 +68,12 @@ export default function MenuPage() {
         </div>
 
         {/* 🔥 BOTÃO PADRONIZADO */}
-        <Button onClick={handleLogout}>
-          Sair
-        </Button>
+<Button onClick={handleLogout}>
+  <div className="flex items-center gap-2">
+    <LogOut size={16} />
+    Sair
+  </div>
+</Button>
 
       </div>
 

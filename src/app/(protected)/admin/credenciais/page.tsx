@@ -6,7 +6,7 @@ import { fetchWithAuth } from "@/lib/fetchWithAuth"
 import { Eye, EyeOff } from "lucide-react"
 import { getAuth, signOut } from "firebase/auth"
 import { cache, persistCache, clearCacheKey } from "@/lib/cache"
-
+import PageContainer from "@/components/ui/PageContainer"
 /* ================= TYPES ================= */
 
 type Role = "admin" | "user"
@@ -236,42 +236,47 @@ setUsers(prev =>
     )
   }, [users, search])
 
-  return (
-    <div className="min-h-[100dvh] bg-gray-900 text-white p-4">
+return (
+  <PageContainer>
 
-      {/* HEADER */}
-<div className="grid grid-cols-3 items-center mb-6">
+    <div className="flex items-center justify-between mb-6">
+      <div className="flex items-center gap-3">
+        <img src="/logo.png" className="h-10 w-10" />
+        <div>
+          <h1 className="text-base font-bold">
+            Central Gourmet
+          </h1>
+          <p className="text-xs text-gray-400">
+            Credenciais
+          </p>
+        </div>
+      </div>
 
-  <div className="flex justify-start">
-    <BackButton href="/admin" />
-  </div>
+      <BackButton href="/admin" />
+    </div>
 
-  <div className="flex justify-center">
-    <h1 className="text-2xl font-bold">
-      Credenciais
-    </h1>
-  </div>
+<div className="flex gap-3 mb-4">
 
-  <div className="flex justify-end">
-    <button
-      onClick={() => setModal("create")}
-      className="bg-green-600 hover:bg-green-700 px-4 py-2 rounded-lg text-sm"
-    >
-      + Novo usuário
-    </button>
+  <button
+    onClick={() => setModal("create")}
+    className="bg-green-600 hover:bg-green-700 px-4 py-3 rounded-xl font-semibold whitespace-nowrap"
+  >
+    + Novo usuário
+  </button>
+
+  <div className="relative w-full">
+    <input
+      placeholder="Buscar usuário..."
+      value={search}
+      onChange={(e) => setSearch(e.target.value)}
+      className="w-full pl-10 pr-4 py-3 rounded-xl bg-zinc-800 border border-zinc-700 focus:border-green-600 outline-none"
+    />
+    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400">
+      🔍
+    </span>
   </div>
 
 </div>
-      {/* SEARCH */}
-      <div className="relative mb-4">
-        <input
-          placeholder="Buscar usuário..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          className="w-full pl-10 pr-4 py-2 rounded-lg bg-zinc-800 border border-zinc-700 focus:border-green-600 outline-none"
-        />
-        <span className="absolute left-3 top-2.5 text-zinc-400">🔍</span>
-      </div>
 
       {/* LISTA */}
 <div className="space-y-3">
@@ -420,8 +425,8 @@ setUsers(prev =>
           {toast.message}
         </div>
       )}
-    </div>
-  )
+</PageContainer>
+)
 }
 
 /* ================= COMPONENTS ================= */

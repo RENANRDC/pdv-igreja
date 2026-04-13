@@ -12,6 +12,7 @@ import {
 import { db } from "@/services/firebase"
 import BackButton from "@/components/ui/BackButton"
 import { cache } from "@/lib/cache"
+import PageContainer from "@/components/ui/PageContainer"
 
 type Pedido = {
   id: string
@@ -124,21 +125,23 @@ export default function Cozinha() {
       : finalizados
 
   return (
-    <div className="bg-gray-900 text-white p-4 min-h-[100vh]">
+    <PageContainer>
 
-<div className="grid grid-cols-3 items-center mb-6">
+<div className="flex items-center justify-between mb-6">
 
-  <div className="flex justify-start">
-    <BackButton href="/" />
+  <div className="flex items-center gap-3">
+    <img src="/logo.png" className="h-10 w-10" />
+    <div>
+      <h1 className="text-base font-bold">
+        Central Gourmet
+      </h1>
+      <p className="text-xs text-gray-400">
+        Cozinha
+      </p>
+    </div>
   </div>
 
-  <div className="flex justify-center">
-    <h1 className="text-2xl font-bold">
-      Cozinha
-    </h1>
-  </div>
-
-  <div />
+  <BackButton href="/" />
 
 </div>
 
@@ -358,6 +361,6 @@ export default function Cozinha() {
         </div>
       )}
 
-    </div>
+</PageContainer>
   )
 }

@@ -5,6 +5,7 @@ import BackButton from "@/components/ui/BackButton"
 import { db } from "@/services/firebase"
 import { doc, setDoc, onSnapshot } from "firebase/firestore"
 import { cache, clearCacheKey } from "@/lib/cache"
+import PageContainer from "@/components/ui/PageContainer"
 
 export default function ConfigDisplayPage() {
   const key = "config-display"
@@ -51,20 +52,26 @@ useEffect(() => {
   }
 
   return (
-    <div className="min-h-[100dvh] bg-gray-900 text-white p-4">
+    <PageContainer>
 
       {/* HEADER */}
-      <div className="grid grid-cols-3 items-center mb-6">
-        <div className="flex justify-start">
-          <BackButton href="/" />
-        </div>
+<div className="flex items-center justify-between mb-6">
 
-        <div className="flex justify-center">
-          <h1 className="text-2xl font-bold">Display</h1>
-        </div>
+  <div className="flex items-center gap-3">
+    <img src="/logo.png" className="h-10 w-10" />
+    <div>
+      <h1 className="text-base font-bold">
+        Central Gourmet
+      </h1>
+      <p className="text-xs text-gray-400">
+        Display Config
+      </p>
+    </div>
+  </div>
 
-        <div />
-      </div>
+  <BackButton href="/" />
+
+</div>
 
       <div className="grid md:grid-cols-3 gap-6">
 
@@ -142,6 +149,6 @@ useEffect(() => {
         </div>
       )}
 
-    </div>
+</PageContainer>
   )
 }

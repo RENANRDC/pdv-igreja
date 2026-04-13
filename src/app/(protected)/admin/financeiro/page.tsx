@@ -1,7 +1,6 @@
 "use client"
 
-import BackButton from "@/components/ui/BackButton"
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import {
   collection,
   getDocs,
@@ -13,6 +12,9 @@ import {
 import { db } from "@/services/firebase"
 import * as XLSX from "xlsx"
 import { usePedidos } from "@/hooks/usePedidos"
+import PageContainer from "@/components/ui/PageContainer"
+import BackButton from "@/components/ui/BackButton"
+
 type Item = {
   nome: string
   quantidade: number
@@ -32,8 +34,10 @@ type Pedido = {
 }
 
 export default function FinanceiroPage() {
+  const { pedidos } = usePedidos()
 
-const { pedidos } = usePedidos()
+  const [mounted, setMounted] = useState(false)
+
   const [limite, setLimite] = useState(50)
   const [exportado, setExportado] = useState(false)
 
@@ -41,6 +45,12 @@ const { pedidos } = usePedidos()
   const [successModal, setSuccessModal] = useState(false)
   const [erroModal, setErroModal] = useState(false)
   const [loading, setLoading] = useState(false)
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+
+  if (!mounted) return null
 
   const getTotal = (p: Pedido) => p.total ?? p.valor ?? 0
 
@@ -56,7 +66,6 @@ const { pedidos } = usePedidos()
   const totalGeral = ativos.reduce((acc, p) => acc + getTotal(p), 0)
   const ticketMedio = totalGeral / (totalPedidos || 1)
 
-  // 📦 PRODUTOS
   const produtos: Record<string, { qtd: number; total: number }> = {}
 
   ativos.forEach(p => {
@@ -74,24 +83,19 @@ const { pedidos } = usePedidos()
     .map(([nome, data]) => ({ nome, ...data }))
     .sort((a, b) => b.qtd - a.qtd)
 
-  // 🔥 EXPORTAR
-function exportarExcel() {
-  const hoje = new Date()
-  const dataFormatada = hoje
-    .toLocaleDateString("pt-BR")
-    .replace(/\//g, "-")
+  function exportarExcel() {
+    const hoje = new Date()
+    const dataFormatada = hoje.toLocaleDateString("pt-BR").replace(/\//g, "-")
 
-  // 📋 PEDIDOS
-const pedidosData = ativosOrdenados.map(p => ({
-  Pedido: p.codigo,
-  Cliente: p.nomeCliente || "",
-  Pagamento: p.formaPagamento || "outros",
-  Total: getTotal(p),
-  Data: p.createdAt?.toDate?.().toLocaleString("pt-BR"),
-}))
+    const pedidosData = ativosOrdenados.map(p => ({
+      Pedido: p.codigo,
+      Cliente: p.nomeCliente || "",
+      Pagamento: p.formaPagamento || "outros",
+      Total: getTotal(p),
+      Data: p.createdAt?.toDate?.().toLocaleString("pt-BR"),
+    }))
 
-  // 📦 ITENS (DETALHADO)
-type ItemExport = {
+    type ItemExport = {
   Pedido?: string
   Produto: string
   Quantidade: number
@@ -101,53 +105,35 @@ type ItemExport = {
 
 const itensData: ItemExport[] = []
 
-ativosOrdenados.forEach(p => {
-  p.itens?.forEach((item: Item) => {
-    itensData.push({
-      Pedido: p.codigo,
-      Produto: item.nome,
-      Quantidade: item.quantidade,
-      Preco: item.preco || 0,
-      Total: (item.preco || 0) * item.quantidade,
+    ativosOrdenados.forEach(p => {
+      p.itens?.forEach((item: Item) => {
+        itensData.push({
+          Pedido: p.codigo,
+          Produto: item.nome,
+          Quantidade: item.quantidade,
+          Preco: item.preco || 0,
+          Total: (item.preco || 0) * item.quantidade,
+        })
+      })
     })
-  })
-})
 
-  // 🧾 PRODUTOS (RESUMO)
-  const produtosData = rankingProdutos.map(p => ({
-    Produto: p.nome,
-    Quantidade: p.qtd,
-    Total: p.total,
-  }))
+    const produtosData = rankingProdutos.map(p => ({
+      Produto: p.nome,
+      Quantidade: p.qtd,
+      Total: p.total,
+    }))
 
-  // 📊 CRIA PLANILHA
-  const wb = XLSX.utils.book_new()
+    const wb = XLSX.utils.book_new()
 
-  XLSX.utils.book_append_sheet(
-    wb,
-    XLSX.utils.json_to_sheet(pedidosData),
-    "Pedidos"
-  )
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(pedidosData), "Pedidos")
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(itensData), "Itens")
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(produtosData), "Produtos")
 
-  XLSX.utils.book_append_sheet(
-    wb,
-    XLSX.utils.json_to_sheet(itensData),
-    "Itens"
-  )
+    XLSX.writeFile(wb, `financeiro-${dataFormatada}.xlsx`)
 
-  XLSX.utils.book_append_sheet(
-    wb,
-    XLSX.utils.json_to_sheet(produtosData),
-    "Produtos"
-  )
+    setExportado(true)
+  }
 
-  // 📥 DOWNLOAD
-  XLSX.writeFile(wb, `financeiro-${dataFormatada}.xlsx`)
-
-  setExportado(true)
-}
-
-  // 🔥 FECHAMENTO
   async function handleFechamento() {
     setLoading(true)
 
@@ -180,16 +166,25 @@ ativosOrdenados.forEach(p => {
   }
 
   return (
-    <div className="min-h-[100dvh] bg-gray-900 text-white p-4">
+    <PageContainer>
 
-      {/* HEADER */}
-      <div className="grid grid-cols-3 items-center mb-6">
+      {/* HEADER PADRÃO */}
+      <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center gap-3">
+          <img src="/logo.png" className="h-10 w-10" />
+          <div>
+            <h1 className="text-base font-bold">
+              Central Gourmet
+            </h1>
+            <p className="text-xs text-gray-400">
+              Financeiro
+            </p>
+          </div>
+        </div>
+
         <BackButton href="/admin" />
-        <h1 className="text-center text-2xl font-bold">Financeiro</h1>
-        <div />
       </div>
 
-      {/* RESUMO */}
       <div className="grid md:grid-cols-3 gap-6 mb-6">
         <div className="bg-gray-800 p-4 rounded-xl">
           <p>Pedidos</p>
@@ -207,33 +202,24 @@ ativosOrdenados.forEach(p => {
         </div>
       </div>
 
-      {/* EXPORTAR */}
       <button
         onClick={exportarExcel}
-        className="w-full bg-blue-600 hover:bg-blue-700 transition p-4 rounded-xl font-bold mb-4"
+        className="w-full bg-blue-600 hover:bg-blue-700 p-4 rounded-xl font-bold mb-4"
       >
         Exportar Relatório Completo
       </button>
 
-      {/* 🔥 PRODUTOS (COLE AQUI) */}
-<div className="bg-gray-800 p-4 rounded-xl mb-6">
-  <h2 className="mb-3 font-semibold">Produtos</h2>
+      <div className="bg-gray-800 p-4 rounded-xl mb-6">
+        <h2 className="mb-3 font-semibold">Produtos</h2>
 
-  {rankingProdutos.map((p, i) => (
-    <div
-      key={p.nome}
-      className="flex justify-between border-b border-gray-700 py-2"
-    >
-      <span>#{i + 1} {p.nome}</span>
+        {rankingProdutos.map((p, i) => (
+          <div key={p.nome} className="flex justify-between border-b border-gray-700 py-2">
+            <span>#{i + 1} {p.nome}</span>
+            <span>Qtd: {p.qtd} | R$ {p.total.toFixed(2)}</span>
+          </div>
+        ))}
+      </div>
 
-      <span>
-        Qtd: {p.qtd} | R$ {p.total.toFixed(2)}
-      </span>
-    </div>
-  ))}
-</div>
-
-      {/* PEDIDOS */}
       <div className="bg-gray-800 p-4 rounded-xl mb-6 max-h-[400px] overflow-y-auto">
         <h2 className="mb-3 font-semibold">Relatório de Pedidos</h2>
 
@@ -251,17 +237,16 @@ ativosOrdenados.forEach(p => {
           </div>
         ))}
 
-{limite < ativosOrdenados.length && (
-  <button
-    onClick={() => setLimite(l => l + 50)}
-    className="w-full mt-3 bg-gray-700 p-2 rounded"
-  >
-    Carregar mais
-  </button>
-)}
+        {limite < ativosOrdenados.length && (
+          <button
+            onClick={() => setLimite(l => l + 50)}
+            className="w-full mt-3 bg-gray-700 p-2 rounded"
+          >
+            Carregar mais
+          </button>
+        )}
       </div>
 
-      {/* FECHAR */}
       <button
         onClick={() => {
           if (!exportado) return setErroModal(true)
@@ -272,7 +257,8 @@ ativosOrdenados.forEach(p => {
         Fechar Caixa
       </button>
 
-      {/* MODAL ERRO */}
+      {/* MODAIS (inalterados) */}
+
       {erroModal && (
         <div className="fixed inset-0 bg-black/80 flex items-center justify-center">
           <div className="bg-gray-900 p-6 rounded-xl w-80 text-center">
@@ -287,7 +273,6 @@ ativosOrdenados.forEach(p => {
         </div>
       )}
 
-      {/* MODAL CONFIRM */}
       {confirmModal && (
         <div className="fixed inset-0 bg-black/80 flex items-center justify-center">
           <div className="bg-gray-900 p-6 rounded-xl w-80 text-center">
@@ -313,7 +298,6 @@ ativosOrdenados.forEach(p => {
         </div>
       )}
 
-      {/* MODAL SUCESSO */}
       {successModal && (
         <div className="fixed inset-0 bg-black/80 flex items-center justify-center">
           <div className="bg-gray-900 p-6 rounded-xl w-80 text-center">
@@ -328,6 +312,6 @@ ativosOrdenados.forEach(p => {
         </div>
       )}
 
-    </div>
+    </PageContainer>
   )
 }

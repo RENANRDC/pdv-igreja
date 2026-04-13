@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import BackButton from "@/components/ui/BackButton"
+import { useRouter } from "next/navigation"
 import { db } from "@/services/firebase"
 import {
   collection,
@@ -12,6 +12,8 @@ import {
 } from "firebase/firestore"
 import { useCategorias } from "@/hooks/useCategorias"
 
+import PageContainer from "@/components/ui/PageContainer"
+import BackButton from "@/components/ui/BackButton"
 
 type Categoria = {
   id: string
@@ -21,14 +23,13 @@ type Categoria = {
 
 export default function CategoriasPage() {
 
+  const router = useRouter()
+
   const [nome, setNome] = useState("")
   const [editandoId, setEditandoId] = useState<string | null>(null)
 
   const { categorias } = useCategorias()
 
-  
-
-  // ➕ criar / editar
   async function handleAdd() {
     if (!nome.trim()) return
 
@@ -47,54 +48,52 @@ export default function CategoriasPage() {
     setNome("")
   }
 
-  // ✏️ editar
   function handleEdit(cat: Categoria) {
     setNome(cat.nome)
     setEditandoId(cat.id)
   }
 
-  // ❌ excluir
   async function handleDelete(id: string) {
     if (!confirm("Deseja excluir esta categoria?")) return
     await deleteDoc(doc(db, "categorias", id))
   }
 
-  // 🔄 toggle ativo
   async function toggleCategoria(cat: Categoria) {
     await updateDoc(doc(db, "categorias", cat.id), {
       ativo: !cat.ativo,
     })
   }
 
-  // ❌ cancelar edição
   function handleCancel() {
     setNome("")
     setEditandoId(null)
   }
 
   return (
-    <div className="min-h-[100dvh] bg-gray-900 text-white p-4">
+    <PageContainer>
 
-<div className="grid grid-cols-3 items-center mb-6">
+      {/* ✅ HEADER IGUAL HOME */}
+      <div className="flex items-center justify-between mb-6">
 
-  {/* ESQUERDA */}
-  <div className="flex justify-start">
-    <BackButton href="/admin" />
-  </div>
+        <div className="flex items-center gap-3">
+          <img src="/logo.png" className="h-10 w-10" />
+          <div>
+            <h1 className="text-base font-bold">
+              Central Gourmet
+            </h1>
+            <p className="text-xs text-gray-400">
+              Categorias
+            </p>
+          </div>
+        </div>
 
-  {/* CENTRO */}
-  <div className="flex justify-center">
-    <h1 className="text-2xl font-bold">Categorias</h1>
-  </div>
+<BackButton href="/admin" />
 
-  {/* DIREITA (reserva futura) */}
-  <div />
+      </div>
 
-</div>
-
+      {/* ✅ CONTEÚDO ORIGINAL (INALTERADO) */}
       <div className="grid md:grid-cols-3 gap-6">
 
-        {/* 🧾 CADASTRO */}
         <div className="bg-gray-800 p-4 rounded-xl space-y-3 self-start">
 
           <h2 className="font-semibold text-lg">
@@ -129,7 +128,6 @@ export default function CategoriasPage() {
           </div>
         </div>
 
-        {/* 📋 LISTA */}
         <div className="md:col-span-2 space-y-2">
 
           {categorias.map((cat) => (
@@ -176,6 +174,7 @@ export default function CategoriasPage() {
         </div>
 
       </div>
-    </div>
+
+    </PageContainer>
   )
 }
