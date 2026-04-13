@@ -7,6 +7,7 @@ import { getAuth } from "firebase/auth"
 import { Eye, EyeOff } from "lucide-react"
 import { setCachedUser } from "@/hooks/useAdminGuard"
 import { fetchWithAuth } from "@/lib/fetchWithAuth"
+import { cache } from "@/lib/cache"
 
 export default function LoginPage() {
   const [usuario, setUsuario] = useState("")
@@ -64,6 +65,18 @@ export default function LoginPage() {
         const data = await meRes.json()
         setCachedUser(data)
       }
+
+      // 🔥 PRELOAD COZINHA (INSTANTÂNEO)
+// 🔥 PRELOAD COZINHA (SE DER ERRO, IGNORA)
+try {
+  const pedidos = await fetchWithAuth("/api/pedidos")
+
+  if (Array.isArray(pedidos)) {
+    cache["cozinha-pedidos"] = pedidos
+  } else if (Array.isArray(pedidos?.pedidos)) {
+    cache["cozinha-pedidos"] = pedidos.pedidos
+  }
+} catch {}
 
       // PRELOAD CREDENCIAIS
       await fetchWithAuth("/api/admin/users")

@@ -11,7 +11,7 @@ import {
 } from "firebase/firestore"
 import { db } from "@/services/firebase"
 import BackButton from "@/components/BackButton"
-
+import { cache } from "@/lib/cache" // 🔥 NOVO
 
 type Pedido = {
   id: string
@@ -26,9 +26,17 @@ type Pedido = {
 
 export default function Cozinha() {
 
-  
+  const key = "cozinha-pedidos"
 
-  const [pedidos, setPedidos] = useState<Pedido[]>([])
+  // 🔥 inicia com cache (evita delay)
+const [pedidos, setPedidos] = useState<Pedido[]>(() => {
+  if (typeof window !== "undefined") {
+    const local = localStorage.getItem(key)
+    if (local) return JSON.parse(local)
+  }
+
+  return (cache[key] as Pedido[]) || []
+})
   const [pedidoSelecionado, setPedidoSelecionado] = useState<Pedido | null>(null)
 
   const somNovoRef = useRef<HTMLAudioElement | null>(null)
@@ -50,6 +58,9 @@ export default function Cozinha() {
         ...doc.data(),
       })) as Pedido[]
 
+      // 🔥 salva no cache
+      cache[key] = lista
+
       const novosIds = snapshot.docs.map((doc) => doc.id)
 
       if (idsRef.current.length > 0) {
@@ -58,6 +69,8 @@ export default function Cozinha() {
       }
 
       idsRef.current = novosIds
+      cache[key] = lista
+      localStorage.setItem(key, JSON.stringify(lista))
       setPedidos(lista)
     })
 
@@ -86,11 +99,11 @@ export default function Cozinha() {
     setPedidoSelecionado(null)
   }
 
-async function voltarParaPreparo(id: string) {
-  await updateDoc(doc(db, "pedidos", id), {
-    status: "em_preparo",
-  })
-}
+  async function voltarParaPreparo(id: string) {
+    await updateDoc(doc(db, "pedidos", id), {
+      status: "em_preparo",
+    })
+  }
 
   const pendentes = pedidos.filter(p => p.status === "pendente")
   const emPreparo = pedidos.filter(p => p.status === "em_preparo")
@@ -126,17 +139,15 @@ async function voltarParaPreparo(id: string) {
             {pendentes.map((pedido) => (
               <div key={pedido.id} className="bg-gray-800 p-3 rounded-xl">
 
-              <div className="flex justify-between items-center w-full">
+                <div className="flex justify-between items-center w-full">
+                  <span className="text-sm font-semibold">
+                    #{pedido.codigo}
+                  </span>
 
-                <span className="text-sm font-semibold">
-                  #{pedido.codigo}
-                </span>
-
-                <span className="text-xs text-gray-200 truncate max-w-25">
-                  {pedido.nomeCliente}
-                </span>
-
-              </div>
+                  <span className="text-xs text-gray-200 truncate max-w-25">
+                    {pedido.nomeCliente}
+                  </span>
+                </div>
 
                 <button
                   onClick={() => assumirPedido(pedido.id)}
@@ -183,7 +194,6 @@ async function voltarParaPreparo(id: string) {
                   </button>
                 </div>
 
-                {/* 🔥 NOVO BOTÃO VOLTAR */}
                 <button
                   onClick={() => voltarParaPendente(pedido.id)}
                   className="w-full mt-2 bg-gray-700 p-2 rounded text-xs"
@@ -204,22 +214,20 @@ async function voltarParaPreparo(id: string) {
 
           <div className="space-y-2 max-h-[75vh] overflow-y-auto pr-1">
             {finalizados.map((pedido) => (
-            <div
-              key={pedido.id}
-              className="bg-green-900/60 p-2 rounded flex justify-between items-center gap-2"
-            >
+              <div
+                key={pedido.id}
+                className="bg-green-900/60 p-2 rounded flex justify-between items-center gap-2"
+              >
 
-              <div className="flex justify-between items-center w-full">
+                <div className="flex justify-between items-center w-full">
+                  <span className="text-sm font-semibold">
+                    #{pedido.codigo}
+                  </span>
 
-                <span className="text-sm font-semibold">
-                  #{pedido.codigo}
-                </span>
-
-                <span className="text-xs text-gray-200 truncate max-w-25">
-                  {pedido.nomeCliente}
-                </span>
-
-              </div>
+                  <span className="text-xs text-gray-200 truncate max-w-25">
+                    {pedido.nomeCliente}
+                  </span>
+                </div>
 
                 <button
                   onClick={() => voltarParaPreparo(pedido.id)}
@@ -228,7 +236,7 @@ async function voltarParaPreparo(id: string) {
                   Desfazer
                 </button>
 
-            </div>
+              </div>
             ))}
           </div>
         </div>
