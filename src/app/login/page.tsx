@@ -7,6 +7,7 @@ import { getAuth } from "firebase/auth"
 import { Eye, EyeOff } from "lucide-react"
 import { setCachedUser } from "@/hooks/useAdminGuard"
 import { fetchWithAuth } from "@/lib/fetchWithAuth"
+
 export default function LoginPage() {
   const [usuario, setUsuario] = useState("")
   const [senha, setSenha] = useState("")
@@ -41,12 +42,13 @@ export default function LoginPage() {
       // 🔐 pega token seguro
       const token = await user.getIdToken()
 
-      // 🔐 cria sessão no backend
+      // 🔐 cria sessão no backend (CORRIGIDO)
       const res = await fetch("/api/session", {
         method: "POST",
         headers: {
           Authorization: `Bearer ${token}`,
         },
+        credentials: "include", // 🔥 ESSENCIAL
       })
 
       if (!res.ok) {
@@ -54,7 +56,9 @@ export default function LoginPage() {
       }
 
       // 🔥 BUSCA USER E SALVA NO CACHE
-      const meRes = await fetch("/api/me")
+      const meRes = await fetch("/api/me", {
+        credentials: "include", // 🔥 garante uso do cookie
+      })
 
       if (meRes.ok) {
         const data = await meRes.json()
@@ -63,20 +67,20 @@ export default function LoginPage() {
 
       // PRELOAD CREDENCIAIS
       await fetchWithAuth("/api/admin/users")
-      
+
       // ✅ redireciona
       router.push("/")
 
     } catch (err: unknown) {
       let mensagem = "Erro ao fazer login"
 
-if (
-  typeof err === "object" &&
-  err !== null &&
-  "code" in err &&
-  typeof (err as { code: unknown }).code === "string"
-) {
-  const errorCode = (err as { code: string }).code
+      if (
+        typeof err === "object" &&
+        err !== null &&
+        "code" in err &&
+        typeof (err as { code: unknown }).code === "string"
+      ) {
+        const errorCode = (err as { code: string }).code
 
         switch (errorCode) {
           case "auth/invalid-credential":
