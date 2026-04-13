@@ -15,18 +15,18 @@ export default function MenuPage() {
   const router = useRouter()
   useSessionRefresh()
 
-  const [user, setUser] = useState<User | null>(null)
-  const [loadingUser, setLoadingUser] = useState(true)
+const [user, setUser] = useState<User | null>(null)
 
-  useEffect(() => {
-    const cached = getCachedUser()
+useEffect(() => {
+  const cached = getCachedUser()
 
-    // 🔥 UM ÚNICO setState (resolve warning)
-    const finalUser = cached || { role: "user", username: null }
+  // 👇 evita warning do React
+  Promise.resolve().then(() => {
+    setUser(cached || { role: "user", username: null })
+  })
+}, [])
 
-    setUser(finalUser)
-    setLoadingUser(false)
-  }, [])
+if (!user) return null
 
   async function handleLogout() {
     await fetch("/api/logout", {
@@ -38,10 +38,6 @@ export default function MenuPage() {
     clearVendaMode()
 
     router.push("/login")
-  }
-
-  if (loadingUser) {
-    return null
   }
 
   return (

@@ -5,7 +5,7 @@ import BackButton from "@/components/BackButton"
 import { fetchWithAuth } from "@/lib/fetchWithAuth"
 import { Eye, EyeOff } from "lucide-react"
 import { getAuth, signOut } from "firebase/auth"
-import { cache } from "@/lib/cache"
+import { cache, persistCache, clearCacheKey } from "@/lib/cache"
 
 /* ================= TYPES ================= */
 
@@ -23,13 +23,19 @@ type ToastType = {
   type: "success" | "error"
 } | null
 
-
+let loadingUsers = false
 
 /* ================= PAGE ================= */
 
 export default function CredenciaisPage() {
   const [users, setUsers] = useState<User[]>([])
   const [search, setSearch] = useState("")
+
+  // 👇 AQUI
+  useEffect(() => {
+    loadUsers()
+  }, [])
+
 
   const [selectedUser, setSelectedUser] = useState<User | null>(null)
   const [modal, setModal] = useState<ModalType>(null)
@@ -63,10 +69,13 @@ export default function CredenciaisPage() {
   }
 
 async function loadUsers() {
+  if (loadingUsers) return
+  loadingUsers = true
+
   try {
     const key = "/api/admin/users"
 
-    // 🔥 usa cache global
+    // 🔥 usa cache
     if (cache[key]) {
       const cached = cache[key] as { users?: User[] }
       setUsers(cached.users || [])
@@ -76,10 +85,15 @@ async function loadUsers() {
     const data = await fetchWithAuth(key)
     const list = Array.isArray(data?.users) ? data.users : []
 
+    cache[key] = data
+    persistCache()
+
     setUsers(list)
 
   } catch (err) {
     showToast(getErrorMessage(err), "error")
+  } finally {
+    loadingUsers = false
   }
 }
   async function createUser() {
@@ -107,6 +121,7 @@ async function loadUsers() {
         }),
       })
 
+      clearCacheKey("/api/admin/users")
       showToast("Usuário criado", "success")
       setModal(null)
 
@@ -117,7 +132,11 @@ async function loadUsers() {
         role: "user",
       })
 
-      loadUsers()
+      setUsers(prev => [
+  ...prev,
+  
+  { username, role }
+])
     } catch (err) {
       showToast(getErrorMessage(err), "error")
     } finally {
@@ -148,11 +167,18 @@ async function loadUsers() {
           role,
         }),
       })
-
-showToast("Usuário atualizado. Faça login novamente.", "success")
-
+clearCacheKey("/api/admin/users")
 const auth = getAuth()
 const currentUser = auth.currentUser
+
+if (currentUser && selectedUser.username === currentUser.email?.split("@")[0]) {
+  showToast("Usuário atualizado. Faça login novamente.", "success")
+  await signOut(auth)
+  window.location.href = "/login"
+  return
+}
+
+showToast("Usuário atualizado com sucesso", "success")
 
 if (currentUser && selectedUser.username === currentUser.email?.split("@")[0]) {
   await signOut(auth)
@@ -163,7 +189,16 @@ if (currentUser && selectedUser.username === currentUser.email?.split("@")[0]) {
 setModal(null)
 setSelectedUser(null)
 
-loadUsers()
+setUsers(prev =>
+  prev.map(u =>
+    u.username === selectedUser.username
+      ? {
+          username: newUsername || u.username,
+          role: role || u.role,
+        }
+      : u
+  )
+)
 
 } catch (err) {
   showToast(getErrorMessage(err), "error")
@@ -183,18 +218,17 @@ loadUsers()
           username: deleteModal.username,
         }),
       })
-
+      clearCacheKey("/api/admin/users")
       showToast("Usuário excluído", "success")
-      setDeleteModal(null)
-      loadUsers()
+setDeleteModal(null)
+
+setUsers(prev =>
+  prev.filter(u => u.username !== deleteModal!.username)
+)
     } catch (err) {
       showToast(getErrorMessage(err), "error")
     }
   }
-
-  useEffect(() => {
-    loadUsers()
-  }, [])
 
   const filteredUsers = useMemo(() => {
     return users.filter(u =>
