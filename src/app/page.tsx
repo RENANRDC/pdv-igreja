@@ -15,7 +15,6 @@ export default function MenuPage() {
   const router = useRouter()
   useSessionRefresh()
 
-  // 🔥 usa cache imediatamente
   const [user, setUser] = useState<User | null>(() => getCachedUser())
   const [loadingUser, setLoadingUser] = useState(!getCachedUser())
 
@@ -23,7 +22,7 @@ export default function MenuPage() {
     async function fetchUser() {
       try {
         const res = await fetch("/api/me", {
-          credentials: "include", // 🔥 ESSENCIAL
+          credentials: "include",
         })
 
         if (!res.ok) {
@@ -41,7 +40,6 @@ export default function MenuPage() {
       }
     }
 
-    // 🔥 só chama API se NÃO tiver cache
     if (!user) {
       fetchUser()
     } else {
@@ -52,13 +50,18 @@ export default function MenuPage() {
   async function handleLogout() {
     await fetch("/api/logout", {
       method: "POST",
-      credentials: "include", // 🔥 ESSENCIAL
+      credentials: "include",
     })
 
     clearUserCache()
     clearVendaMode()
 
     router.push("/login")
+  }
+
+  // 🔥 CORREÇÃO PRINCIPAL (REMOVE PISCADA)
+  if (loadingUser) {
+    return null
   }
 
   return (
@@ -125,7 +128,6 @@ export default function MenuPage() {
             </div>
           </Link>
 
-          {/* ADMIN */}
           {user?.role === "admin" && (
             <Link
               href="/admin"
