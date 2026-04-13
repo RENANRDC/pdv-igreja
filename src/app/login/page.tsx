@@ -118,7 +118,7 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-900 p-4">
+    <div className="min-h-[100dvh] flex items-center justify-center bg-gray-900 p-4">
 
       <div className="w-full max-w-sm bg-gray-800 rounded-2xl p-6 shadow-lg">
 

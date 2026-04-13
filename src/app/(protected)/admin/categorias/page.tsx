@@ -73,7 +73,7 @@ export default function CategoriasPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-900 text-white p-6">
+    <div className="min-h-[100dvh] bg-gray-900 text-white p-6">
 
 <div className="grid grid-cols-3 items-center mb-6">
 

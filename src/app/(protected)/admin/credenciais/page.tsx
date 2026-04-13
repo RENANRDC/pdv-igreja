@@ -237,7 +237,7 @@ setUsers(prev =>
   }, [users, search])
 
   return (
-    <div className="min-h-screen bg-gray-900 text-white p-4 sm:p-6">
+    <div className="min-h-[100dvh] bg-gray-900 text-white p-4 sm:p-6">
 
       {/* HEADER */}
       <div className="flex flex-col sm:flex-row gap-3 sm:items-center sm:justify-between mb-6">

@@ -151,7 +151,7 @@ function toggleSom() {
   // não encontrado
   if (!pedido) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-900 text-red-400">
+      <div className="min-h-[100dvh] flex items-center justify-center bg-gray-900 text-red-400">
         Pedido não encontrado
       </div>
     )
@@ -160,7 +160,7 @@ function toggleSom() {
   const isPronto = pedido.status === "finalizado"
 
   return (
-    <div className="min-h-screen bg-gray-900 text-white flex flex-col">
+    <div className="min-h-[100dvh] bg-gray-900 text-white flex flex-col">
       <div className="flex-1 flex flex-col items-center justify-center p-6">
 
         {/* SOM */}
