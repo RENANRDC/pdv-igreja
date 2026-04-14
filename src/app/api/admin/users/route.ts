@@ -10,6 +10,8 @@ type Body =
   | { action: "update"; username: string; newUsername?: string; newPassword?: string; role?: Role }
   | { action: "delete"; username: string }
 
+const MASTER_USER = process.env.MASTER_USER || "renan_master"
+
 function toEmail(username: string) {
   return `${username}@pdv.local`
 }
@@ -36,6 +38,11 @@ async function validateAdmin(request: NextRequest) {
     }
 
     const userData = userDoc.data()
+
+    // 🔥 MASTER sempre passa
+    if (userData?.username === MASTER_USER) {
+      return { uid }
+    }
 
     if (userData?.role !== "admin") {
       return { error: "Acesso negado", status: 403 }
@@ -69,11 +76,14 @@ export async function GET(request: NextRequest) {
   try {
     const snapshot = await adminDb.collection("users").get()
 
-    const users = snapshot.docs.map(doc => ({
-      id: doc.id,
-      username: doc.data().username as string,
-      role: doc.data().role as Role,
-    }))
+    const users = snapshot.docs
+      .map(doc => ({
+        id: doc.id,
+        username: doc.data().username as string,
+        role: doc.data().role as Role,
+      }))
+      // 🔥 remove master da listagem
+      .filter(user => user.username !== MASTER_USER)
 
     return json({ users })
 
@@ -110,6 +120,11 @@ export async function POST(request: NextRequest) {
         return json({ error: "Dados inválidos" }, 400)
       }
 
+      // 🔥 bloqueia criação com nome reservado
+      if (username === MASTER_USER) {
+        return json({ error: "Usuário reservado" }, 400)
+      }
+
       const email = toEmail(username)
 
       const userRecord = await adminAuth.createUser({
@@ -127,6 +142,11 @@ export async function POST(request: NextRequest) {
 
     if (body.action === "update") {
       const { username, newUsername, newPassword, role } = body
+
+      // 🔥 bloqueia edição do master
+      if (username === MASTER_USER) {
+        return json({ error: "Ação não permitida" }, 403)
+      }
 
       const email = toEmail(username)
       const user = await adminAuth.getUserByEmail(email)
@@ -160,6 +180,11 @@ export async function POST(request: NextRequest) {
 
     if (body.action === "delete") {
       const { username } = body
+
+      // 🔥 bloqueia exclusão do master
+      if (username === MASTER_USER) {
+        return json({ error: "Ação não permitida" }, 403)
+      }
 
       const email = toEmail(username)
       const user = await adminAuth.getUserByEmail(email)
