@@ -56,6 +56,7 @@ export default function LoginPage() {
         username: usuario,
       })
 
+      // 🔥 COZINHA (já existia)
       try {
         const pedidos = await fetchWithAuth("/api/pedidos")
 
@@ -66,32 +67,44 @@ export default function LoginPage() {
         }
       } catch {}
 
+      // 🔥 ADMIN USERS (já existia)
       await fetchWithAuth("/api/admin/users")
+
+      // 🔥 NOVO: FINANCEIRO / RELATÓRIOS
+      try {
+        const fechamentos = await fetchWithAuth("/api/fechamentos")
+
+        if (Array.isArray(fechamentos)) {
+          cache["financeiro-fechamentos"] = fechamentos
+        } else if (Array.isArray(fechamentos?.fechamentos)) {
+          cache["financeiro-fechamentos"] = fechamentos.fechamentos
+        }
+      } catch {}
 
       router.push("/")
 
-      } catch (err: unknown) {
-        const code = (err as { code?: string })?.code
+    } catch (err: unknown) {
+      const code = (err as { code?: string })?.code
 
-        if (
-          code === "auth/invalid-credential" ||
-          code === "auth/wrong-password" ||
-          code === "auth/user-not-found"
-        ) {
-          setErro("Usuário ou senha inválidos")
-        } else {
-          setErro("Erro ao fazer login")
-        }
-      } finally {
-        setLoading(false)
+      if (
+        code === "auth/invalid-credential" ||
+        code === "auth/wrong-password" ||
+        code === "auth/user-not-found"
+      ) {
+        setErro("Usuário ou senha inválidos")
+      } else {
+        setErro("Erro ao fazer login")
       }
-}
+    } finally {
+      setLoading(false)
+    }
+  }
+
   return (
     <div className="min-h-[100dvh] flex items-center justify-center bg-gray-900 p-6">
 
       <AuthCard>
 
-        {/* LOGO */}
         <div className="flex justify-center mb-4">
           <div className="p-4 rounded-2xl 
             bg-gradient-to-br from-gray-700 to-gray-800
@@ -153,7 +166,6 @@ export default function LoginPage() {
             </button>
           </div>
 
-          {/* 🔥 BOTÃO ORIGINAL (mantido) */}
           <button
             type="submit"
             disabled={loading}

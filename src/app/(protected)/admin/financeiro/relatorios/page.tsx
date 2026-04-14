@@ -13,6 +13,7 @@ import { db } from "@/services/firebase"
 import PageContainer from "@/components/ui/PageContainer"
 import BackButton from "@/components/ui/BackButton"
 import * as XLSX from "xlsx"
+import { cache, persistCache } from "@/lib/cache"
 
 /* ================= TYPES ================= */
 
@@ -100,6 +101,17 @@ export default function RelatoriosPage() {
   /* ================= LOAD ================= */
 
   async function load() {
+    const key = "financeiro-fechamentos"
+
+    // 🔥 CACHE (instantâneo)
+    const cached = cache[key] as Fechamento[] | undefined
+
+    if (cached) {
+      setDados(cached)
+      setLoading(false)
+      return
+    }
+
     const snap = await getDocs(collection(db, "fechamentos"))
 
     let lista: Fechamento[] = snap.docs.map(doc => ({
@@ -108,6 +120,10 @@ export default function RelatoriosPage() {
     }))
 
     lista = lista.sort((a, b) => getTime(b.createdAt) - getTime(a.createdAt))
+
+    // 🔥 salva cache
+    cache[key] = lista
+    persistCache()
 
     setDados(lista)
     setLoading(false)
@@ -120,6 +136,7 @@ useEffect(() => {
 
   init()
 }, [])
+
   /* ================= ABRIR ================= */
 
   function abrirRelatorio(f: Fechamento) {
@@ -194,6 +211,10 @@ useEffect(() => {
       await deleteDoc(doc(db, "fechamentos", d.id))
     }
 
+    // 🔥 limpa cache também
+    cache["financeiro-fechamentos"] = []
+    persistCache()
+
     setConfirmDelete(false)
     setDados([])
     setDeleting(false)
@@ -216,7 +237,7 @@ useEffect(() => {
         <BackButton href="/admin/financeiro" />
       </div>
 
-      {/* 🔥 BOTÃO LIMPAR */}
+      {/* BOTÃO LIMPAR */}
       <button
         onClick={() => setConfirmDelete(true)}
         className="w-full bg-red-600 hover:bg-red-700 p-3 rounded-xl font-bold mb-4"
@@ -278,7 +299,7 @@ useEffect(() => {
         </div>
       )}
 
-      {/* ⚠️ MODAL CRÍTICO */}
+      {/* MODAL CRÍTICO */}
       {confirmDelete && (
         <div className="fixed inset-0 bg-black/90 flex items-center justify-center">
 
