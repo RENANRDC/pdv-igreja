@@ -32,7 +32,6 @@ export default function LoginPage() {
 
       const email = `${usuario}@pdv.local`
 
-      // 🔥 LOGIN FIREBASE
       await login(email, senha)
 
       const auth = getAuth()
@@ -40,27 +39,24 @@ export default function LoginPage() {
 
       if (!user) throw new Error("Erro ao autenticar")
 
-      // 🔥 FORÇA TOKEN ATUALIZADO
       const token = await user.getIdToken(true)
 
-      // 🔥 CRIA SESSÃO NO SERVIDOR (COOKIE)
       const res = await fetch("/api/session", {
         method: "POST",
         headers: {
           Authorization: `Bearer ${token}`,
         },
         credentials: "include",
+        cache: "no-store",
       })
 
       if (!res.ok) throw new Error("Erro ao criar sessão")
 
-      // 🔥 SALVA CACHE LOCAL
       setCachedUser({
         role: "admin",
         username: usuario,
       })
 
-      // 🔥 PRÉ-CARREGAMENTO (mantido)
       try {
         const pedidos = await fetchWithAuth("/api/pedidos")
 
@@ -83,10 +79,8 @@ export default function LoginPage() {
         }
       } catch {}
 
-      // 🔥 IMPORTANTE: garante que cookie foi salvo antes de redirecionar
-      await new Promise((r) => setTimeout(r, 300))
-
-      router.replace("/") // melhor que push
+      router.refresh()
+      router.replace("/")
 
     } catch (err: unknown) {
       const code = (err as { code?: string })?.code

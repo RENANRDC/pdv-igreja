@@ -139,7 +139,7 @@ export default function DisplayPage() {
 
           <div className="bg-gray-800/60 border border-gray-700 rounded-2xl p-4 flex flex-col overflow-hidden">
             <h2 className="text-2xl font-bold text-yellow-400 mb-4 text-center">
-              🟡 Em preparo
+              🟡 Em Preparo
             </h2>
 
             <div ref={containerRef} className="flex-1 overflow-hidden">
