@@ -4,16 +4,17 @@ import { useState, useEffect } from "react"
 import {
   collection,
   getDocs,
-  updateDoc,
+  deleteDoc,
   doc,
   addDoc,
   serverTimestamp,
 } from "firebase/firestore"
 import { db } from "@/services/firebase"
-import * as XLSX from "xlsx"
 import { usePedidos } from "@/hooks/usePedidos"
 import PageContainer from "@/components/ui/PageContainer"
 import BackButton from "@/components/ui/BackButton"
+import { useRouter } from "next/navigation"
+import { FolderOpen } from "lucide-react"
 
 type Item = {
   nome: string
@@ -37,13 +38,11 @@ export default function FinanceiroPage() {
   const { pedidos } = usePedidos()
 
   const [mounted, setMounted] = useState(false)
-
+  const router = useRouter()
   const [limite, setLimite] = useState(50)
-  const [exportado, setExportado] = useState(false)
 
   const [confirmModal, setConfirmModal] = useState(false)
   const [successModal, setSuccessModal] = useState(false)
-  const [erroModal, setErroModal] = useState(false)
   const [loading, setLoading] = useState(false)
 
   useEffect(() => {
@@ -83,83 +82,29 @@ export default function FinanceiroPage() {
     .map(([nome, data]) => ({ nome, ...data }))
     .sort((a, b) => b.qtd - a.qtd)
 
-  function exportarExcel() {
-    const hoje = new Date()
-    const dataFormatada = hoje.toLocaleDateString("pt-BR").replace(/\//g, "-")
-
-    const pedidosData = ativosOrdenados.map(p => ({
-      Pedido: p.codigo,
-      Cliente: p.nomeCliente || "",
-      Pagamento: p.formaPagamento || "outros",
-      Total: getTotal(p),
-      Data: p.createdAt?.toDate?.().toLocaleString("pt-BR"),
-    }))
-
-    type ItemExport = {
-  Pedido?: string
-  Produto: string
-  Quantidade: number
-  Preco: number
-  Total: number
-}
-
-const itensData: ItemExport[] = []
-
-    ativosOrdenados.forEach(p => {
-      p.itens?.forEach((item: Item) => {
-        itensData.push({
-          Pedido: p.codigo,
-          Produto: item.nome,
-          Quantidade: item.quantidade,
-          Preco: item.preco || 0,
-          Total: (item.preco || 0) * item.quantidade,
-        })
-      })
-    })
-
-    const produtosData = rankingProdutos.map(p => ({
-      Produto: p.nome,
-      Quantidade: p.qtd,
-      Total: p.total,
-    }))
-
-    const wb = XLSX.utils.book_new()
-
-    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(pedidosData), "Pedidos")
-    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(itensData), "Itens")
-    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(produtosData), "Produtos")
-
-    XLSX.writeFile(wb, `financeiro-${dataFormatada}.xlsx`)
-
-    setExportado(true)
-  }
-
   async function handleFechamento() {
     setLoading(true)
 
     try {
+      // 🔥 SALVA SNAPSHOT COMPLETO DOS PEDIDOS
       await addDoc(collection(db, "fechamentos"), {
         totalPedidos,
         totalGeral,
         createdAt: serverTimestamp(),
+        itens: ativos, // ✅ ESSA LINHA RESOLVE TUDO
       })
 
       const snapshot = await getDocs(collection(db, "pedidos"))
 
-      const updates = snapshot.docs.map(docSnap =>
-        updateDoc(doc(db, "pedidos", docSnap.id), {
-          status: "fechado",
-        })
-      )
-
-      await Promise.all(updates)
+      for (const docSnap of snapshot.docs) {
+        await deleteDoc(doc(db, "pedidos", docSnap.id))
+      }
 
       setConfirmModal(false)
       setSuccessModal(true)
-      setExportado(false)
 
-    } catch {
-      setErroModal(true)
+    } catch (err) {
+      console.error(err)
     } finally {
       setLoading(false)
     }
@@ -168,7 +113,6 @@ const itensData: ItemExport[] = []
   return (
     <PageContainer>
 
-      {/* HEADER PADRÃO */}
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-3">
           <img src="/logo.png" className="h-10 w-10" />
@@ -202,12 +146,15 @@ const itensData: ItemExport[] = []
         </div>
       </div>
 
-      <button
-        onClick={exportarExcel}
-        className="w-full bg-blue-600 hover:bg-blue-700 p-4 rounded-xl font-bold mb-4"
-      >
-        Exportar Relatório Completo
-      </button>
+      <div className="mb-4">
+        <button
+          onClick={() => router.push("/admin/financeiro/relatorios")}
+          className="w-full bg-gray-800 hover:bg-gray-700 p-4 rounded-xl font-semibold text-sm flex items-center justify-center gap-2 transition-all"
+        >
+          <FolderOpen size={18} />
+          Relatórios
+        </button>
+      </div>
 
       <div className="bg-gray-800 p-4 rounded-xl mb-6">
         <h2 className="mb-3 font-semibold">Produtos</h2>
@@ -248,37 +195,28 @@ const itensData: ItemExport[] = []
       </div>
 
       <button
-        onClick={() => {
-          if (!exportado) return setErroModal(true)
-          setConfirmModal(true)
-        }}
+        onClick={() => setConfirmModal(true)}
         className="w-full bg-green-600 hover:bg-green-700 p-4 rounded-xl font-bold"
       >
         Fechar Caixa
       </button>
 
-      {/* MODAIS (inalterados) */}
-
-      {erroModal && (
-        <div className="fixed inset-0 bg-black/80 flex items-center justify-center">
-          <div className="bg-gray-900 p-6 rounded-xl w-80 text-center">
-            <p className="mb-4">Exporte o relatório antes de fechar</p>
-            <button
-              onClick={() => setErroModal(false)}
-              className="w-full bg-gray-700 p-2 rounded"
-            >
-              OK
-            </button>
-          </div>
-        </div>
-      )}
-
+      {/* ⚠️ MODAL */}
       {confirmModal && (
-        <div className="fixed inset-0 bg-black/80 flex items-center justify-center">
-          <div className="bg-gray-900 p-6 rounded-xl w-80 text-center">
-            <p className="mb-4 font-bold">Confirmar fechamento?</p>
+        <div className="fixed inset-0 bg-black/90 flex items-center justify-center">
+
+          <div className="bg-gray-900 p-6 rounded-xl w-80 text-center border border-red-600">
+
+            <p className="text-red-500 font-bold text-lg mb-3">
+              ⚠️ ATENÇÃO CRÍTICA
+            </p>
+
+            <p className="text-sm text-gray-300 mb-4">
+              Esta ação irá <strong>APAGAR TODOS OS PEDIDOS</strong> e não poderá ser desfeita.
+            </p>
 
             <div className="flex gap-2">
+
               <button
                 onClick={() => setConfirmModal(false)}
                 className="flex-1 bg-gray-700 p-2 rounded"
@@ -289,12 +227,15 @@ const itensData: ItemExport[] = []
               <button
                 onClick={handleFechamento}
                 disabled={loading}
-                className="flex-1 bg-green-600 p-2 rounded"
+                className="flex-1 bg-red-600 p-2 rounded"
               >
                 {loading ? "Fechando..." : "Confirmar"}
               </button>
+
             </div>
+
           </div>
+
         </div>
       )}
 

@@ -97,7 +97,7 @@ export default function MenuPage() {
           href="/client/display"
           icon={<Tv size={22} />}
           title="Painel ao vivo"
-          description="Otimizado para TV"
+          description="Display Otimizado para TV"
         />
 
         <Card3D
