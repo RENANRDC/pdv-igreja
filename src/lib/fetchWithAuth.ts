@@ -17,16 +17,16 @@ export async function fetchWithAuth(
   url: string,
   options: RequestInit = {}
 ) {
-  // 🔥 cache GET
-  if (!options.method || options.method === "GET") {
+  const useCache = options.cache !== "no-store"
+
+  // 🔥 cache opcional
+  if (useCache && (!options.method || options.method === "GET")) {
     if (cache[url]) {
       return cache[url]
     }
   }
 
-  // 🔥 AGORA ESPERA O FIREBASE
   const user = await getUser()
-
   const token = await user.getIdToken()
 
   const headers = {
@@ -38,6 +38,7 @@ export async function fetchWithAuth(
   const response = await fetch(url, {
     ...options,
     headers,
+    cache: "no-store", // 🔥 força atualização
   })
 
   const data = await response.json().catch(() => null)
@@ -46,7 +47,7 @@ export async function fetchWithAuth(
     throw new Error(data?.error || "Erro na requisição")
   }
 
-  if (!options.method || options.method === "GET") {
+  if (useCache && (!options.method || options.method === "GET")) {
     cache[url] = data
   }
 

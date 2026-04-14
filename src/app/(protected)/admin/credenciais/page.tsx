@@ -76,13 +76,15 @@ async function loadUsers() {
     const key = "/api/admin/users"
 
     // 🔥 mostra cache primeiro (rápido)
-    if (cache[key]) {
-      const cached = cache[key] as { users?: User[] }
-      setUsers(cached.users || [])
-    }
+if (cache[key]) {
+const cached = cache[key] as { users?: User[] }
+setUsers(cached.users || [])
+}
 
     // 🔥 SEMPRE busca atualizado depois
-    const data = await fetchWithAuth(key)
+    const data = await fetchWithAuth(key, {
+  cache: "no-store",
+})
     const list = Array.isArray(data?.users) ? data.users : []
 
     cache[key] = data
@@ -133,11 +135,8 @@ async function loadUsers() {
         role: "user",
       })
 
-      setUsers(prev => [
-  ...prev,
-  
-  { username, role }
-])
+await loadUsers()
+
     } catch (err) {
       showToast(getErrorMessage(err), "error")
     } finally {
@@ -190,16 +189,7 @@ if (currentUser && selectedUser.username === currentUser.email?.split("@")[0]) {
 setModal(null)
 setSelectedUser(null)
 
-setUsers(prev =>
-  prev.map(u =>
-    u.username === selectedUser.username
-      ? {
-          username: newUsername || u.username,
-          role: role || u.role,
-        }
-      : u
-  )
-)
+await loadUsers()
 
 } catch (err) {
   showToast(getErrorMessage(err), "error")
@@ -223,9 +213,8 @@ setUsers(prev =>
       showToast("Usuário excluído", "success")
 setDeleteModal(null)
 
-setUsers(prev =>
-  prev.filter(u => u.username !== deleteModal!.username)
-)
+await loadUsers()
+
     } catch (err) {
       showToast(getErrorMessage(err), "error")
     }
