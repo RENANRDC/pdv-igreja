@@ -75,13 +75,13 @@ async function loadUsers() {
   try {
     const key = "/api/admin/users"
 
-    // 🔥 usa cache
+    // 🔥 mostra cache primeiro (rápido)
     if (cache[key]) {
       const cached = cache[key] as { users?: User[] }
       setUsers(cached.users || [])
-      return
     }
 
+    // 🔥 SEMPRE busca atualizado depois
     const data = await fetchWithAuth(key)
     const list = Array.isArray(data?.users) ? data.users : []
 
@@ -96,6 +96,7 @@ async function loadUsers() {
     loadingUsers = false
   }
 }
+
   async function createUser() {
     const { username, password, confirmPassword, role } = createForm
 
