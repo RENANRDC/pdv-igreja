@@ -108,7 +108,7 @@ export default function LoginPage() {
           <div className="p-4 rounded-2xl 
             bg-gradient-to-br from-gray-700 to-gray-800
             shadow-[inset_0_1px_2px_rgba(255,255,255,0.1),0_6px_20px_rgba(0,0,0,0.6)]">
-            <img src="/logo.png" alt="Logo" className="h-16 object-contain" />
+            <img src="/logo.png" alt="Logo" className="h-25 object-contain" />
           </div>
         </div>
 

@@ -35,13 +35,13 @@ export async function POST(req: Request) {
 
     const response = NextResponse.json({ success: true })
 
-    response.cookies.set("session", sessionCookie, {
-      httpOnly: true,
-      secure: true,
-      sameSite: "strict",
-      path: "/",
-      // ❌ sem maxAge → logout ao fechar navegador
-    })
+response.cookies.set("session", sessionCookie, {
+  httpOnly: true,
+  secure: true,
+  sameSite: "none",
+  path: "/",
+  maxAge: 60 * 60 * 10, // 10 horas
+})
 
     return response
 
