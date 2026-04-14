@@ -185,7 +185,7 @@ export default function PedidoPage() {
           }`}
         >
           <p className="text-lg font-semibold">
-            {isPronto ? "🟢 Pronto para retirada" : "🟡 Em Preparo"}
+            {isPronto ? "🟢 Pronto para retirada" : "🟡 Em preparo"}
           </p>
         </div>
 
