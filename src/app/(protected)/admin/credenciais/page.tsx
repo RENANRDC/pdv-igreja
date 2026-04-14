@@ -7,6 +7,8 @@ import { Eye, EyeOff } from "lucide-react"
 import { getAuth, signOut } from "firebase/auth"
 import { cache, persistCache, clearCacheKey } from "@/lib/cache"
 import PageContainer from "@/components/ui/PageContainer"
+import { Search } from "lucide-react"
+
 /* ================= TYPES ================= */
 
 type Role = "admin" | "user"
@@ -254,17 +256,27 @@ return (
     + Novo usuário
   </button>
 
-  <div className="relative w-full">
-    <input
-      placeholder="Buscar usuário..."
-      value={search}
-      onChange={(e) => setSearch(e.target.value)}
-      className="w-full pl-10 pr-4 py-3 rounded-xl bg-zinc-800 border border-zinc-700 focus:border-green-600 outline-none"
-    />
-    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400">
-      🔍
-    </span>
+<div className="relative w-full">
+
+  <input
+    placeholder="Buscar usuário..."
+    value={search}
+    onChange={(e) => setSearch(e.target.value)}
+    className="w-full pl-11 pr-4 py-3 rounded-xl 
+    bg-zinc-800 border border-zinc-700 
+    focus:border-green-600 outline-none
+    transition"
+  />
+
+  {/* 🔥 ÍCONE NOVO */}
+  <div className="
+    absolute left-3 top-1/2 -translate-y-1/2
+    text-zinc-400
+  ">
+    <Search size={18} />
   </div>
+
+</div>
 
 </div>
 
