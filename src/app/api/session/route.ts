@@ -40,7 +40,7 @@ response.cookies.set("session", sessionCookie, {
   secure: true,
   sameSite: "none",
   path: "/",
-  maxAge: 60 * 60 * 10, // 10 horas
+  maxAge: 60 * 60 * 10,
 })
 
     return response
