@@ -9,6 +9,7 @@ import {
   doc,
 } from "firebase/firestore"
 import { db } from "@/services/firebase"
+import DisplayHeader from "@/components/display/DisplayHeader"
 
 type Pedido = {
   id: string
@@ -117,29 +118,10 @@ export default function DisplayPage() {
 
       <div className="p-4 flex flex-col h-full">
 
-        {/* HEADER PADRÃO */}
-        <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center gap-3">
-            <img src="/logo.png" className="h-10 w-10" />
-            <div>
-              <h1 className="text-base font-bold">
-                Central Gourmet
-              </h1>
-              <p className="text-xs text-gray-400">
-                Painel ao vivo
-              </p>
-            </div>
-          </div>
-
-          <div className="text-xs text-gray-400">
-            Desenvolvido por{" "}
-            <span className="font-semibold text-white">
-              R2CodeX
-            </span>
-          </div>
+        <div className="mb-6">
+          <DisplayHeader />
         </div>
 
-        {/* BOTÃO SOM */}
         {!audioLiberado && (
           <button
             onClick={() => {
@@ -153,10 +135,8 @@ export default function DisplayPage() {
           </button>
         )}
 
-        {/* CONTEÚDO */}
         <div className="flex-1 grid grid-cols-1 lg:grid-cols-2 gap-6 overflow-hidden min-h-0">
 
-          {/* EM PREPARO */}
           <div className="bg-gray-800/60 border border-gray-700 rounded-2xl p-4 flex flex-col overflow-hidden">
             <h2 className="text-2xl font-bold text-yellow-400 mb-4 text-center">
               🟡 Em preparo
@@ -185,7 +165,6 @@ export default function DisplayPage() {
             </div>
           </div>
 
-          {/* PRONTOS */}
           <div className="bg-gray-800/60 border border-gray-700 rounded-2xl p-4 flex flex-col overflow-hidden">
             <h2 className="text-2xl font-bold text-green-400 mb-4 text-center">
               🟢 Prontos
