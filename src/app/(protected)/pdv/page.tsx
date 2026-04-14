@@ -264,32 +264,36 @@ return (
   </Link>
 
   {/* DIREITA → MODO */}
-  <div className="flex items-center gap-2">
+<div className="flex items-center">
 
-    <button
-      onClick={() => setVendaMode(null)}
-      className="flex items-center justify-center h-10 w-10 rounded-xl bg-gray-800 hover:bg-gray-700"
-    >
-      <RefreshCw size={16} />
-    </button>
+<button
+  onClick={() => setVendaMode(null)}
+  className={`flex items-center gap-2 px-4 h-10 rounded-xl text-white font-semibold transition ${
+    vendaMode === "balcao"
+      ? "bg-blue-600 hover:bg-blue-700"
+      : vendaMode === "mesa"
+      ? "bg-green-600 hover:bg-green-700"
+      : "bg-gray-700 hover:bg-gray-600"
+  }`}
+>
+  {!vendaMode && <RefreshCw size={16} />}
 
-    {vendaMode && (
-      <div className="flex items-center gap-2 px-4 h-10 rounded-xl bg-green-600 text-white font-semibold">
-        {vendaMode === "balcao" ? (
-          <>
-            <Receipt size={16} />
-            Balcão
-          </>
-        ) : (
-          <>
-            <Smartphone size={16} />
-            Mesa
-          </>
-        )}
-      </div>
-    )}
+  {vendaMode === "balcao" && (
+    <>
+      <Receipt size={16} />
+      Balcão
+    </>
+  )}
 
-  </div>
+  {vendaMode === "mesa" && (
+    <>
+      <Smartphone size={16} />
+      Mesa
+    </>
+  )}
+</button>
+
+</div>
 
 </div>
 

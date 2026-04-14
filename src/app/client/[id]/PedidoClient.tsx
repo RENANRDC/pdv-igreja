@@ -4,6 +4,7 @@ import { useEffect, useRef, useState, useCallback } from "react"
 import { useParams } from "next/navigation"
 import { doc, onSnapshot } from "firebase/firestore"
 import { db } from "@/services/firebase"
+import { Volume2, VolumeX } from "lucide-react"
 
 type Item = {
   nome: string
@@ -19,7 +20,6 @@ type Pedido = {
   total: number
 }
 
-// 🔥 CACHE GLOBAL
 const pedidoCache: Record<string, Pedido> = {}
 
 export default function PedidoPage() {
@@ -35,7 +35,6 @@ export default function PedidoPage() {
   const statusAnterior = useRef<string | null>(null)
   const somRef = useRef<HTMLAudioElement | null>(null)
 
-  // 🔊 preload som
   useEffect(() => {
     const audio = new Audio("/sounds/pronto.wav")
     audio.preload = "auto"
@@ -65,25 +64,23 @@ export default function PedidoPage() {
     }
   }, [tocarSom])
 
-  // 🔥 carregamento inteligente (sem hydration error)
   useEffect(() => {
     if (!id) return
 
-    // ⚡ tenta cache memória primeiro
-queueMicrotask(() => {
-  if (pedidoCache[id]) {
-    setPedido(pedidoCache[id])
-    setLoading(false)
-  } else {
-    const local = localStorage.getItem(`pedido-${id}`)
-    if (local) {
-      const parsed = JSON.parse(local)
-      pedidoCache[id] = parsed
-      setPedido(parsed)
-      setLoading(false)
-    }
-  }
-})
+    queueMicrotask(() => {
+      if (pedidoCache[id]) {
+        setPedido(pedidoCache[id])
+        setLoading(false)
+      } else {
+        const local = localStorage.getItem(`pedido-${id}`)
+        if (local) {
+          const parsed = JSON.parse(local)
+          pedidoCache[id] = parsed
+          setPedido(parsed)
+          setLoading(false)
+        }
+      }
+    })
 
     const ref = doc(db, "pedidos", id)
 
@@ -96,10 +93,7 @@ queueMicrotask(() => {
 
       const data = snapshot.data() as Pedido
 
-      // cache memória
       pedidoCache[id] = data
-
-      // cache localStorage
       localStorage.setItem(`pedido-${id}`, JSON.stringify(data))
 
       if (
@@ -118,26 +112,21 @@ queueMicrotask(() => {
     return () => unsub()
   }, [id, ativarCelebracao])
 
-function toggleSom() {
-  const audio = somRef.current
-  if (!audio) return
+  function toggleSom() {
+    const audio = somRef.current
+    if (!audio) return
 
-  if (!somAtivo) {
-    // ativa (libera autoplay no navegador)
-    audio.play()
-      .then(() => {
+    if (!somAtivo) {
+      audio.play().then(() => {
         audio.pause()
         audio.currentTime = 0
         setSomAtivo(true)
-      })
-      .catch(() => {})
-  } else {
-    // desativa
-    setSomAtivo(false)
+      }).catch(() => {})
+    } else {
+      setSomAtivo(false)
+    }
   }
-}
 
-  // loading
   if (loading) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-gray-900 text-white">
@@ -148,7 +137,6 @@ function toggleSom() {
     )
   }
 
-  // não encontrado
   if (!pedido) {
     return (
       <div className="min-h-[100dvh] flex items-center justify-center bg-gray-900 text-red-400">
@@ -161,42 +149,43 @@ function toggleSom() {
 
   return (
     <div className="min-h-[100dvh] bg-gray-900 text-white flex flex-col">
-      <div className="flex-1 flex flex-col items-center justify-center p-6">
+      <div className="flex-1 flex flex-col items-center justify-center px-6 py-8">
 
         {/* SOM */}
-          <div className="fixed top-4 right-4 z-50 flex items-center gap-3 bg-white/5 backdrop-blur-md px-3 py-2 rounded-xl border border-white/10">
+        <div className="fixed top-4 right-4 z-50 flex items-center gap-2 bg-white/5 backdrop-blur-md px-3 py-2 rounded-xl border border-white/10">
           <button
             onClick={toggleSom}
-            className={`px-3 py-1.5 rounded-lg text-sm font-medium ${
+            className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-medium ${
               somAtivo
                 ? "bg-green-600"
                 : "bg-blue-600 hover:bg-blue-500"
             }`}
           >
-            {somAtivo ? "🔊 Som ativo" : "🔇 Ativar som"}
+            {somAtivo ? <Volume2 size={16} /> : <VolumeX size={16} />}
+            {somAtivo ? "Som ativo" : "Ativar som"}
           </button>
         </div>
 
         {/* CÓDIGO */}
-        <div className="text-center mb-6">
+        <div className="text-center mb-8">
           <p className="text-gray-400 text-sm">Pedido</p>
-          <h1 className="text-6xl font-bold tracking-widest">
+          <h1 className="text-7xl md:text-8xl font-extrabold tracking-widest drop-shadow-lg">
             {pedido.codigo}
           </h1>
         </div>
 
         {/* STATUS */}
         <div
-          className={`w-full max-w-sm rounded-2xl p-6 text-center shadow-xl ${
+          className={`w-full max-w-sm rounded-2xl p-6 text-center shadow-2xl transition-all duration-300 ${
             isPronto
               ? destacar
-                ? "bg-green-500 scale-110 animate-bounce"
-                : "bg-green-600"
-              : "bg-yellow-500 animate-pulse"
+                ? "bg-gradient-to-r from-green-400 to-green-600 scale-105"
+                : "bg-gradient-to-r from-green-500 to-green-700"
+              : "bg-gradient-to-r from-yellow-400 to-yellow-600 animate-pulse"
           }`}
         >
           <p className="text-lg font-semibold">
-            {isPronto ? "🟢 Pronto para retirada" : "🟡 Em preparo"}
+            {isPronto ? "Pronto para retirada" : "Em preparo"}
           </p>
         </div>
 
@@ -206,7 +195,7 @@ function toggleSom() {
         </p>
 
         {/* ITENS */}
-        <div className="mt-6 w-full max-w-sm bg-gray-800 rounded-xl p-4">
+        <div className="mt-6 w-full max-w-sm bg-gray-800/80 backdrop-blur rounded-2xl p-4 border border-gray-700">
           <h3 className="font-bold mb-3 text-gray-300">Itens</h3>
 
           {pedido.itens.map((item, i) => (
@@ -225,11 +214,11 @@ function toggleSom() {
         {/* MENSAGEM */}
         {!isPronto ? (
           <p className="mt-6 text-sm text-gray-400 text-center animate-pulse">
-            Aguarde... seu pedido está sendo preparado 🍕
+            Aguarde... seu pedido está sendo preparado
           </p>
         ) : (
           <p className="mt-6 text-sm text-green-300 text-center font-semibold">
-            Dirija-se ao balcão para retirar seu pedido 🙌
+            Dirija-se ao balcão para retirar seu pedido
           </p>
         )}
 

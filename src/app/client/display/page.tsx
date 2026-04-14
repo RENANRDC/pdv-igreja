@@ -126,7 +126,7 @@ export default function DisplayPage() {
                 Central Gourmet
               </h1>
               <p className="text-xs text-gray-400">
-                Display
+                Painel ao vivo
               </p>
             </div>
           </div>
