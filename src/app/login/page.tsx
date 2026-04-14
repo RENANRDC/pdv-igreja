@@ -32,6 +32,7 @@ export default function LoginPage() {
 
       const email = `${usuario}@pdv.local`
 
+      // 🔥 LOGIN FIREBASE
       await login(email, senha)
 
       const auth = getAuth()
@@ -39,8 +40,10 @@ export default function LoginPage() {
 
       if (!user) throw new Error("Erro ao autenticar")
 
-      const token = await user.getIdToken()
+      // 🔥 FORÇA TOKEN ATUALIZADO
+      const token = await user.getIdToken(true)
 
+      // 🔥 CRIA SESSÃO NO SERVIDOR (COOKIE)
       const res = await fetch("/api/session", {
         method: "POST",
         headers: {
@@ -51,12 +54,13 @@ export default function LoginPage() {
 
       if (!res.ok) throw new Error("Erro ao criar sessão")
 
+      // 🔥 SALVA CACHE LOCAL
       setCachedUser({
         role: "admin",
         username: usuario,
       })
 
-      // 🔥 COZINHA (já existia)
+      // 🔥 PRÉ-CARREGAMENTO (mantido)
       try {
         const pedidos = await fetchWithAuth("/api/pedidos")
 
@@ -67,10 +71,8 @@ export default function LoginPage() {
         }
       } catch {}
 
-      // 🔥 ADMIN USERS (já existia)
       await fetchWithAuth("/api/admin/users")
 
-      // 🔥 NOVO: FINANCEIRO / RELATÓRIOS
       try {
         const fechamentos = await fetchWithAuth("/api/fechamentos")
 
@@ -81,7 +83,10 @@ export default function LoginPage() {
         }
       } catch {}
 
-      router.push("/")
+      // 🔥 IMPORTANTE: garante que cookie foi salvo antes de redirecionar
+      await new Promise((r) => setTimeout(r, 300))
+
+      router.replace("/") // melhor que push
 
     } catch (err: unknown) {
       const code = (err as { code?: string })?.code
