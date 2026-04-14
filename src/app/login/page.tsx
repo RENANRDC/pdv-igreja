@@ -70,13 +70,22 @@ export default function LoginPage() {
 
       router.push("/")
 
-    } catch {
-      setErro("Erro ao fazer login")
-    } finally {
-      setLoading(false)
-    }
-  }
+      } catch (err: unknown) {
+        const code = (err as { code?: string })?.code
 
+        if (
+          code === "auth/invalid-credential" ||
+          code === "auth/wrong-password" ||
+          code === "auth/user-not-found"
+        ) {
+          setErro("Usuário ou senha inválidos")
+        } else {
+          setErro("Erro ao fazer login")
+        }
+      } finally {
+        setLoading(false)
+      }
+}
   return (
     <div className="min-h-[100dvh] flex items-center justify-center bg-gray-900 p-6">
 
