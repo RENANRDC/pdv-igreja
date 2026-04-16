@@ -127,10 +127,9 @@ export default function ControlePedidos() {
 >
 
             <div className="flex justify-between mb-2">
-              <span className="font-bold">#{pedido.codigo}</span>
-              <span className="text-xs text-gray-300 truncate max-w-[120px]">
-                {pedido.nomeCliente}
-              </span>
+              <span className="font-bold">
+  #{pedido.codigo} • {pedido.nomeCliente}
+</span>
             </div>
 
             <div className="flex justify-between items-center">
@@ -174,10 +173,9 @@ export default function ControlePedidos() {
                 className="bg-gray-800 p-3 rounded-xl cursor-pointer"
               >
                 <div className="flex justify-between mb-2">
-                  <span className="font-bold">#{pedido.codigo}</span>
-                  <span className="text-xs text-gray-300 truncate max-w-[120px]">
-                    {pedido.nomeCliente}
-                  </span>
+                  <span className="font-bold">
+  #{pedido.codigo} • {pedido.nomeCliente}
+</span>
                 </div>
 
                 <span className="text-sm font-bold text-green-400">
@@ -202,10 +200,9 @@ export default function ControlePedidos() {
                 className="bg-blue-900/40 p-3 rounded-xl cursor-pointer"
               >
                 <div className="flex justify-between mb-2">
-                  <span className="font-bold">#{pedido.codigo}</span>
-                  <span className="text-xs text-gray-300 truncate max-w-[120px]">
-                    {pedido.nomeCliente}
-                  </span>
+                  <span className="font-bold">
+  #{pedido.codigo} • {pedido.nomeCliente}
+</span>
                 </div>
 
                 <span className="text-sm font-bold text-green-400">
@@ -229,7 +226,9 @@ export default function ControlePedidos() {
                 onClick={() => setPedidoSelecionado(pedido)}
                 className="bg-green-900/60 p-2 rounded flex justify-between items-center cursor-pointer"
               >
-                <span>#{pedido.codigo}</span>
+                <span className="font-semibold">
+                  #{pedido.codigo} • {pedido.nomeCliente}
+                </span>
 
                 <span className="text-sm font-bold text-green-300">
                   R${getTotal(pedido).toFixed(2)}

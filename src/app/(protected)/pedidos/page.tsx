@@ -181,9 +181,8 @@ export default function Cozinha() {
           <div key={pedido.id} className="bg-gray-800 p-3 rounded-xl">
 
             <div className="flex justify-between mb-2">
-              <span className="font-bold">#{pedido.codigo}</span>
-              <span className="text-xs text-gray-300 truncate max-w-[120px]">
-                {pedido.nomeCliente}
+              <span className="font-bold">
+                #{pedido.codigo} • {pedido.nomeCliente}
               </span>
             </div>
 
@@ -240,8 +239,9 @@ export default function Cozinha() {
             {pendentes.map((pedido) => (
               <div key={pedido.id} className="bg-gray-800 p-3 rounded-xl">
                 <div className="flex justify-between items-center mb-2">
-                  <span>#{pedido.codigo}</span>
-                  <span className="text-xs">{pedido.nomeCliente}</span>
+<span className="font-semibold">
+  #{pedido.codigo} • {pedido.nomeCliente}
+</span>
                 </div>
 
                 <button
@@ -265,8 +265,9 @@ export default function Cozinha() {
             {emPreparo.map((pedido) => (
               <div key={pedido.id} className="bg-blue-900/40 p-3 rounded-xl">
                 <div className="flex justify-between mb-2">
-                  <span>#{pedido.codigo}</span>
-                  <span className="text-xs">{pedido.nomeCliente}</span>
+<span className="font-semibold">
+  #{pedido.codigo} • {pedido.nomeCliente}
+</span>
                 </div>
 
                 <div className="flex gap-2">
@@ -305,7 +306,9 @@ export default function Cozinha() {
           <div className="space-y-2 max-h-[75vh] overflow-y-auto pr-1">
             {finalizados.map((pedido) => (
               <div key={pedido.id} className="bg-green-900/60 p-2 rounded flex justify-between items-center">
-                <span>#{pedido.codigo}</span>
+                <span className="font-bold">
+                  #{pedido.codigo} • {pedido.nomeCliente}
+                </span>
                 <button
                   onClick={() => voltarParaPreparo(pedido.id)}
                   className="bg-yellow-500 text-black px-2 py-1 rounded text-xs"
