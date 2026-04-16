@@ -66,175 +66,94 @@ export default function ControlePedidos() {
     return (pedido.total ?? pedido.valor ?? 0)
   }
 
+  const CardPedido = (pedido: Pedido) => (
+    <div
+      key={pedido.id}
+      onClick={() => setPedidoSelecionado(pedido)}
+      className="bg-gray-800 p-4 rounded-xl cursor-pointer h-[60px] flex items-center"
+    >
+      <div className="flex justify-between items-center w-full">
+        <span className="font-bold">
+          #{pedido.codigo} • {pedido.nomeCliente}
+        </span>
+
+        <span className="text-sm font-bold text-green-400">
+          R${getTotal(pedido).toFixed(2)}
+        </span>
+      </div>
+    </div>
+  )
+
   return (
     <PageContainer>
 
-<div className="flex items-center justify-between mb-6">
+      <div className="flex items-center justify-between mb-6">
 
-  <div className="flex items-center gap-3">
-    <img src="/logo.png" className="h-10 w-10" />
-    <div>
-      <h1 className="text-base font-bold">
-        Central Gourmet
-      </h1>
-      <p className="text-xs text-gray-400">
-        Pedidos
-      </p>
-    </div>
-  </div>
+        <div className="flex items-center gap-3">
+          <img src="/logo.png" className="h-10 w-10" />
+          <div>
+            <h1 className="text-base font-bold">
+              Central Gourmet
+            </h1>
+            <p className="text-xs text-gray-400">
+              Pedidos
+            </p>
+          </div>
+        </div>
 
-  <BackButton href="/pdv" />
+        <BackButton href="/pdv" />
 
-</div>
+      </div>
 
-      {/* MOBILE - ABAS */}
+      {/* MOBILE */}
       <div className="flex gap-2 mb-4 lg:hidden">
-        <button
-          onClick={() => setAba("pendente")}
-          className={`flex-1 p-2 rounded text-sm font-semibold ${
-            aba === "pendente" ? "bg-yellow-500 text-black" : "bg-gray-800"
-          }`}
-        >
+        <button onClick={() => setAba("pendente")} className={`flex-1 p-2 rounded text-sm font-semibold ${aba === "pendente" ? "bg-yellow-500 text-black" : "bg-gray-800"}`}>
           Pendentes ({pendentes.length})
         </button>
 
-        <button
-          onClick={() => setAba("em_preparo")}
-          className={`flex-1 p-2 rounded text-sm font-semibold ${
-            aba === "em_preparo" ? "bg-blue-600" : "bg-gray-800"
-          }`}
-        >
+        <button onClick={() => setAba("em_preparo")} className={`flex-1 p-2 rounded text-sm font-semibold ${aba === "em_preparo" ? "bg-blue-600" : "bg-gray-800"}`}>
           Preparo ({emPreparo.length})
         </button>
 
-        <button
-          onClick={() => setAba("finalizado")}
-          className={`flex-1 p-2 rounded text-sm font-semibold ${
-            aba === "finalizado" ? "bg-green-600" : "bg-gray-800"
-          }`}
-        >
+        <button onClick={() => setAba("finalizado")} className={`flex-1 p-2 rounded text-sm font-semibold ${aba === "finalizado" ? "bg-green-600" : "bg-gray-800"}`}>
           Prontos ({finalizados.length})
         </button>
       </div>
 
-      {/* MOBILE LISTA */}
       <div className="space-y-3 lg:hidden">
-        {lista.map((pedido) => (
-          <div
-  key={pedido.id}
-  onClick={() => setPedidoSelecionado(pedido)}
-  className="bg-gray-800 p-3 rounded-xl cursor-pointer"
->
-
-            <div className="flex justify-between mb-2">
-              <span className="font-bold">
-  #{pedido.codigo} • {pedido.nomeCliente}
-</span>
-            </div>
-
-            <div className="flex justify-between items-center">
-              <span className="text-sm font-bold text-green-400">
-                R${getTotal(pedido).toFixed(2)}
-              </span>
-
-              <span className={`text-xs px-2 py-1 rounded ${
-                pedido.status === "pendente"
-                  ? "bg-yellow-500 text-black"
-                  : pedido.status === "em_preparo"
-                  ? "bg-blue-600"
-                  : "bg-green-600"
-              }`}>
-                {pedido.status === "pendente"
-                  ? "Pendente"
-                  : pedido.status === "em_preparo"
-                  ? "Em preparo"
-                  : "Pronto"}
-              </span>
-            </div>
-
-          </div>
-        ))}
+        {lista.map(CardPedido)}
       </div>
 
-      {/* DESKTOP - COLUNAS IGUAL COZINHA */}
+      {/* DESKTOP */}
       <div className="hidden lg:grid grid-cols-3 gap-4">
 
-        {/* PENDENTES */}
         <div className="bg-yellow-500/10 border border-yellow-500/30 p-3 rounded-xl">
           <h2 className="text-yellow-400 font-semibold mb-3">
             Pendentes ({pendentes.length})
           </h2>
 
           <div className="space-y-3 max-h-[75vh] overflow-y-auto pr-1">
-            {pendentes.map((pedido) => (
-              <div
-                key={pedido.id}
-                onClick={() => setPedidoSelecionado(pedido)}
-                className="bg-gray-800 p-3 rounded-xl cursor-pointer"
-              >
-                <div className="flex justify-between mb-2">
-                  <span className="font-bold">
-  #{pedido.codigo} • {pedido.nomeCliente}
-</span>
-                </div>
-
-                <span className="text-sm font-bold text-green-400">
-                  R${getTotal(pedido).toFixed(2)}
-                </span>
-              </div>
-            ))}
+            {pendentes.map(CardPedido)}
           </div>
         </div>
 
-        {/* EM PREPARO */}
         <div className="bg-blue-500/10 border border-blue-500/30 p-3 rounded-xl">
           <h2 className="text-blue-400 font-semibold mb-3">
             Em preparo ({emPreparo.length})
           </h2>
 
           <div className="space-y-3 max-h-[75vh] overflow-y-auto pr-1">
-            {emPreparo.map((pedido) => (
-              <div
-                key={pedido.id}
-                onClick={() => setPedidoSelecionado(pedido)}
-                className="bg-blue-900/40 p-3 rounded-xl cursor-pointer"
-              >
-                <div className="flex justify-between mb-2">
-                  <span className="font-bold">
-  #{pedido.codigo} • {pedido.nomeCliente}
-</span>
-                </div>
-
-                <span className="text-sm font-bold text-green-400">
-                  R${getTotal(pedido).toFixed(2)}
-                </span>
-              </div>
-            ))}
+            {emPreparo.map(CardPedido)}
           </div>
         </div>
 
-        {/* FINALIZADOS */}
         <div className="bg-green-500/10 border border-green-500/30 p-3 rounded-xl">
           <h2 className="text-green-400 font-semibold mb-3">
             Prontos ({finalizados.length})
           </h2>
 
-          <div className="space-y-2 max-h-[75vh] overflow-y-auto pr-1">
-            {finalizados.map((pedido) => (
-              <div
-                key={pedido.id}
-                onClick={() => setPedidoSelecionado(pedido)}
-                className="bg-green-900/60 p-2 rounded flex justify-between items-center cursor-pointer"
-              >
-                <span className="font-semibold">
-                  #{pedido.codigo} • {pedido.nomeCliente}
-                </span>
-
-                <span className="text-sm font-bold text-green-300">
-                  R${getTotal(pedido).toFixed(2)}
-                </span>
-              </div>
-            ))}
+          <div className="space-y-3 max-h-[75vh] overflow-y-auto pr-1">
+            {finalizados.map(CardPedido)}
           </div>
         </div>
 
@@ -271,7 +190,7 @@ export default function ControlePedidos() {
 
             <button
               onClick={() => setPedidoSelecionado(null)}
-              className="w-full bg-gray-700 p-2 rounded"
+              className="w-full bg-gray-700 py-2 rounded-lg"
             >
               Fechar
             </button>
@@ -281,6 +200,6 @@ export default function ControlePedidos() {
         </div>
       )}
 
-</PageContainer>
+    </PageContainer>
   )
 }

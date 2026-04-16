@@ -127,60 +127,38 @@ export default function Cozinha() {
   return (
     <PageContainer>
 
-<div className="flex items-center justify-between mb-6">
+      <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center gap-3">
+          <img src="/logo.png" className="h-10 w-10" />
+          <div>
+            <h1 className="text-base font-bold">Central Gourmet</h1>
+            <p className="text-xs text-gray-400">Cozinha</p>
+          </div>
+        </div>
+        <BackButton href="/" />
+      </div>
 
-  <div className="flex items-center gap-3">
-    <img src="/logo.png" className="h-10 w-10" />
-    <div>
-      <h1 className="text-base font-bold">
-        Central Gourmet
-      </h1>
-      <p className="text-xs text-gray-400">
-        Cozinha
-      </p>
-    </div>
-  </div>
-
-  <BackButton href="/" />
-
-</div>
-
-      {/* MOBILE - ABAS */}
+      {/* MOBILE */}
       <div className="flex gap-2 mb-4 lg:hidden">
-        <button
-          onClick={() => setAba("pendente")}
-          className={`flex-1 p-2 rounded text-sm font-semibold ${
-            aba === "pendente" ? "bg-yellow-500 text-black" : "bg-gray-800"
-          }`}
-        >
+        <button onClick={() => setAba("pendente")} className={`flex-1 p-2 rounded text-sm font-semibold ${aba === "pendente" ? "bg-yellow-500 text-black" : "bg-gray-800"}`}>
           Pendentes ({pendentes.length})
         </button>
 
-        <button
-          onClick={() => setAba("em_preparo")}
-          className={`flex-1 p-2 rounded text-sm font-semibold ${
-            aba === "em_preparo" ? "bg-blue-600" : "bg-gray-800"
-          }`}
-        >
+        <button onClick={() => setAba("em_preparo")} className={`flex-1 p-2 rounded text-sm font-semibold ${aba === "em_preparo" ? "bg-blue-600" : "bg-gray-800"}`}>
           Preparo ({emPreparo.length})
         </button>
 
-        <button
-          onClick={() => setAba("finalizado")}
-          className={`flex-1 p-2 rounded text-sm font-semibold ${
-            aba === "finalizado" ? "bg-green-600" : "bg-gray-800"
-          }`}
-        >
+        <button onClick={() => setAba("finalizado")} className={`flex-1 p-2 rounded text-sm font-semibold ${aba === "finalizado" ? "bg-green-600" : "bg-gray-800"}`}>
           Prontos ({finalizados.length})
         </button>
       </div>
 
-      {/* MOBILE LISTA */}
+      {/* LISTA */}
       <div className="space-y-3 lg:hidden">
         {lista.map((pedido) => (
-          <div key={pedido.id} className="bg-gray-800 p-3 rounded-xl">
+          <div key={pedido.id} className="bg-gray-800 p-4 rounded-xl min-h-[90px] flex flex-col justify-between">
 
-            <div className="flex justify-between mb-2">
+            <div className="flex justify-between">
               <span className="font-bold">
                 #{pedido.codigo} • {pedido.nomeCliente}
               </span>
@@ -189,34 +167,25 @@ export default function Cozinha() {
             {pedido.status === "pendente" && (
               <button
                 onClick={() => assumirPedido(pedido.id)}
-                className="w-full bg-yellow-500 text-black p-2 rounded text-sm"
+                className="w-full bg-yellow-500 text-black font-semibold h-10 rounded-lg"
               >
                 Assumir
               </button>
             )}
 
             {pedido.status === "em_preparo" && (
-              <div className="flex gap-2">
-                <button
-                  onClick={() => setPedidoSelecionado(pedido)}
-                  className="flex-1 bg-blue-600 p-2 rounded text-xs"
-                >
-                  Ver
-                </button>
-
-                <button
-                  onClick={() => setPedidoSelecionado(pedido)}
-                  className="flex-1 bg-green-600 p-2 rounded text-xs"
-                >
-                  Finalizar
-                </button>
-              </div>
+              <button
+                onClick={() => setPedidoSelecionado(pedido)}
+                className="w-full bg-blue-600 h-10 rounded-lg text-sm font-semibold"
+              >
+                Detalhes
+              </button>
             )}
 
             {pedido.status === "finalizado" && (
               <button
                 onClick={() => voltarParaPreparo(pedido.id)}
-                className="w-full bg-yellow-500 text-black p-2 rounded text-xs"
+                className="w-full bg-red-600 text-white font-semibold h-10 rounded-lg"
               >
                 Desfazer
               </button>
@@ -226,7 +195,7 @@ export default function Cozinha() {
         ))}
       </div>
 
-      {/* DESKTOP ORIGINAL */}
+      {/* DESKTOP */}
       <div className="hidden lg:grid grid-cols-3 gap-4">
 
         {/* PENDENTES */}
@@ -237,16 +206,14 @@ export default function Cozinha() {
 
           <div className="space-y-3 max-h-[75vh] overflow-y-auto pr-1">
             {pendentes.map((pedido) => (
-              <div key={pedido.id} className="bg-gray-800 p-3 rounded-xl">
-                <div className="flex justify-between items-center mb-2">
-<span className="font-semibold">
-  #{pedido.codigo} • {pedido.nomeCliente}
-</span>
-                </div>
+              <div key={pedido.id} className="bg-gray-800 p-4 rounded-xl min-h-[90px] flex flex-col justify-between">
+                <span className="font-semibold">
+                  #{pedido.codigo} • {pedido.nomeCliente}
+                </span>
 
                 <button
                   onClick={() => assumirPedido(pedido.id)}
-                  className="w-full bg-yellow-500 text-black p-2 rounded text-sm"
+                  className="w-full bg-yellow-500 text-black font-semibold h-10 rounded-lg"
                 >
                   Assumir
                 </button>
@@ -263,34 +230,16 @@ export default function Cozinha() {
 
           <div className="space-y-3 max-h-[75vh] overflow-y-auto pr-1">
             {emPreparo.map((pedido) => (
-              <div key={pedido.id} className="bg-blue-900/40 p-3 rounded-xl">
-                <div className="flex justify-between mb-2">
-<span className="font-semibold">
-  #{pedido.codigo} • {pedido.nomeCliente}
-</span>
-                </div>
-
-                <div className="flex gap-2">
-                  <button
-                    onClick={() => setPedidoSelecionado(pedido)}
-                    className="flex-1 bg-blue-600 p-2 rounded text-xs"
-                  >
-                    Ver
-                  </button>
-
-                  <button
-                    onClick={() => setPedidoSelecionado(pedido)}
-                    className="flex-1 bg-green-600 p-2 rounded text-xs"
-                  >
-                    Finalizar
-                  </button>
-                </div>
+              <div key={pedido.id} className="bg-gray-800 p-4 rounded-xl min-h-[90px] flex flex-col justify-between">
+                <span className="font-semibold">
+                  #{pedido.codigo} • {pedido.nomeCliente}
+                </span>
 
                 <button
-                  onClick={() => voltarParaPendente(pedido.id)}
-                  className="w-full mt-2 bg-gray-700 p-2 rounded text-xs"
+                  onClick={() => setPedidoSelecionado(pedido)}
+                  className="w-full bg-blue-600 h-10 rounded-lg text-sm font-semibold"
                 >
-                  Voltar
+                  Detalhes
                 </button>
               </div>
             ))}
@@ -303,15 +252,16 @@ export default function Cozinha() {
             Prontos ({finalizados.length})
           </h2>
 
-          <div className="space-y-2 max-h-[75vh] overflow-y-auto pr-1">
+          <div className="space-y-3 max-h-[75vh] overflow-y-auto pr-1">
             {finalizados.map((pedido) => (
-              <div key={pedido.id} className="bg-green-900/60 p-2 rounded flex justify-between items-center">
-                <span className="font-bold">
+              <div key={pedido.id} className="bg-gray-800 p-4 rounded-xl min-h-[90px] flex flex-col justify-between">
+                <span className="font-semibold">
                   #{pedido.codigo} • {pedido.nomeCliente}
                 </span>
+
                 <button
                   onClick={() => voltarParaPreparo(pedido.id)}
-                  className="bg-yellow-500 text-black px-2 py-1 rounded text-xs"
+                  className="w-full bg-red-600 text-white font-semibold h-10 rounded-lg"
                 >
                   Desfazer
                 </button>
@@ -344,17 +294,24 @@ export default function Cozinha() {
               ))}
             </div>
 
-            <div className="flex gap-2">
+            <div className="grid grid-cols-3 gap-2">
               <button
                 onClick={() => setPedidoSelecionado(null)}
-                className="w-full bg-gray-700 p-2 rounded"
+                className="bg-gray-700 h-10 rounded-lg text-sm"
               >
                 Fechar
               </button>
 
               <button
+                onClick={() => voltarParaPendente(pedidoSelecionado.id)}
+                className="bg-yellow-500 text-black h-10 rounded-lg text-sm font-semibold"
+              >
+                Voltar
+              </button>
+
+              <button
                 onClick={confirmarFinalizar}
-                className="w-full bg-green-600 p-2 rounded"
+                className="bg-green-600 h-10 rounded-lg text-sm font-semibold"
               >
                 Finalizar
               </button>
@@ -364,6 +321,6 @@ export default function Cozinha() {
         </div>
       )}
 
-</PageContainer>
+    </PageContainer>
   )
 }
