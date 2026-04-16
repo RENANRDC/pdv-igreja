@@ -103,7 +103,7 @@ useEffect(() => {
           <div className="bg-gray-800 p-4 rounded">
             <p className="font-semibold">Como funciona</p>
             <p className="text-sm text-gray-400 mt-1">
-              Define quantos pedidos prontos serão exibidos no display, conforme o espaço disponível na tela do dispositivo.
+              Define quantos pedidos prontos serão exibidos no painel ao vivo, de acordo com o espaço disponível na tela.
             </p>
           </div>
         </div>
