@@ -124,6 +124,8 @@ export default function Cozinha() {
       ? emPreparo
       : finalizados
 
+  const btnBase = "w-full h-10 rounded-lg text-sm font-semibold flex items-center justify-center"
+
   return (
     <PageContainer>
 
@@ -156,18 +158,16 @@ export default function Cozinha() {
       {/* LISTA */}
       <div className="space-y-3 lg:hidden">
         {lista.map((pedido) => (
-          <div key={pedido.id} className="bg-gray-800 p-4 rounded-xl min-h-[90px] flex flex-col justify-between">
+          <div key={pedido.id} className="bg-gray-800 px-4 min-h-[90px] py-3 rounded-xl flex flex-col justify-center">
 
-            <div className="flex justify-between">
-              <span className="font-bold">
-                #{pedido.codigo} • {pedido.nomeCliente}
-              </span>
-            </div>
+            <span className="font-bold mb-2">
+              #{pedido.codigo} • {pedido.nomeCliente}
+            </span>
 
             {pedido.status === "pendente" && (
               <button
                 onClick={() => assumirPedido(pedido.id)}
-                className="w-full bg-yellow-500 text-black font-semibold h-10 rounded-lg"
+                className={`${btnBase} bg-yellow-500 text-black`}
               >
                 Assumir
               </button>
@@ -176,7 +176,7 @@ export default function Cozinha() {
             {pedido.status === "em_preparo" && (
               <button
                 onClick={() => setPedidoSelecionado(pedido)}
-                className="w-full bg-blue-600 h-10 rounded-lg text-sm font-semibold"
+                className={`${btnBase} bg-blue-600`}
               >
                 Detalhes
               </button>
@@ -185,7 +185,7 @@ export default function Cozinha() {
             {pedido.status === "finalizado" && (
               <button
                 onClick={() => voltarParaPreparo(pedido.id)}
-                className="w-full bg-red-600 text-white font-semibold h-10 rounded-lg"
+                className={`${btnBase} bg-red-600 text-white`}
               >
                 Desfazer
               </button>
@@ -198,77 +198,47 @@ export default function Cozinha() {
       {/* DESKTOP */}
       <div className="hidden lg:grid grid-cols-3 gap-4">
 
-        {/* PENDENTES */}
-        <div className="bg-yellow-500/10 border border-yellow-500/30 p-3 rounded-xl">
-          <h2 className="text-yellow-400 font-semibold mb-3">
-            Pendentes ({pendentes.length})
-          </h2>
+        {[
+          { lista: pendentes, cor: "yellow", titulo: "Pendentes" },
+          { lista: emPreparo, cor: "blue", titulo: "Em preparo" },
+          { lista: finalizados, cor: "green", titulo: "Prontos" },
+        ].map((col, i) => (
+          <div key={i} className={`bg-${col.cor}-500/10 border border-${col.cor}-500/30 p-3 rounded-xl`}>
+            <h2 className={`text-${col.cor}-400 font-semibold mb-3`}>
+              {col.titulo} ({col.lista.length})
+            </h2>
 
-          <div className="space-y-3 max-h-[75vh] overflow-y-auto pr-1">
-            {pendentes.map((pedido) => (
-              <div key={pedido.id} className="bg-gray-800 p-4 rounded-xl min-h-[90px] flex flex-col justify-between">
-                <span className="font-semibold">
-                  #{pedido.codigo} • {pedido.nomeCliente}
-                </span>
+            <div className="space-y-3 max-h-[75vh] overflow-y-auto pr-1">
+              {col.lista.map((pedido) => (
+                <div key={pedido.id} className="bg-gray-800 px-4 min-h-[90px] py-3 rounded-xl flex flex-col justify-center">
 
-                <button
-                  onClick={() => assumirPedido(pedido.id)}
-                  className="w-full bg-yellow-500 text-black font-semibold h-10 rounded-lg"
-                >
-                  Assumir
-                </button>
-              </div>
-            ))}
+                  <span className="font-semibold mb-2">
+                    #{pedido.codigo} • {pedido.nomeCliente}
+                  </span>
+
+                  {pedido.status === "pendente" && (
+                    <button onClick={() => assumirPedido(pedido.id)} className={`${btnBase} bg-yellow-500 text-black`}>
+                      Assumir
+                    </button>
+                  )}
+
+                  {pedido.status === "em_preparo" && (
+                    <button onClick={() => setPedidoSelecionado(pedido)} className={`${btnBase} bg-blue-600`}>
+                      Detalhes
+                    </button>
+                  )}
+
+                  {pedido.status === "finalizado" && (
+                    <button onClick={() => voltarParaPreparo(pedido.id)} className={`${btnBase} bg-red-600 text-white`}>
+                      Desfazer
+                    </button>
+                  )}
+
+                </div>
+              ))}
+            </div>
           </div>
-        </div>
-
-        {/* EM PREPARO */}
-        <div className="bg-blue-500/10 border border-blue-500/30 p-3 rounded-xl">
-          <h2 className="text-blue-400 font-semibold mb-3">
-            Em preparo ({emPreparo.length})
-          </h2>
-
-          <div className="space-y-3 max-h-[75vh] overflow-y-auto pr-1">
-            {emPreparo.map((pedido) => (
-              <div key={pedido.id} className="bg-gray-800 p-4 rounded-xl min-h-[90px] flex flex-col justify-between">
-                <span className="font-semibold">
-                  #{pedido.codigo} • {pedido.nomeCliente}
-                </span>
-
-                <button
-                  onClick={() => setPedidoSelecionado(pedido)}
-                  className="w-full bg-blue-600 h-10 rounded-lg text-sm font-semibold"
-                >
-                  Detalhes
-                </button>
-              </div>
-            ))}
-          </div>
-        </div>
-
-        {/* FINALIZADOS */}
-        <div className="bg-green-500/10 border border-green-500/30 p-3 rounded-xl">
-          <h2 className="text-green-400 font-semibold mb-3">
-            Prontos ({finalizados.length})
-          </h2>
-
-          <div className="space-y-3 max-h-[75vh] overflow-y-auto pr-1">
-            {finalizados.map((pedido) => (
-              <div key={pedido.id} className="bg-gray-800 p-4 rounded-xl min-h-[90px] flex flex-col justify-between">
-                <span className="font-semibold">
-                  #{pedido.codigo} • {pedido.nomeCliente}
-                </span>
-
-                <button
-                  onClick={() => voltarParaPreparo(pedido.id)}
-                  className="w-full bg-red-600 text-white font-semibold h-10 rounded-lg"
-                >
-                  Desfazer
-                </button>
-              </div>
-            ))}
-          </div>
-        </div>
+        ))}
 
       </div>
 
@@ -295,24 +265,21 @@ export default function Cozinha() {
             </div>
 
             <div className="grid grid-cols-3 gap-2">
-              <button
-                onClick={() => setPedidoSelecionado(null)}
-                className="bg-gray-700 h-10 rounded-lg text-sm"
-              >
+              <button onClick={() => setPedidoSelecionado(null)} className="bg-gray-700 h-10 rounded-lg text-sm flex items-center justify-center">
                 Fechar
               </button>
 
               <button
-                onClick={() => voltarParaPendente(pedidoSelecionado.id)}
-                className="bg-yellow-500 text-black h-10 rounded-lg text-sm font-semibold"
+                onClick={async () => {
+                  await voltarParaPendente(pedidoSelecionado.id)
+                  setPedidoSelecionado(null)
+                }}
+                className="bg-yellow-500 text-black h-10 rounded-lg text-sm font-semibold flex items-center justify-center"
               >
                 Voltar
               </button>
 
-              <button
-                onClick={confirmarFinalizar}
-                className="bg-green-600 h-10 rounded-lg text-sm font-semibold"
-              >
+              <button onClick={confirmarFinalizar} className="bg-green-600 h-10 rounded-lg text-sm font-semibold flex items-center justify-center">
                 Finalizar
               </button>
             </div>

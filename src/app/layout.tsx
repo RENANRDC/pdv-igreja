@@ -13,16 +13,15 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 })
 
+export const viewport = {
+  themeColor: "#0f172a",
+}
+
 export const metadata: Metadata = {
   title: "Central Gourmet | Sistema de Pedidos",
   description: "Sistema de pedidos em tempo real integrado entre atendimento, cozinha e cliente.",
 
   manifest: "/manifest.json",
-
-  themeColor: [
-    { media: "(prefers-color-scheme: light)", color: "#0f172a" },
-    { media: "(prefers-color-scheme: dark)", color: "#0f172a" }
-  ],
 
   appleWebApp: {
     capable: true,
@@ -32,6 +31,7 @@ export const metadata: Metadata = {
 
   icons: {
     icon: [
+      { url: "/favicon.ico" },
       { url: "/icons/icon-192.png", sizes: "192x192", type: "image/png" },
       { url: "/icons/icon-512.png", sizes: "512x512", type: "image/png" },
     ],
