@@ -25,7 +25,9 @@ type Item = {
 }
 
 type FormaPagamento = "pix" | "dinheiro" | "cartao"
+import { db } from "@/services/firebase"
 
+import { doc, onSnapshot } from "firebase/firestore"
 export default function Home() {
 
   const [nome, setNome] = useState("")
