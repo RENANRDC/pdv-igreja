@@ -82,6 +82,7 @@ const produtosFiltrados = categoriaSelecionada
 
 const { vendaMode, setVendaMode, isLoaded } = useVendaMode()
 const [printerIp, setPrinterIp] = useState("")
+const [imprimindo, setImprimindo] = useState(false)
 
 useEffect(() => {
   const ref = doc(db, "config", "printer")
@@ -609,7 +610,6 @@ onFocus={() => {
       )}
 
       {/* MODAL FINAL */}
-      {/* MODAL FINAL */}
       {codigoPedido && (
 <div className="fixed inset-0 bg-black/90 flex items-center justify-center z-50 pointer-events-auto">
 
@@ -685,9 +685,11 @@ onFocus={() => {
 
 {/* IMPRIMIR (só balcão) */}
 {vendaMode === "balcao" && (
+
 <button
   onClick={async () => {
     try {
+      setImprimindo(true)
       console.log("ENVIANDO PARA FILA DE IMPRESSÃO")
 
       await addDoc(collection(db, "fila_impressao"), {
@@ -707,14 +709,21 @@ onFocus={() => {
 
       console.log("ENVIADO COM SUCESSO")
 
+      // 🔥 fecha o modal após enviar
+      setTimeout(() => {
+        setCodigoPedido(null)
+        setImprimindo(false)
+      }, 800)
+
     } catch (err) {
       console.error("Erro ao enviar para impressão:", err)
+      setImprimindo(false)
     }
   }}
   className="w-full p-3 rounded-xl font-bold flex items-center justify-center gap-2 bg-blue-600 text-white"
 >
   <Printer size={18} />
-  Imprimir
+  {imprimindo ? "Enviando..." : "Imprimir"}
 </button>
 )}
 
