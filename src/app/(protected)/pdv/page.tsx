@@ -611,7 +611,7 @@ onFocus={() => {
       {/* MODAL FINAL */}
       {/* MODAL FINAL */}
       {codigoPedido && (
-<div className="fixed inset-0 bg-black/90 flex items-center justify-center z-50">
+<div className="fixed inset-0 bg-black/90 flex items-center justify-center z-50 pointer-events-auto">
 
           <div className="bg-white text-black p-6 rounded-2xl w-full max-w-sm print:hidden">
 
@@ -687,7 +687,7 @@ onFocus={() => {
 {vendaMode === "balcao" && (
 <button
   disabled={!printerIp}
-  onClick={async () => {
+  onTouchStart={async () => {
     try {
       console.log("CLICK IMPRIMIR")
       console.log("IP:", printerIp)
