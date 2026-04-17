@@ -74,7 +74,7 @@ export default function AdminPage() {
         />
 
         <Card3D
-          href="/admin/config"
+          href="/admin/ajustes"
           icon={<Settings size={22} />}
           title="Ajustes"
           description="Ajustes do sistema"
