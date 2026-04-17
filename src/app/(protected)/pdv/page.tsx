@@ -17,7 +17,6 @@ import {
   Send
 } from "lucide-react"
 import PageContainer from "@/components/ui/PageContainer"
-
 type Item = {
   nome: string
   preco: number
@@ -670,7 +669,35 @@ onFocus={() => {
 {/* IMPRIMIR (só balcão) */}
 {vendaMode === "balcao" && (
 <button
-  onClick={() => window.print()}
+  onClick={async () => {
+    try {
+const url =
+  typeof window !== "undefined"
+    ? localStorage.getItem("printer_ip") || "http://localhost:3001"
+    : "http://localhost:3001";
+
+      await fetch(`${url}/print`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          codigo: codigoPedido,
+          nome: nomePedido,
+          itens: itensPedido,
+          total: itensPedido
+            .reduce((acc, i) => acc + i.preco * i.quantidade, 0)
+            .toFixed(2),
+          pagamento: formaPagamento.toUpperCase(),
+          valorPago: valorRecebidoPedido,
+          troco: trocoPedido,
+          link: qrUrl,
+        }),
+      });
+    } catch (err) {
+      console.error("Erro ao imprimir:", err);
+    }
+  }}
   className="w-full bg-blue-600 text-white p-3 rounded-xl font-bold flex items-center justify-center gap-2"
 >
   <Printer size={18} />
@@ -774,13 +801,6 @@ onFocus={() => {
             </p>
 
           </div>
-<style jsx global>{`
-  @media print {
-    .print-area {
-      display: block !important;
-    }
-  }
-`}</style>
         </div>
 
       )}

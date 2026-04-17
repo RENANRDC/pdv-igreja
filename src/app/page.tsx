@@ -12,8 +12,7 @@ import { clearVendaMode } from "@/hooks/useVendaMode"
 import {
   Receipt,
   ChefHat,
-  Monitor,
-  Settings,
+  Shield,
   Tv
 } from "lucide-react"
 
@@ -100,17 +99,10 @@ export default function MenuPage() {
           description="Display Otimizado para TV"
         />
 
-        <Card3D
-          href="/config-display"
-          icon={<Monitor size={22} />}
-          title="Display Config"
-          description="Ajustar painel"
-        />
-
         {user.role === "admin" && (
           <Card3D
             href="/admin"
-            icon={<Settings size={22} />}
+            icon={<Shield  size={22} />}
             title="Admin"
             description="Configurações"
           />

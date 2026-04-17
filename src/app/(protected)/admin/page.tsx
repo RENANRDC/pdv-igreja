@@ -3,7 +3,7 @@
 import { useEffect } from "react"
 import { useRouter } from "next/navigation"
 import { getCachedUser } from "@/hooks/useAdminGuard"
-import { Folder, Package, DollarSign, Lock } from "lucide-react"
+import { Folder, Package, DollarSign, Lock, Settings } from "lucide-react"
 
 import Card3D from "@/components/ui/Card3D"
 import PageContainer from "@/components/ui/PageContainer"
@@ -12,17 +12,25 @@ import BackButton from "@/components/ui/BackButton"
 export default function AdminPage() {
   const router = useRouter()
 
-  useEffect(() => {
-    const user = getCachedUser()
+  const user = getCachedUser()
 
-    if (!user) return router.replace("/login")
-    if (user.role !== "admin") return router.replace("/")
-  }, [])
+  useEffect(() => {
+    if (!user) {
+      router.replace("/login")
+      return
+    }
+
+    if (user.role !== "admin") {
+      router.replace("/")
+      return
+    }
+  }, [user, router])
+
+  if (!user || user.role !== "admin") return null
 
   return (
     <PageContainer>
 
-      {/* 🔥 HEADER IGUAL DA HOME */}
       <div className="flex items-center justify-between mb-6">
 
         <div className="flex items-center gap-3">
@@ -38,7 +46,6 @@ export default function AdminPage() {
           </div>
         </div>
 
-        {/* 👇 ÚNICA DIFERENÇA */}
         <BackButton href="/" />
 
       </div>
@@ -64,6 +71,13 @@ export default function AdminPage() {
           icon={<DollarSign size={22} />}
           title="Financeiro"
           description="Relatórios e vendas"
+        />
+
+        <Card3D
+          href="/admin/config"
+          icon={<Settings size={22} />}
+          title="Ajustes"
+          description="Ajustes do sistema"
         />
 
         <Card3D
