@@ -26,7 +26,7 @@ type Item = {
 
 type FormaPagamento = "pix" | "dinheiro" | "cartao"
 import { db } from "@/services/firebase"
-
+import { addDoc, collection } from "firebase/firestore"
 import { doc, onSnapshot } from "firebase/firestore"
 export default function Home() {
 
@@ -686,48 +686,35 @@ onFocus={() => {
 {/* IMPRIMIR (só balcão) */}
 {vendaMode === "balcao" && (
 <button
-  disabled={!printerIp}
-  onTouchStart={async () => {
+  onClick={async () => {
     try {
-      console.log("CLICK IMPRIMIR")
-      console.log("IP:", printerIp)
+      console.log("ENVIANDO PARA FILA DE IMPRESSÃO")
 
-      if (!printerIp) {
-        alert("Carregando impressora...")
-        return
-      }
-
-      await fetch(`${printerIp}/print`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          codigo: codigoPedido,
-          nome: nomePedido,
-          itens: itensPedido,
-          total: itensPedido
-            .reduce((acc, i) => acc + i.preco * i.quantidade, 0)
-            .toFixed(2),
-          pagamento: formaPagamento.toUpperCase(),
-          valorPago: valorRecebidoPedido,
-          troco: trocoPedido,
-          link: qrUrl,
-        }),
+      await addDoc(collection(db, "fila_impressao"), {
+        codigo: codigoPedido,
+        nome: nomePedido,
+        itens: itensPedido,
+        total: itensPedido
+          .reduce((acc, i) => acc + i.preco * i.quantidade, 0)
+          .toFixed(2),
+        pagamento: formaPagamento.toUpperCase(),
+        valorPago: valorRecebidoPedido,
+        troco: trocoPedido,
+        link: qrUrl,
+        status: "pendente",
+        createdAt: Date.now()
       })
 
+      console.log("ENVIADO COM SUCESSO")
+
     } catch (err) {
-      console.error("Erro ao imprimir:", err)
+      console.error("Erro ao enviar para impressão:", err)
     }
   }}
-  className={`w-full p-3 rounded-xl font-bold flex items-center justify-center gap-2 ${
-    !printerIp
-      ? "bg-gray-400 cursor-not-allowed"
-      : "bg-blue-600 text-white"
-  }`}
+  className="w-full p-3 rounded-xl font-bold flex items-center justify-center gap-2 bg-blue-600 text-white"
 >
   <Printer size={18} />
-  {printerIp ? "Imprimir" : "Carregando impressora..."}
+  Imprimir
 </button>
 )}
 
