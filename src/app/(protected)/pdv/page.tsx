@@ -79,6 +79,21 @@ const produtosFiltrados = categoriaSelecionada
 
 
 const { vendaMode, setVendaMode, isLoaded } = useVendaMode()
+const [printerIp, setPrinterIp] = useState("")
+
+useEffect(() => {
+  const ref = doc(db, "config", "printer")
+
+  const unsub = onSnapshot(ref, (snap) => {
+    const valor = snap.exists()
+      ? snap.data().url || ""
+      : ""
+
+    setPrinterIp(valor)
+  })
+
+  return () => unsub()
+}, [])
 
 if (!isLoaded) return null
 
@@ -671,12 +686,12 @@ onFocus={() => {
 <button
   onClick={async () => {
     try {
-const url =
-  typeof window !== "undefined"
-    ? localStorage.getItem("printer_ip") || "http://localhost:3001"
-    : "http://localhost:3001";
+      if (!printerIp) {
+        alert("Impressora não configurada")
+        return
+      }
 
-      await fetch(`${url}/print`, {
+      await fetch(`${printerIp}/print`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -694,6 +709,7 @@ const url =
           link: qrUrl,
         }),
       });
+
     } catch (err) {
       console.error("Erro ao imprimir:", err);
     }
