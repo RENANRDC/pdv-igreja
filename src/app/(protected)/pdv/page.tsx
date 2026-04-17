@@ -686,12 +686,16 @@ onFocus={() => {
 {/* IMPRIMIR (só balcão) */}
 {vendaMode === "balcao" && (
 <button
+  disabled={!printerIp}
   onClick={async () => {
     try {
-if (!printerIp || !printerIp.startsWith("http")) {
-  alert("Impressora não carregada ainda")
-  return
-}
+      console.log("CLICK IMPRIMIR")
+      console.log("IP:", printerIp)
+
+      if (!printerIp) {
+        alert("Carregando impressora...")
+        return
+      }
 
       await fetch(`${printerIp}/print`, {
         method: "POST",
@@ -710,16 +714,20 @@ if (!printerIp || !printerIp.startsWith("http")) {
           troco: trocoPedido,
           link: qrUrl,
         }),
-      });
+      })
 
     } catch (err) {
-      console.error("Erro ao imprimir:", err);
+      console.error("Erro ao imprimir:", err)
     }
   }}
-  className="w-full bg-blue-600 text-white p-3 rounded-xl font-bold flex items-center justify-center gap-2"
+  className={`w-full p-3 rounded-xl font-bold flex items-center justify-center gap-2 ${
+    !printerIp
+      ? "bg-gray-400 cursor-not-allowed"
+      : "bg-blue-600 text-white"
+  }`}
 >
   <Printer size={18} />
-  Imprimir
+  {printerIp ? "Imprimir" : "Carregando impressora..."}
 </button>
 )}
 
