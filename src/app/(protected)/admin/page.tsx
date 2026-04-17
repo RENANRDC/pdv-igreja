@@ -41,7 +41,7 @@ export default function AdminPage() {
               Central Gourmet
             </h1>
             <p className="text-xs text-gray-400">
-              Configurações
+              Admin
             </p>
           </div>
         </div>

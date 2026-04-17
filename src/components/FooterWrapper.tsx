@@ -9,13 +9,13 @@ export default function FooterWrapper() {
   // rotas que NÃO devem ter footer
   const hiddenRoutes = [
     "/pdv",
-    "/config-display",
     "/client/display",
     "/pedidos",
     "/admin/categorias",
     "/admin/credenciais",
     "/admin/financeiro",
-    "/admin/produtos"
+    "/admin/produtos",
+    "/admin/ajustes"
   ]
 
   const hideFooter = hiddenRoutes.some(route =>

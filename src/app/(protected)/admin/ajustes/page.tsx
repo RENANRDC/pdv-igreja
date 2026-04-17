@@ -10,13 +10,11 @@ import PageContainer from "@/components/ui/PageContainer"
 export default function ConfigDisplayPage() {
   const key = "config-display"
 
-  // 🔥 CACHE INSTANTÂNEO
   const valorInicial =
     typeof cache[key] === "number" ? cache[key] : 20
 
   const [limite, setLimite] = useState<number>(valorInicial)
 
-  // 🔥 IMPRESSORA (SEM DELAY)
   const [printerIp, setPrinterIp] = useState(() => {
     if (typeof window !== "undefined") {
       return localStorage.getItem("printer_ip") || "http://localhost:3001"
@@ -27,7 +25,17 @@ export default function ConfigDisplayPage() {
   const [showModal, setShowModal] = useState(false)
   const [saving, setSaving] = useState(false)
 
-  // 🔥 DISPLAY REALTIME
+  // 🔥 NOVO: TOAST
+  const [toast, setToast] = useState<{
+    message: string
+    type: "success" | "error"
+  } | null>(null)
+
+  function showToast(message: string, type: "success" | "error") {
+    setToast({ message, type })
+    setTimeout(() => setToast(null), 2500)
+  }
+
   useEffect(() => {
     const ref = doc(db, "config", "display")
 
@@ -43,7 +51,6 @@ export default function ConfigDisplayPage() {
     return () => unsub()
   }, [])
 
-  // 🔥 IMPRESSORA REALTIME (SEM TRAVAR UI)
   useEffect(() => {
     const ref = doc(db, "config", "printer")
 
@@ -59,24 +66,33 @@ export default function ConfigDisplayPage() {
     return () => unsub()
   }, [])
 
-  // 💾 SALVAR
   async function confirmarSalvar() {
-    setSaving(true)
+    try {
+      setSaving(true)
 
-    await Promise.all([
-      setDoc(doc(db, "config", "display"), {
-        limiteProntos: limite,
-      }),
-      setDoc(doc(db, "config", "printer"), {
-        url: printerIp,
-      }),
-    ])
+      await Promise.all([
+        setDoc(doc(db, "config", "display"), {
+          limiteProntos: limite,
+        }),
+        setDoc(doc(db, "config", "printer"), {
+          url: printerIp,
+        }),
+      ])
 
-    localStorage.setItem("printer_ip", printerIp)
-    clearCacheKey(key)
+      localStorage.setItem("printer_ip", printerIp)
+      clearCacheKey(key)
 
-    setSaving(false)
-    setShowModal(false)
+setShowModal(false)
+
+setTimeout(() => {
+  showToast("Ajustes aplicados", "success")
+}, 100)
+
+    } catch (err) {
+      showToast("Erro ao salvar configurações", "error")
+    } finally {
+      setSaving(false)
+    }
   }
 
   return (
@@ -91,24 +107,22 @@ export default function ConfigDisplayPage() {
               Central Gourmet
             </h1>
             <p className="text-xs text-gray-400">
-              Configurações
+              Ajustes
             </p>
           </div>
         </div>
 
-        <BackButton href="/" />
+        <BackButton href="/admin" />
       </div>
 
       <div className="grid md:grid-cols-3 gap-6">
 
-        {/* CONFIG */}
         <div className="bg-gray-800 p-4 rounded-xl space-y-4 self-start">
 
           <h2 className="font-semibold text-lg">
             Configuração
           </h2>
 
-          {/* DISPLAY */}
           <div>
             <p className="text-sm text-gray-400 mb-1">
               Limite de pedidos prontos
@@ -121,7 +135,6 @@ export default function ConfigDisplayPage() {
             />
           </div>
 
-          {/* IMPRESSORA */}
           <div>
             <p className="text-sm text-gray-400 mb-1">
               IP da Impressora
@@ -143,14 +156,12 @@ export default function ConfigDisplayPage() {
 
         </div>
 
-        {/* INFO */}
         <div className="md:col-span-2 space-y-2">
 
           <div className="bg-gray-800 p-4 rounded">
             <p className="font-semibold">Display</p>
             <p className="text-sm text-gray-400 mt-1">
-              Define quantos pedidos PRONTOS serão exibidos no painel ao vivo,
-              de acordo com o espaço disponível na tela.
+              Define quantos pedidos PRONTOS serão exibidos no painel ao vivo.
             </p>
           </div>
 
@@ -158,7 +169,6 @@ export default function ConfigDisplayPage() {
             <p className="font-semibold">Impressora</p>
             <p className="text-sm text-gray-400 mt-1">
               Informe o IP do computador que está rodando o serviço de impressão.
-              Exemplo: http://192.168.1.7:3001
             </p>
           </div>
 
@@ -203,6 +213,14 @@ export default function ConfigDisplayPage() {
 
           </div>
 
+        </div>
+      )}
+
+      {/* 🔥 TOAST */}
+      {toast && (
+        <div className={`fixed bottom-5 right-5 z-[9999] px-4 py-2 rounded-lg shadow-lg text-sm
+          ${toast.type === "success" ? "bg-green-600" : "bg-red-600"}`}>
+          {toast.message}
         </div>
       )}
 
