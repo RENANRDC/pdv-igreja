@@ -688,10 +688,10 @@ onFocus={() => {
 <button
   onClick={async () => {
     try {
-      if (!printerIp) {
-        alert("Impressora não configurada")
-        return
-      }
+if (!printerIp || !printerIp.startsWith("http")) {
+  alert("Impressora não carregada ainda")
+  return
+}
 
       await fetch(`${printerIp}/print`, {
         method: "POST",
