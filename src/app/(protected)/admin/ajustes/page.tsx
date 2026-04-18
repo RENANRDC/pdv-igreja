@@ -14,18 +14,9 @@ export default function ConfigDisplayPage() {
     typeof cache[key] === "number" ? cache[key] : 20
 
   const [limite, setLimite] = useState<number>(valorInicial)
-
-  const [printerIp, setPrinterIp] = useState(() => {
-    if (typeof window !== "undefined") {
-      return localStorage.getItem("printer_ip") || "http://localhost:3001"
-    }
-    return "http://localhost:3001"
-  })
-
   const [showModal, setShowModal] = useState(false)
   const [saving, setSaving] = useState(false)
 
-  // 🔥 NOVO: TOAST
   const [toast, setToast] = useState<{
     message: string
     type: "success" | "error"
@@ -51,42 +42,21 @@ export default function ConfigDisplayPage() {
     return () => unsub()
   }, [])
 
-  useEffect(() => {
-    const ref = doc(db, "config", "printer")
-
-    const unsub = onSnapshot(ref, (snap) => {
-      const valor = snap.exists()
-        ? snap.data().url || "http://localhost:3001"
-        : "http://localhost:3001"
-
-      setPrinterIp(valor)
-      localStorage.setItem("printer_ip", valor)
-    })
-
-    return () => unsub()
-  }, [])
-
   async function confirmarSalvar() {
     try {
       setSaving(true)
 
-      await Promise.all([
-        setDoc(doc(db, "config", "display"), {
-          limiteProntos: limite,
-        }),
-        setDoc(doc(db, "config", "printer"), {
-          url: printerIp,
-        }),
-      ])
+      await setDoc(doc(db, "config", "display"), {
+        limiteProntos: limite,
+      })
 
-      localStorage.setItem("printer_ip", printerIp)
       clearCacheKey(key)
 
-setShowModal(false)
+      setShowModal(false)
 
-setTimeout(() => {
-  showToast("Ajustes aplicados", "success")
-}, 100)
+      setTimeout(() => {
+        showToast("Ajustes aplicados", "success")
+      }, 100)
 
     } catch (err) {
       showToast("Erro ao salvar configurações", "error")
@@ -135,18 +105,6 @@ setTimeout(() => {
             />
           </div>
 
-          <div>
-            <p className="text-sm text-gray-400 mb-1">
-              IP da Impressora
-            </p>
-            <input
-              value={printerIp}
-              onChange={(e) => setPrinterIp(e.target.value)}
-              placeholder="http://192.168.1.7:3001"
-              className="w-full p-3 rounded bg-gray-700 outline-none"
-            />
-          </div>
-
           <button
             onClick={() => setShowModal(true)}
             className="bg-green-600 w-full p-3 rounded font-semibold"
@@ -165,13 +123,6 @@ setTimeout(() => {
             </p>
           </div>
 
-          <div className="bg-gray-800 p-4 rounded">
-            <p className="font-semibold">Impressora</p>
-            <p className="text-sm text-gray-400 mt-1">
-              Informe o IP do computador que está rodando o serviço de impressão.
-            </p>
-          </div>
-
         </div>
 
       </div>
@@ -187,8 +138,7 @@ setTimeout(() => {
             </h2>
 
             <p className="text-sm text-gray-400">
-              Limite: <strong>{limite}</strong><br />
-              Impressora: <strong>{printerIp}</strong>
+              Limite: <strong>{limite}</strong>
             </p>
 
             <div className="flex gap-2 pt-2">
@@ -216,7 +166,7 @@ setTimeout(() => {
         </div>
       )}
 
-      {/* 🔥 TOAST */}
+      {/* TOAST */}
       {toast && (
         <div className={`fixed bottom-5 right-5 z-[9999] px-4 py-2 rounded-lg shadow-lg text-sm
           ${toast.type === "success" ? "bg-green-600" : "bg-red-600"}`}>
