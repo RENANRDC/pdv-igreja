@@ -103,39 +103,40 @@ export default function RelatoriosPage() {
   async function load() {
     const key = "financeiro-fechamentos"
 
-    // 🔥 CACHE (instantâneo)
     const cached = cache[key] as Fechamento[] | undefined
 
-    if (cached) {
+    if (cached && cached.length > 0) {
       setDados(cached)
-      setLoading(false)
-      return
     }
 
-    const snap = await getDocs(collection(db, "fechamentos"))
+    try {
+      const snap = await getDocs(collection(db, "fechamentos"))
 
-    let lista: Fechamento[] = snap.docs.map(doc => ({
-      id: doc.id,
-      ...(doc.data() as Omit<Fechamento, "id">)
-    }))
+      let lista: Fechamento[] = snap.docs.map(doc => ({
+        id: doc.id,
+        ...(doc.data() as Omit<Fechamento, "id">)
+      }))
 
-    lista = lista.sort((a, b) => getTime(b.createdAt) - getTime(a.createdAt))
+      lista = lista.sort((a, b) => getTime(b.createdAt) - getTime(a.createdAt))
 
-    // 🔥 salva cache
-    cache[key] = lista
-    persistCache()
+      cache[key] = lista
+      persistCache()
 
-    setDados(lista)
+      setDados(lista)
+
+    } catch (err) {
+      console.error("Erro ao carregar fechamentos:", err)
+    }
+
     setLoading(false)
   }
 
-useEffect(() => {
-  async function init() {
-    await load()
-  }
-
-  init()
-}, [])
+  useEffect(() => {
+    async function init() {
+      await load()
+    }
+    init()
+  }, [])
 
   /* ================= ABRIR ================= */
 
@@ -192,10 +193,30 @@ useEffect(() => {
       })
     })
 
+    const produtosMap: Record<string, { qtd: number; total: number }> = {}
+
+    lista.forEach(p => {
+      p.itens?.forEach(i => {
+        if (!produtosMap[i.nome]) {
+          produtosMap[i.nome] = { qtd: 0, total: 0 }
+        }
+
+        produtosMap[i.nome].qtd += i.quantidade
+        produtosMap[i.nome].total += (i.preco || 0) * i.quantidade
+      })
+    })
+
+    const produtosData = Object.entries(produtosMap).map(([nome, d]) => ({
+      Produto: nome,
+      Quantidade: d.qtd,
+      Total: d.total,
+    }))
+
     const wb = XLSX.utils.book_new()
 
     XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(pedidosData), "Pedidos")
     XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(itensData), "Itens")
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(produtosData), "Produtos")
 
     XLSX.writeFile(wb, `relatorio-${dataFormatada}.xlsx`)
   }
@@ -211,7 +232,6 @@ useEffect(() => {
       await deleteDoc(doc(db, "fechamentos", d.id))
     }
 
-    // 🔥 limpa cache também
     cache["financeiro-fechamentos"] = []
     persistCache()
 
@@ -237,7 +257,6 @@ useEffect(() => {
         <BackButton href="/admin/financeiro" />
       </div>
 
-      {/* BOTÃO LIMPAR */}
       <button
         onClick={() => setConfirmDelete(true)}
         className="w-full bg-red-600 hover:bg-red-700 p-3 rounded-xl font-bold mb-4"
@@ -263,7 +282,6 @@ useEffect(() => {
         </div>
       )}
 
-      {/* MODAL RELATÓRIO */}
       {selected && (
         <div className="fixed inset-0 bg-black/80 flex items-center justify-center">
           <div className="bg-gray-900 p-6 rounded-xl w-[400px]">
@@ -299,7 +317,6 @@ useEffect(() => {
         </div>
       )}
 
-      {/* MODAL CRÍTICO */}
       {confirmDelete && (
         <div className="fixed inset-0 bg-black/90 flex items-center justify-center">
 

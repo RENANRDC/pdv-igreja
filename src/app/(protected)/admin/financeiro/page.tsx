@@ -86,25 +86,37 @@ export default function FinanceiroPage() {
     setLoading(true)
 
     try {
-      // 🔥 SALVA SNAPSHOT COMPLETO DOS PEDIDOS
+      // 🔥 SALVA HISTÓRICO
       await addDoc(collection(db, "fechamentos"), {
         totalPedidos,
         totalGeral,
         createdAt: serverTimestamp(),
-        itens: ativos, // ✅ ESSA LINHA RESOLVE TUDO
+        itens: ativos,
       })
 
-      const snapshot = await getDocs(collection(db, "pedidos"))
+      // 🔥 APAGA PEDIDOS
+      const pedidosSnap = await getDocs(collection(db, "pedidos"))
 
-      for (const docSnap of snapshot.docs) {
-        await deleteDoc(doc(db, "pedidos", docSnap.id))
-      }
+      await Promise.all(
+        pedidosSnap.docs.map(d =>
+          deleteDoc(doc(db, "pedidos", d.id))
+        )
+      )
+
+      // 🔥 APAGA FILA DE IMPRESSÃO (GARANTIDO)
+      const filaSnap = await getDocs(collection(db, "fila_impressao"))
+
+      await Promise.all(
+        filaSnap.docs.map(d =>
+          deleteDoc(doc(db, "fila_impressao", d.id))
+        )
+      )
 
       setConfirmModal(false)
       setSuccessModal(true)
 
     } catch (err) {
-      console.error(err)
+      console.error("ERRO NO FECHAMENTO:", err)
     } finally {
       setLoading(false)
     }
@@ -201,12 +213,9 @@ export default function FinanceiroPage() {
         Fechar Caixa
       </button>
 
-      {/* ⚠️ MODAL */}
       {confirmModal && (
         <div className="fixed inset-0 bg-black/90 flex items-center justify-center">
-
           <div className="bg-gray-900 p-6 rounded-xl w-80 text-center border border-red-600">
-
             <p className="text-red-500 font-bold text-lg mb-3">
               ⚠️ ATENÇÃO CRÍTICA
             </p>
@@ -216,7 +225,6 @@ export default function FinanceiroPage() {
             </p>
 
             <div className="flex gap-2">
-
               <button
                 onClick={() => setConfirmModal(false)}
                 className="flex-1 bg-gray-700 p-2 rounded"
@@ -231,11 +239,8 @@ export default function FinanceiroPage() {
               >
                 {loading ? "Fechando..." : "Confirmar"}
               </button>
-
             </div>
-
           </div>
-
         </div>
       )}
 
