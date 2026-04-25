@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useRef, useState } from "react"
+import { useEffect, useState } from "react"
 import {
   collection,
   onSnapshot,
@@ -35,9 +35,6 @@ export default function Cozinha() {
   const [pedidoSelecionado, setPedidoSelecionado] = useState<Pedido | null>(null)
   const [aba, setAba] = useState<"pendente" | "em_preparo" | "finalizado">("pendente")
 
-  const somNovoRef = useRef<HTMLAudioElement | null>(null)
-  const idsRef = useRef<string[]>([])
-
   useEffect(() => {
     const load = () => {
       const local = localStorage.getItem(key)
@@ -50,10 +47,6 @@ export default function Cozinha() {
     }
 
     queueMicrotask(load)
-  }, [])
-
-  useEffect(() => {
-    somNovoRef.current = new Audio("/sounds/novo.wav")
   }, [])
 
   useEffect(() => {
@@ -71,16 +64,6 @@ export default function Cozinha() {
       cache[key] = lista
       localStorage.setItem(key, JSON.stringify(lista))
 
-      const novosIds = snapshot.docs.map((doc) => doc.id)
-
-      if (idsRef.current.length > 0) {
-        const temNovo = novosIds.some(id => !idsRef.current.includes(id))
-        if (temNovo) {
-          somNovoRef.current?.play().catch(() => {})
-        }
-      }
-
-      idsRef.current = novosIds
       setPedidos(lista)
     })
 
