@@ -217,9 +217,23 @@ setDeleteModal(null)
 
 await loadUsers()
 
-    } catch (err) {
-      showToast(getErrorMessage(err), "error")
-    }
+} catch (err: unknown) {
+
+  if (
+    err instanceof Error &&
+    (
+      err.message.includes("não autenticado") ||
+      err.message.includes("401")
+    )
+  ) {
+    const auth = getAuth()
+    await signOut(auth)
+    window.location.href = "/login"
+    return
+  }
+
+  showToast(getErrorMessage(err), "error")
+}
   }
 
   const filteredUsers = useMemo(() => {
@@ -387,7 +401,25 @@ return (
                 onChange={e => setEditForm({ ...editForm, role: e.target.value as Role })}
               />
 
-              <Button onClick={updateUser} loading={isLoading} label="Salvar alterações" />
+              <div className="flex gap-2">
+  <button
+    onClick={() => {
+      setModal(null)
+      setSelectedUser(null)
+    }}
+    className="flex-1 bg-zinc-700 p-2 rounded"
+  >
+    Cancelar
+  </button>
+
+  <button
+    onClick={updateUser}
+    disabled={isLoading}
+    className="flex-1 bg-green-600 hover:bg-green-700 p-2 rounded disabled:opacity-60"
+  >
+    {isLoading ? "Processando..." : "Salvar alterações"}
+  </button>
+</div>
             </>
           )}
         </Modal>
