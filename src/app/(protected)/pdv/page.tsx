@@ -492,7 +492,7 @@ onFocus={() => {
           disabled={!itens.length}
           className="w-full h-14 rounded-xl bg-green-600 hover:bg-green-700 transition font-bold text-lg disabled:opacity-50"
         >
-          Finalizar Pedido
+          Receber Pagamento
         </button>
 
         <button
@@ -528,7 +528,7 @@ onFocus={() => {
       disabled={!itens.length}
       className="w-full h-14 rounded-xl bg-green-600 hover:bg-green-700 transition font-bold text-lg disabled:opacity-50"
     >
-      Finalizar Pedido
+      Receber Pagamento
     </button>
 
     <button
@@ -546,7 +546,7 @@ onFocus={() => {
           <div className="bg-white text-gray-900 w-full max-w-sm rounded-2xl p-6">
 
             <h2 className="text-xl font-bold mb-4 text-center">
-              Confirmar pagamento
+              Pagamento recebido?
             </h2>
 
             <div className="mb-4 text-center">
