@@ -5,9 +5,12 @@ import { login } from "@/services/auth"
 import { useRouter } from "next/navigation"
 import { getAuth } from "firebase/auth"
 import { Eye, EyeOff } from "lucide-react"
-import { setCachedUser } from "@/hooks/useAdminGuard"
+import {
+  setCachedUser,
+  clearUserCache
+} from "@/hooks/useAdminGuard"
 import { fetchWithAuth } from "@/lib/fetchWithAuth"
-import { cache } from "@/lib/cache"
+import { clearCache } from "@/lib/cache"
 
 import AuthCard from "@/components/ui/AuthCard"
 
@@ -32,6 +35,7 @@ export default function LoginPage() {
 
       const email = `${usuario}@pdv.local`
 
+      // 🔐 Login Firebase
       await login(email, senha)
 
       const auth = getAuth()
@@ -41,55 +45,39 @@ export default function LoginPage() {
 
       const token = await user.getIdToken(true)
 
-      // 🔐 cria sessão
+      // 🔐 cria sessão no backend
       const res = await fetch("/api/session", {
         method: "POST",
         headers: {
           Authorization: `Bearer ${token}`,
         },
         credentials: "include",
-        cache: "no-store",
       })
 
       if (!res.ok) throw new Error("Erro ao criar sessão")
 
-      // 🔥 pega dados reais do usuário
-      const me = await fetchWithAuth("/api/me")
+      // 🔥 LIMPA TODOS OS CACHES (ESSENCIAL)
+      clearUserCache()
+      clearCache()
 
-      setCachedUser({
-        role: me.role || "user",
-        username: me.username || usuario,
-      })
-
-      // 🔥 pré-carregamento comum (todos usuários)
-      try {
-        const pedidos = await fetchWithAuth("/api/pedidos")
-
-        if (Array.isArray(pedidos)) {
-          cache["cozinha-pedidos"] = pedidos
-        } else if (Array.isArray(pedidos?.pedidos)) {
-          cache["cozinha-pedidos"] = pedidos.pedidos
-        }
-      } catch {}
+      // 🔥 pega role com segurança (sem quebrar login)
+      let role: "admin" | "user" = "user"
 
       try {
-        const fechamentos = await fetchWithAuth("/api/fechamentos")
-
-        if (Array.isArray(fechamentos)) {
-          cache["financeiro-fechamentos"] = fechamentos
-        } else if (Array.isArray(fechamentos?.fechamentos)) {
-          cache["financeiro-fechamentos"] = fechamentos.fechamentos
-        }
-      } catch {}
-
-      // 🔐 só admin carrega coisas de admin
-      if (me.role === "admin") {
-        try {
-          await fetchWithAuth("/api/admin/users")
-        } catch {}
+        const me = await fetchWithAuth("/api/me")
+        role = me.role === "admin" ? "admin" : "user"
+      } catch (err) {
+        console.warn("Falha ao buscar /api/me:", err)
+        // não quebra login
       }
 
-      router.refresh()
+      // 🔥 salva usuário corretamente
+      setCachedUser({
+        role,
+        username: usuario,
+      })
+
+      // 🚀 redireciona
       router.replace("/")
 
     } catch (err: unknown) {
@@ -114,14 +102,16 @@ export default function LoginPage() {
 
       <AuthCard>
 
+        {/* LOGO */}
         <div className="flex justify-center mb-4">
           <div className="p-4 rounded-2xl 
             bg-gradient-to-br from-gray-700 to-gray-800
             shadow-[inset_0_1px_2px_rgba(255,255,255,0.1),0_6px_20px_rgba(0,0,0,0.6)]">
-            <img src="/logo.png" alt="Logo" className="h-25 object-contain" />
+            <img src="/logo.png" alt="Logo" className="h-24 object-contain" />
           </div>
         </div>
 
+        {/* TÍTULO */}
         <h1 className="text-white text-xl font-semibold text-center">
           Central Gourmet
         </h1>
@@ -130,6 +120,7 @@ export default function LoginPage() {
           Gestão de Pedidos
         </p>
 
+        {/* FORM */}
         <form
           onSubmit={(e) => {
             e.preventDefault()
@@ -137,6 +128,7 @@ export default function LoginPage() {
           }}
         >
 
+          {/* USUÁRIO */}
           <input
             autoFocus
             placeholder="Usuário"
@@ -151,6 +143,7 @@ export default function LoginPage() {
             shadow-inner"
           />
 
+          {/* SENHA */}
           <div className="relative mb-4">
             <input
               type={mostrarSenha ? "text" : "password"}
@@ -175,6 +168,7 @@ export default function LoginPage() {
             </button>
           </div>
 
+          {/* BOTÃO */}
           <button
             type="submit"
             disabled={loading}
@@ -188,6 +182,7 @@ export default function LoginPage() {
 
         </form>
 
+        {/* ERRO */}
         {erro && (
           <p className="text-red-400 text-sm mt-3 text-center">
             {erro}
