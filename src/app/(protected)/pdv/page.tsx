@@ -362,7 +362,7 @@ onFocus={() => {
   </div>
 
   {/* PRODUTOS */}
-  <div className="grid grid-cols-2 md:grid-cols-3 gap-3 max-h-[60vh] overflow-y-auto pr-1">
+  <div className="grid grid-cols-2 md:grid-cols-3 gap-3 max-h-[45vh] lg:max-h-[60vh] overflow-y-auto pr-1 pb-6">
 
     {produtosFiltrados.length === 0 && (
       <div className="col-span-full text-center text-gray-400 py-10">
@@ -448,15 +448,14 @@ onFocus={() => {
                 compacto ? "rounded-lg" : "rounded-xl"
               }`}>
 
-                <button
-                  onClick={() => removerItem(item.nome)}
-                  disabled={item.quantidade === 1}
-                  className={`flex items-center justify-center bg-red-600 hover:bg-red-700 active:scale-95 transition font-bold disabled:opacity-40 ${
-                    compacto ? "w-9 h-9" : "w-11 h-11"
-                  }`}
-                >
-                  −
-                </button>
+<button
+  onClick={() => removerItem(item.nome)}
+  className={`flex items-center justify-center bg-red-600 hover:bg-red-700 active:scale-95 transition font-bold ${
+    compacto ? "w-9 h-9" : "w-11 h-11"
+  }`}
+>
+  −
+</button>
 
                 <div className={`flex items-center justify-center font-bold ${
                   compacto ? "w-9 h-9 text-base" : "w-11 h-11 text-lg"
@@ -516,7 +515,7 @@ onFocus={() => {
     </p>
   )}
 
-  <div className="h-32"></div>
+  <div className="h-40 lg:h-0"></div>
 
   <div className="fixed bottom-0 left-0 w-full bg-gray-800 p-4 lg:hidden">
     <div className="flex justify-between text-lg font-bold mb-2">
