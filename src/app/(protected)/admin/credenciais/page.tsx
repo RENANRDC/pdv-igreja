@@ -393,33 +393,33 @@ return (
         </Modal>
       )}
 
-      {deleteModal && (
-        <Modal onClose={() => setDeleteModal(null)}>
-          <h2 className="text-lg font-semibold mb-3 text-red-400">
-            Confirmar exclusão
-          </h2>
+{deleteModal && (
+  <Modal onClose={() => setDeleteModal(null)}>
+    <h2 className="text-lg font-semibold mb-3 text-red-400">
+      Confirmar exclusão
+    </h2>
 
-          <p className="text-sm text-gray-400 mb-4">
-            Deseja realmente excluir <strong>{deleteModal.username}</strong>?
-          </p>
+    <p className="text-sm text-gray-400 mb-4">
+      Deseja realmente excluir <strong>{deleteModal.username}</strong>?
+    </p>
 
-          <div className="flex gap-2">
-            <button
-              onClick={() => setDeleteModal(null)}
-              className="flex-1 bg-zinc-700 p-2 rounded"
-            >
-              Cancelar
-            </button>
+    <div className="flex gap-2">
+      <button
+        onClick={() => setDeleteModal(null)}
+        className="flex-1 bg-zinc-700 p-2 rounded"
+      >
+        Cancelar
+      </button>
 
-            <button
-              onClick={confirmDelete}
-              className="flex-1 bg-red-600 hover:bg-red-700 p-2 rounded"
-            >
-              Excluir
-            </button>
-          </div>
-        </Modal>
-      )}
+      <button
+        onClick={confirmDelete}
+        className="flex-1 bg-red-600 hover:bg-red-700 p-2 rounded"
+      >
+        Excluir
+      </button>
+    </div>
+  </Modal>
+)}
 
       {toast && (
         <div className={`fixed bottom-5 right-5 px-4 py-2 rounded-lg shadow-lg text-sm
@@ -509,12 +509,7 @@ function Modal({
       <div className="bg-zinc-900 p-6 rounded-xl w-full max-w-sm border border-zinc-700 shadow-xl">
         {children}
 
-        <button
-          onClick={onClose}
-          className="mt-4 w-full text-gray-400 hover:text-white transition"
-        >
-          Cancelar
-        </button>
+
       </div>
     </div>
   )
