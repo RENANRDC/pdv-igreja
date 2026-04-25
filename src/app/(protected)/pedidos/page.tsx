@@ -13,6 +13,7 @@ import { db } from "@/services/firebase"
 import BackButton from "@/components/ui/BackButton"
 import { cache } from "@/lib/cache"
 import PageContainer from "@/components/ui/PageContainer"
+import { Timestamp } from "firebase/firestore"
 
 type Pedido = {
   id: string
@@ -23,6 +24,7 @@ type Pedido = {
     nome: string
     quantidade: number
   }[]
+  finalizadoAt?: Timestamp // 🔥 adiciona isso
 }
 
 export default function Cozinha() {
@@ -100,9 +102,10 @@ export default function Cozinha() {
   async function confirmarFinalizar() {
     if (!pedidoSelecionado) return
 
-    await updateDoc(doc(db, "pedidos", pedidoSelecionado.id), {
-      status: "finalizado",
-    })
+await updateDoc(doc(db, "pedidos", pedidoSelecionado.id), {
+  status: "finalizado",
+  finalizadoAt: new Date(), // 🔥 ESSENCIAL
+})
 
     setPedidoSelecionado(null)
   }
@@ -115,7 +118,13 @@ export default function Cozinha() {
 
   const pendentes = pedidos.filter(p => p.status === "pendente")
   const emPreparo = pedidos.filter(p => p.status === "em_preparo")
-  const finalizados = pedidos.filter(p => p.status === "finalizado")
+const finalizados = pedidos
+  .filter(p => p.status === "finalizado")
+  .sort((a, b) => {
+    const aTime = a.finalizadoAt?.seconds || 0
+    const bTime = b.finalizadoAt?.seconds || 0
+    return bTime - aTime
+  })
 
   const lista =
     aba === "pendente"
