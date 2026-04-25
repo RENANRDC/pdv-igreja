@@ -41,6 +41,7 @@ export default function LoginPage() {
 
       const token = await user.getIdToken(true)
 
+      // 🔐 cria sessão
       const res = await fetch("/api/session", {
         method: "POST",
         headers: {
@@ -52,11 +53,15 @@ export default function LoginPage() {
 
       if (!res.ok) throw new Error("Erro ao criar sessão")
 
+      // 🔥 pega dados reais do usuário
+      const me = await fetchWithAuth("/api/me")
+
       setCachedUser({
-        role: "admin",
-        username: usuario,
+        role: me.role || "user",
+        username: me.username || usuario,
       })
 
+      // 🔥 pré-carregamento comum (todos usuários)
       try {
         const pedidos = await fetchWithAuth("/api/pedidos")
 
@@ -67,8 +72,6 @@ export default function LoginPage() {
         }
       } catch {}
 
-      await fetchWithAuth("/api/admin/users")
-
       try {
         const fechamentos = await fetchWithAuth("/api/fechamentos")
 
@@ -78,6 +81,13 @@ export default function LoginPage() {
           cache["financeiro-fechamentos"] = fechamentos.fechamentos
         }
       } catch {}
+
+      // 🔐 só admin carrega coisas de admin
+      if (me.role === "admin") {
+        try {
+          await fetchWithAuth("/api/admin/users")
+        } catch {}
+      }
 
       router.refresh()
       router.replace("/")
