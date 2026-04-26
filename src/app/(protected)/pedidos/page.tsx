@@ -156,14 +156,14 @@ const finalizados = pedidos
               #{pedido.codigo} • {pedido.nomeCliente}
             </span>
 
-            {pedido.status === "pendente" && (
-              <button
-                onClick={() => assumirPedido(pedido.id)}
-                className={`${btnBase} bg-yellow-500 text-black`}
-              >
-                Assumir
-              </button>
-            )}
+{pedido.status === "pendente" && (
+  <button
+    onClick={() => setPedidoSelecionado(pedido)}
+    className={`${btnBase} bg-yellow-500 text-black`}
+  >
+    Detalhes
+  </button>
+)}
 
             {pedido.status === "em_preparo" && (
               <button
@@ -208,11 +208,14 @@ const finalizados = pedidos
                     #{pedido.codigo} • {pedido.nomeCliente}
                   </span>
 
-                  {pedido.status === "pendente" && (
-                    <button onClick={() => assumirPedido(pedido.id)} className={`${btnBase} bg-yellow-500 text-black`}>
-                      Assumir
-                    </button>
-                  )}
+{pedido.status === "pendente" && (
+  <button
+    onClick={() => setPedidoSelecionado(pedido)}
+    className={`${btnBase} bg-yellow-500 text-black`}
+  >
+    Detalhes
+  </button>
+)}
 
                   {pedido.status === "em_preparo" && (
                     <button onClick={() => setPedidoSelecionado(pedido)} className={`${btnBase} bg-blue-600`}>
@@ -234,51 +237,78 @@ const finalizados = pedidos
 
       </div>
 
-      {/* MODAL */}
-      {pedidoSelecionado && (
-        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50">
-          <div className="bg-gray-900 p-6 rounded-xl w-80">
+{/* MODAL */}
+{pedidoSelecionado && (
+  <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50">
+    <div className="bg-gray-900 p-6 rounded-xl w-80">
 
-            <h2 className="text-xl font-bold mb-3">
-              Pedido #{pedidoSelecionado.codigo}
-            </h2>
+      <h2 className="text-xl font-bold mb-3">
+        Pedido #{pedidoSelecionado.codigo}
+      </h2>
 
-            <p className="text-sm text-gray-400 mb-3">
-              {pedidoSelecionado.nomeCliente}
-            </p>
+      <p className="text-sm text-gray-400 mb-3">
+        {pedidoSelecionado.nomeCliente}
+      </p>
 
-            <div className="mb-4 space-y-1">
-              {pedidoSelecionado.itens.map((item, i) => (
-                <div key={i} className="flex justify-between text-sm">
-                  <span>{item.nome}</span>
-                  <span>x{item.quantidade}</span>
-                </div>
-              ))}
-            </div>
-
-            <div className="grid grid-cols-3 gap-2">
-              <button onClick={() => setPedidoSelecionado(null)} className="bg-gray-700 h-10 rounded-lg text-sm flex items-center justify-center">
-                Fechar
-              </button>
-
-              <button
-                onClick={async () => {
-                  await voltarParaPendente(pedidoSelecionado.id)
-                  setPedidoSelecionado(null)
-                }}
-                className="bg-yellow-500 text-black h-10 rounded-lg text-sm font-semibold flex items-center justify-center"
-              >
-                Voltar
-              </button>
-
-              <button onClick={confirmarFinalizar} className="bg-green-600 h-10 rounded-lg text-sm font-semibold flex items-center justify-center">
-                Finalizar
-              </button>
-            </div>
-
+      <div className="mb-4 space-y-1">
+        {pedidoSelecionado.itens.map((item, i) => (
+          <div key={i} className="flex justify-between text-sm">
+            <span>{item.nome}</span>
+            <span>x{item.quantidade}</span>
           </div>
+        ))}
+      </div>
+
+      {pedidoSelecionado.status === "pendente" ? (
+        <div className="grid grid-cols-2 gap-2">
+          <button
+            onClick={() => setPedidoSelecionado(null)}
+            className="bg-gray-700 h-10 rounded-lg text-sm flex items-center justify-center"
+          >
+            Fechar
+          </button>
+
+          <button
+            onClick={async () => {
+              await assumirPedido(pedidoSelecionado.id)
+              setPedidoSelecionado(null)
+            }}
+            className="bg-yellow-500 text-black h-10 rounded-lg text-sm font-semibold flex items-center justify-center"
+          >
+            Assumir
+          </button>
+        </div>
+      ) : (
+        <div className="grid grid-cols-3 gap-2">
+          <button
+            onClick={() => setPedidoSelecionado(null)}
+            className="bg-gray-700 h-10 rounded-lg text-sm flex items-center justify-center"
+          >
+            Fechar
+          </button>
+
+          <button
+            onClick={async () => {
+              await voltarParaPendente(pedidoSelecionado.id)
+              setPedidoSelecionado(null)
+            }}
+            className="bg-yellow-500 text-black h-10 rounded-lg text-sm font-semibold flex items-center justify-center"
+          >
+            Voltar
+          </button>
+
+          <button
+            onClick={confirmarFinalizar}
+            className="bg-green-600 h-10 rounded-lg text-sm font-semibold flex items-center justify-center"
+          >
+            Finalizar
+          </button>
         </div>
       )}
+
+    </div>
+  </div>
+)}
 
     </PageContainer>
   )

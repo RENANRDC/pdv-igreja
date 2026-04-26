@@ -190,9 +190,16 @@ export default function FinanceiroPage() {
                 R$ {getTotal(p).toFixed(2)}
               </span>
             </div>
-            <div className="text-xs text-gray-400">
-              {p.formaPagamento}
-            </div>
+<div className="text-xs text-gray-400 flex justify-between">
+  <span>{p.formaPagamento}</span>
+
+  <span>
+    {p.createdAt?.toDate?.()?.toLocaleTimeString("pt-BR", {
+      hour: "2-digit",
+      minute: "2-digit",
+    }) || "--:--"}
+  </span>
+</div>
           </div>
         ))}
 
