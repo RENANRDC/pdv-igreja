@@ -102,10 +102,9 @@ export default function DisplayPage() {
   )
 
   // 🔥 PRONTOS
-  const prontos = pedidos
-    .filter((p) => p.status === "finalizado")
-    .sort((a, b) => Number(b.id) - Number(a.id))
-    .slice(0, limiteProntos)
+const prontos = pedidos
+  .filter((p) => p.status === "finalizado")
+  .slice(0, limiteProntos)
 
   // 🔥 scroll EM PREPARO
   useEffect(() => {
@@ -126,22 +125,42 @@ export default function DisplayPage() {
   }, [emPreparo])
 
   // 🔥 scroll PRONTOS (NOVO)
-  useEffect(() => {
-    const check = () => {
-      if (containerProntosRef.current && contentProntosRef.current) {
-        const containerHeight = containerProntosRef.current.offsetHeight
-        const contentHeight = contentProntosRef.current.scrollHeight
-        setPrecisaScrollProntos(contentHeight > containerHeight)
-      }
+useEffect(() => {
+  const check = () => {
+    if (containerProntosRef.current && contentProntosRef.current) {
+      const containerHeight =
+        containerProntosRef.current.offsetHeight
+
+      const contentHeight =
+        contentProntosRef.current.scrollHeight
+
+      setPrecisaScrollProntos(
+        contentHeight > containerHeight
+      )
     }
+  }
 
+  const timeout = setTimeout(() => {
     check()
+  }, 100)
 
-    const observer = new ResizeObserver(check)
-    if (contentProntosRef.current) observer.observe(contentProntosRef.current)
+  const observer = new ResizeObserver(() => {
+    check()
+  })
 
-    return () => observer.disconnect()
-  }, [prontos])
+  if (contentProntosRef.current) {
+    observer.observe(contentProntosRef.current)
+  }
+
+  if (containerProntosRef.current) {
+    observer.observe(containerProntosRef.current)
+  }
+
+  return () => {
+    clearTimeout(timeout)
+    observer.disconnect()
+  }
+}, [prontos, limiteProntos])
 
   return (
     <div className="h-screen bg-gray-900 text-white overflow-hidden">
@@ -180,10 +199,14 @@ export default function DisplayPage() {
                   precisaScroll ? "animate-scroll" : ""
                 }`}
               >
-                {(precisaScroll ? [...emPreparo, ...emPreparo] : emPreparo).map(
+                {(
+  precisaScroll
+    ? [...emPreparo, ...emPreparo]
+    : emPreparo
+).map(
                   (pedido, index) => (
                     <div
-                      key={index}
+                      key={`${pedido.id}-${index}`}
                       className="bg-yellow-400 text-black rounded-xl p-6 flex items-center justify-center"
                     >
                       <span className="text-6xl lg:text-7xl font-bold">
@@ -215,7 +238,7 @@ export default function DisplayPage() {
 
                     return (
                       <div
-                        key={index}
+                        key={`${pedido.id}-${index}`}
                         className={`rounded-xl p-6 flex items-center justify-center transition-all duration-300 ${
                           isHighlight
                             ? "bg-lime-400 text-black animate-pulse shadow-[0_0_30px_#84cc16]"

@@ -65,16 +65,18 @@ main {
 
 /* 🔥 SCROLL INFINITO */
 @keyframes scrollVertical {
-  0% {
-    transform: translateY(0%);
+  from {
+    transform: translateY(0);
   }
-  100% {
-    transform: translateY(-50%);
+
+  to {
+transform: translateY(calc(-50% - 12px));
   }
 }
 
 .animate-scroll {
-  animation: scrollVertical 40s linear infinite;
+  animation: scrollVertical 25s linear infinite;
+  will-change: transform;
 }
 
 /* 🔥 FADE */
