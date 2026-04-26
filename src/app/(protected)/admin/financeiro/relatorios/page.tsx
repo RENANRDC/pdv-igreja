@@ -212,11 +212,40 @@ export default function RelatoriosPage() {
       Total: d.total,
     }))
 
-    const wb = XLSX.utils.book_new()
+const resumoData = [
+  {
+    Total_Pedidos: selected.totalPedidos,
+    Total_Vendas: selected.totalGeral,
+    Ticket_Medio:
+      selected.totalGeral / (selected.totalPedidos || 1),
+  },
+]
 
-    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(pedidosData), "Pedidos")
-    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(itensData), "Itens")
-    XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(produtosData), "Produtos")
+const wb = XLSX.utils.book_new()
+
+XLSX.utils.book_append_sheet(
+  wb,
+  XLSX.utils.json_to_sheet(resumoData),
+  "Resumo"
+)
+
+XLSX.utils.book_append_sheet(
+  wb,
+  XLSX.utils.json_to_sheet(pedidosData),
+  "Pedidos"
+)
+
+XLSX.utils.book_append_sheet(
+  wb,
+  XLSX.utils.json_to_sheet(itensData),
+  "Itens"
+)
+
+XLSX.utils.book_append_sheet(
+  wb,
+  XLSX.utils.json_to_sheet(produtosData),
+  "Produtos"
+)
 
     XLSX.writeFile(wb, `relatorio-${dataFormatada}.xlsx`)
   }
