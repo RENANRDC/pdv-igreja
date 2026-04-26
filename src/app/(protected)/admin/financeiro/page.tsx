@@ -14,7 +14,7 @@ import { usePedidos } from "@/hooks/usePedidos"
 import PageContainer from "@/components/ui/PageContainer"
 import BackButton from "@/components/ui/BackButton"
 import { useRouter } from "next/navigation"
-import { FolderOpen } from "lucide-react"
+import { FolderOpen, Trash2 } from "lucide-react"
 
 type Item = {
   nome: string
@@ -44,6 +44,7 @@ export default function FinanceiroPage() {
   const [confirmModal, setConfirmModal] = useState(false)
   const [successModal, setSuccessModal] = useState(false)
   const [loading, setLoading] = useState(false)
+  const [pedidoExcluir, setPedidoExcluir] = useState<Pedido | null>(null)
 
   useEffect(() => {
     setMounted(true)
@@ -81,6 +82,17 @@ export default function FinanceiroPage() {
   const rankingProdutos = Object.entries(produtos)
     .map(([nome, data]) => ({ nome, ...data }))
     .sort((a, b) => b.qtd - a.qtd)
+
+async function confirmarExclusaoPedido() {
+  if (!pedidoExcluir) return
+
+  try {
+    await deleteDoc(doc(db, "pedidos", pedidoExcluir.id))
+    setPedidoExcluir(null)
+  } catch (err) {
+    console.error(err)
+  }
+}
 
   async function handleFechamento() {
     setLoading(true)
@@ -184,12 +196,24 @@ export default function FinanceiroPage() {
 
         {ativosOrdenados.slice(0, limite).map(p => (
           <div key={p.id} className="border-b border-gray-700 py-2">
-            <div className="flex justify-between">
-              <span>#{p.codigo} • {p.nomeCliente || "Cliente"}</span>
-              <span className="text-green-400">
-                R$ {getTotal(p).toFixed(2)}
-              </span>
-            </div>
+<div className="flex justify-between items-center">
+  <span>
+    #{p.codigo} • {p.nomeCliente || "Cliente"}
+  </span>
+
+  <div className="flex items-center gap-3">
+    <span className="text-green-400">
+      R$ {getTotal(p).toFixed(2)}
+    </span>
+
+    <button
+      onClick={() => setPedidoExcluir(p)}
+      className="text-red-500 hover:text-red-400"
+    >
+      <Trash2 size={16} />
+    </button>
+  </div>
+</div>
 <div className="text-xs text-gray-400 flex justify-between">
   <span>{p.formaPagamento}</span>
 
@@ -264,6 +288,38 @@ export default function FinanceiroPage() {
           </div>
         </div>
       )}
+
+{pedidoExcluir && (
+  <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50">
+    <div className="bg-gray-900 p-6 rounded-xl w-80 border border-red-600">
+
+      <h2 className="text-lg font-bold text-red-500 mb-3">
+        Confirmar exclusão
+      </h2>
+
+      <p className="text-sm text-gray-300 mb-4">
+        Deseja excluir o pedido #{pedidoExcluir.codigo}?
+      </p>
+
+      <div className="flex gap-2">
+        <button
+          onClick={() => setPedidoExcluir(null)}
+          className="flex-1 bg-gray-700 p-2 rounded"
+        >
+          Cancelar
+        </button>
+
+        <button
+          onClick={confirmarExclusaoPedido}
+          className="flex-1 bg-red-600 p-2 rounded"
+        >
+          Excluir
+        </button>
+      </div>
+
+    </div>
+  </div>
+)}
 
     </PageContainer>
   )
