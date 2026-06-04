@@ -48,14 +48,14 @@ export default function DisplayPage() {
 
   // 🔊 áudio
   useEffect(() => {
-    const audio = new Audio("/sounds/pronto.wav")
+    const audio = new Audio("/sounds/pronto2.wav")
     audio.volume = 1
     audioRef.current = audio
   }, [])
 
   function ativarAlerta(id: string) {
     setHighlightId(id)
-    setTimeout(() => setHighlightId(null), 5000)
+    setTimeout(() => setHighlightId(null), 20000)
 
     if (audioRef.current && audioLiberadoRef.current) {
       audioRef.current.currentTime = 0
@@ -133,6 +133,13 @@ useEffect(() => {
 
       const contentHeight =
         contentProntosRef.current.scrollHeight
+
+      console.log({
+      prontos: prontos.length,
+      containerHeight,
+      contentHeight,
+      scroll: contentHeight > containerHeight,
+    })
 
       setPrecisaScrollProntos(
         contentHeight > containerHeight
@@ -228,11 +235,9 @@ useEffect(() => {
             <div ref={containerProntosRef} className="flex-1 overflow-hidden">
               <div
                 ref={contentProntosRef}
-                className={`grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-6 ${
-                  precisaScrollProntos ? "animate-scroll" : ""
-                }`}
+                className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-6"
               >
-                {(precisaScrollProntos ? [...prontos, ...prontos] : prontos).map(
+                {prontos.map(
                   (pedido, index) => {
                     const isHighlight = pedido.id === highlightId
 

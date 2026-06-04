@@ -174,14 +174,14 @@ const finalizados = pedidos
               </button>
             )}
 
-            {pedido.status === "finalizado" && (
-              <button
-                onClick={() => voltarParaPreparo(pedido.id)}
-                className={`${btnBase} bg-red-600 text-white`}
-              >
-                Desfazer
-              </button>
-            )}
+{pedido.status === "finalizado" && (
+  <button
+    onClick={() => setPedidoSelecionado(pedido)}
+    className={`${btnBase} bg-green-600 text-white`}
+  >
+    Detalhes
+  </button>
+)}
 
           </div>
         ))}
@@ -223,11 +223,14 @@ const finalizados = pedidos
                     </button>
                   )}
 
-                  {pedido.status === "finalizado" && (
-                    <button onClick={() => voltarParaPreparo(pedido.id)} className={`${btnBase} bg-red-600 text-white`}>
-                      Desfazer
-                    </button>
-                  )}
+{pedido.status === "finalizado" && (
+  <button
+    onClick={() => setPedidoSelecionado(pedido)}
+    className={`${btnBase} bg-green-600 text-white`}
+  >
+    Detalhes
+  </button>
+)}
 
                 </div>
               ))}
@@ -259,57 +262,74 @@ const finalizados = pedidos
         ))}
       </div>
 
-      {pedidoSelecionado.status === "pendente" ? (
-        <div className="grid grid-cols-2 gap-2">
-          <button
-            onClick={() => setPedidoSelecionado(null)}
-            className="bg-gray-700 h-10 rounded-lg text-sm flex items-center justify-center"
-          >
-            Fechar
-          </button>
+{pedidoSelecionado.status === "pendente" ? (
+  <div className="grid grid-cols-2 gap-2">
+    <button
+      onClick={() => setPedidoSelecionado(null)}
+      className="bg-gray-700 h-10 rounded-lg text-sm flex items-center justify-center"
+    >
+      Fechar
+    </button>
 
-          <button
-            onClick={async () => {
-              await assumirPedido(pedidoSelecionado.id)
-              setPedidoSelecionado(null)
-            }}
-            className="bg-yellow-500 text-black h-10 rounded-lg text-sm font-semibold flex items-center justify-center"
-          >
-            Assumir
-          </button>
-        </div>
-      ) : (
-        <div className="grid grid-cols-3 gap-2">
-          <button
-            onClick={() => setPedidoSelecionado(null)}
-            className="bg-gray-700 h-10 rounded-lg text-sm flex items-center justify-center"
-          >
-            Fechar
-          </button>
+    <button
+      onClick={async () => {
+        await assumirPedido(pedidoSelecionado.id)
+        setPedidoSelecionado(null)
+      }}
+      className="bg-yellow-500 text-black h-10 rounded-lg text-sm font-semibold flex items-center justify-center"
+    >
+      Assumir
+    </button>
+  </div>
+) : pedidoSelecionado.status === "em_preparo" ? (
+  <div className="grid grid-cols-3 gap-2">
+    <button
+      onClick={() => setPedidoSelecionado(null)}
+      className="bg-gray-700 h-10 rounded-lg text-sm flex items-center justify-center"
+    >
+      Fechar
+    </button>
 
-          <button
-            onClick={async () => {
-              await voltarParaPendente(pedidoSelecionado.id)
-              setPedidoSelecionado(null)
-            }}
-            className="bg-yellow-500 text-black h-10 rounded-lg text-sm font-semibold flex items-center justify-center"
-          >
-            Voltar
-          </button>
+    <button
+      onClick={async () => {
+        await voltarParaPendente(pedidoSelecionado.id)
+        setPedidoSelecionado(null)
+      }}
+      className="bg-yellow-500 text-black h-10 rounded-lg text-sm font-semibold flex items-center justify-center"
+    >
+      Voltar
+    </button>
 
-          <button
-            onClick={confirmarFinalizar}
-            className="bg-green-600 h-10 rounded-lg text-sm font-semibold flex items-center justify-center"
-          >
-            Finalizar
-          </button>
-        </div>
-      )}
+    <button
+      onClick={confirmarFinalizar}
+      className="bg-green-600 h-10 rounded-lg text-sm font-semibold flex items-center justify-center"
+    >
+      Finalizar
+    </button>
+  </div>
+) : (
+  <div className="grid grid-cols-2 gap-2">
+    <button
+      onClick={() => setPedidoSelecionado(null)}
+      className="bg-gray-700 h-10 rounded-lg text-sm flex items-center justify-center"
+    >
+      Fechar
+    </button>
 
+    <button
+      onClick={async () => {
+        await voltarParaPreparo(pedidoSelecionado.id)
+        setPedidoSelecionado(null)
+      }}
+      className="bg-red-600 text-white h-10 rounded-lg text-sm font-semibold flex items-center justify-center"
+    >
+      Desfazer
+    </button>
+  </div>
+)}
     </div>
   </div>
 )}
-
     </PageContainer>
   )
 }
