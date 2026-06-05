@@ -728,8 +728,9 @@ onFocus={() => {
   onClick={async () => {
     try {
       setImprimindo(true)
-      console.log("ENVIANDO PARA FILA DE IMPRESSÃO")
+      console.log("ENVIANDO PARA FILAS")
 
+      // 🖨️ Impressora do balcão
       await addDoc(collection(db, "fila_impressao"), {
         codigo: codigoPedido,
         nome: nomePedido,
@@ -745,9 +746,17 @@ onFocus={() => {
         createdAt: Date.now()
       })
 
+      // 🍔 Impressora da cozinha
+      await addDoc(collection(db, "fila_cozinha"), {
+        codigo: codigoPedido,
+        nome: nomePedido,
+        itens: itensPedido,
+        status: "pendente",
+        createdAt: Date.now()
+      })
+
       console.log("ENVIADO COM SUCESSO")
 
-      // 🔥 fecha o modal após enviar
       setTimeout(() => {
         setCodigoPedido(null)
         setImprimindo(false)
