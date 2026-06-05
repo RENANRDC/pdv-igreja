@@ -184,7 +184,7 @@ async function handleConfirmarPagamento() {
   }
 
 try {
-  const nomeFinal = nome.trim() || "Consumidor"
+  const nomeFinal = nome.trim() || "Não Identificado"
 
   const res = await criarPedido(
     nomeFinal,
@@ -250,7 +250,7 @@ if (!whatsNumero.trim()) {
       let texto =
         `Pedido criado com sucesso!\n\n` +
         `Pedido: ${codigoPedido}\n` +
-        `Cliente: ${nomePedido}\n\n` +
+        `Consumidor: ${nomePedido}\n\n` +
         `Itens:\n${itensTexto}\n\n`
 
 // 🔥 PAGAMENTO
@@ -342,7 +342,7 @@ return (
 </div>
 
     <input
-      placeholder={erro === "nome" ? "Digite o nome do cliente" : "Consumidor"}
+      placeholder={erro === "nome" ? "Digite o nome do consumidor" : "Consumidor"}
       value={nome}
 onChange={(e) => {
   setNome(e.target.value)
@@ -664,7 +664,7 @@ onFocus={() => {
 
             {/* CLIENTE */}
             <div className="mb-3 text-sm">
-              <span className="text-gray-500">Cliente:</span>
+              <span className="text-gray-500">Consumidor:</span>
               <p className="font-bold">{nomePedido}</p>
             </div>
 
@@ -816,7 +816,7 @@ onFocus={() => {
             </div>
 
             <p>Pedido: {codigoPedido}</p>
-            <p>Cliente: {nomePedido}</p>
+            <p>Consumidor: {nomePedido}</p>
 
             <p>------------------------------</p>
 
