@@ -173,7 +173,7 @@ export default function RelatoriosPage() {
 
     const pedidosData = lista.map(p => ({
       Pedido: p.codigo,
-      Cliente: p.nomeCliente || "",
+      Consumidor: p.nomeCliente || "",
       Pagamento: p.formaPagamento || "",
       Total: p.total || p.valor || 0,
       Data: formatarData(p.createdAt),

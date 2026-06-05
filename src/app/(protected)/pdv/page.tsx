@@ -100,24 +100,42 @@ useEffect(() => {
 
 if (!isLoaded) return null
 
-  function adicionarItem(produto: Omit<Item, "quantidade">) {
-    setItens((prev) => {
-      const existe = prev.find((i) => i.nome === produto.nome)
+function adicionarItem(produto: Omit<Item, "quantidade">) {
 
-      if (existe) {
-        return prev.map((i) =>
-          i.nome === produto.nome
-            ? { ...i, quantidade: i.quantidade + 1 }
-            : i
-        )
-      }
+  const produtoCompleto = produtos.find(
+    (p) => p.nome === produto.nome
+  )
 
-      return [...prev, { ...produto, quantidade: 1 }]
-    })
+  const estoque = produtoCompleto?.estoque ?? 0
 
-    setUltimoItem(produto.nome)
-    setTimeout(() => setUltimoItem(null), 200)
+  const itemCarrinho = itens.find(
+    (i) => i.nome === produto.nome
+  )
+
+  const quantidadeAtual = itemCarrinho?.quantidade ?? 0
+
+  if (quantidadeAtual >= estoque) {
+    setErro(`Estoque máximo de ${produto.nome} atingido`)
+    return
   }
+
+  setItens((prev) => {
+    const existe = prev.find((i) => i.nome === produto.nome)
+
+    if (existe) {
+      return prev.map((i) =>
+        i.nome === produto.nome
+          ? { ...i, quantidade: i.quantidade + 1 }
+          : i
+      )
+    }
+
+    return [...prev, { ...produto, quantidade: 1 }]
+  })
+
+  setUltimoItem(produto.nome)
+  setTimeout(() => setUltimoItem(null), 200)
+}
 
   function removerItem(nome: string) {
     setItens((prev) =>
@@ -146,10 +164,6 @@ const troco =
     : 0
 
   function handlePedido() {
-if (!nome.trim()) {
-  setErro("nome")
-  return
-}
 
     if (itens.length === 0) {
       setErro("Adicione pelo menos 1 item")
@@ -169,35 +183,48 @@ async function handleConfirmarPagamento() {
     }
   }
 
-  try {
-    const res = await criarPedido(nome, itens, formaPagamento)
+try {
+  const nomeFinal = nome.trim() || "Consumidor"
 
-    const url = `${window.location.origin}/client/${res.id}`
+  const res = await criarPedido(
+    nomeFinal,
+    itens,
+    formaPagamento
+  )
 
-    setNomePedido(nome)
-    setItensPedido(itens)
+  const url = `${window.location.origin}/client/${res.id}`
 
-    const valorRecebidoNum = parseReal(valorRecebido)
-    const trocoCalculado = Math.max(0, valorRecebidoNum - total)
+  setNomePedido(nomeFinal)
+  setItensPedido(itens)
 
-    setTrocoPedido(trocoCalculado)
-    setValorRecebidoPedido(valorRecebidoNum)
+  const valorRecebidoNum = parseReal(valorRecebido)
+  const trocoCalculado = Math.max(0, valorRecebidoNum - total)
 
-    setQrUrl(url)
-    setCodigoPedido(res.codigo)
+  setTrocoPedido(trocoCalculado)
+  setValorRecebidoPedido(valorRecebidoNum)
 
-    setMensagem(`Pedido ${res.codigo} criado!`)
-    setNome("")
-    setItens([])
-    setConfirmando(false)
-    setValorRecebido("")
-    setCategoriaSelecionada(null)
+  setQrUrl(url)
+  setCodigoPedido(res.codigo)
 
-  } catch (err) {
-    console.error(err)
-    setErro("Erro ao criar pedido")
-  }
+  setMensagem(`Pedido ${res.codigo} criado!`)
+  setNome("")
+  setItens([])
+  setConfirmando(false)
+  setValorRecebido("")
+  setCategoriaSelecionada(null)
+
+} catch (err: unknown) {
+  console.error(err)
+
+  setErro(
+    err instanceof Error
+      ? err.message
+      : "Erro ao criar pedido"
+  )
 }
+
+}  // <-- adicionar esta chave
+
 
     function handleWhatsApp() {
       if (!codigoPedido || !qrUrl) return
@@ -315,7 +342,7 @@ return (
 </div>
 
     <input
-      placeholder={erro === "nome" ? "Digite o nome do cliente" : "Nome do cliente"}
+      placeholder={erro === "nome" ? "Digite o nome do cliente" : "Consumidor"}
       value={nome}
 onChange={(e) => {
   setNome(e.target.value)
