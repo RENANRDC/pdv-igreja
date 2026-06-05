@@ -371,27 +371,39 @@ onFocus={() => {
     )}
 
     {produtosFiltrados.map((prod) => (
-      <button
-        key={prod.id}
-        onClick={() =>
-          adicionarItem({
-            nome: prod.nome,
-            preco: prod.preco,
-            barracaId: prod.categoriaId,
-          })
-        }
-        className={`p-4 rounded-xl text-left border transition-all ${
-          ultimoItem === prod.nome
-            ? "bg-green-500 border-green-400"
-            : "bg-gray-800 border-gray-700 hover:bg-gray-700"
-        }`}
-      >
+    <button
+      key={prod.id}
+      disabled={(prod.estoque ?? 0) <= 0}
+      onClick={() =>
+        adicionarItem({
+          nome: prod.nome,
+          preco: prod.preco,
+          barracaId: prod.categoriaId,
+        })
+      }
+      className={`p-4 rounded-xl text-left border transition-all ${
+        (prod.estoque ?? 0) <= 0
+          ? "bg-gray-900 border-red-500 opacity-50 cursor-not-allowed"
+          : ultimoItem === prod.nome
+          ? "bg-green-500 border-green-400"
+          : "bg-gray-800 border-gray-700 hover:bg-gray-700"
+      }`}
+    >
         <div className="font-semibold text-white text-sm leading-tight">
           {prod.nome}
         </div>
 
         <div className="text-green-400 font-bold mt-2 text-sm">
           R$ {prod.preco.toFixed(2)}
+        </div>
+        <div
+          className={`text-xs mt-1 ${
+            (prod.estoque ?? 0) <= 0
+              ? "text-red-400"
+              : "text-yellow-400"
+          }`}
+        >
+          Estoque: {prod.estoque ?? 0}
         </div>
       </button>
     ))}

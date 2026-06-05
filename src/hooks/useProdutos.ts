@@ -8,6 +8,7 @@ type Produto = {
   preco: number
   categoriaId: string
   ativo: boolean
+  estoque?: number
 }
 
 export function useProdutos() {

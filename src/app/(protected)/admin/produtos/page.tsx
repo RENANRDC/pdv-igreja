@@ -20,6 +20,7 @@ type Produto = {
   preco: number
   categoriaId: string
   ativo: boolean
+  estoque?: number
 }
 
 export default function ProdutosPage() {
@@ -28,7 +29,7 @@ export default function ProdutosPage() {
   const [categoriaId, setCategoriaId] = useState("")
   const [categoriaFiltro, setCategoriaFiltro] = useState("")
   const [editandoId, setEditandoId] = useState<string | null>(null)
-
+  const [estoque, setEstoque] = useState("")
   const { categorias } = useCategorias()
   const { produtos } = useProdutos()
 
@@ -44,43 +45,53 @@ export default function ProdutosPage() {
     return Number(precoFormatado.replace(/\D/g, "")) / 100
   }
 
-  async function handleAdd() {
-    if (!nome || !precoFormatado || !categoriaId) return
+async function handleAdd() {
+  if (!nome || !precoFormatado || !categoriaId) return
 
-    const preco = parsePreco()
+  const preco = parsePreco()
 
-    if (editandoId) {
-      await updateDoc(doc(db, "produtos", editandoId), {
-        nome,
-        preco,
-        categoriaId,
-      })
-      setEditandoId(null)
-    } else {
-      await addDoc(collection(db, "produtos"), {
-        nome,
-        preco,
-        categoriaId,
-        ativo: true,
-      })
-    }
+  if (editandoId) {
+    await updateDoc(doc(db, "produtos", editandoId), {
+      nome,
+      preco,
+      categoriaId,
+      estoque: Number(estoque || 0),
+    })
 
-    setNome("")
-    setPrecoFormatado("")
-    setCategoriaId("")
+    setEditandoId(null)
+
+  } else {
+
+    await addDoc(collection(db, "produtos"), {
+      nome,
+      preco,
+      categoriaId,
+      ativo: true,
+      estoque: Number(estoque || 0),
+    })
+
   }
 
-  function handleEdit(prod: Produto) {
-    setNome(prod.nome)
-    setPrecoFormatado(
-      prod.preco.toLocaleString("pt-BR", {
-        style: "currency",
-        currency: "BRL",
-      })
-    )
-    setCategoriaId(prod.categoriaId)
-    setEditandoId(prod.id)
-  }
+  setNome("")
+  setPrecoFormatado("")
+  setCategoriaId("")
+  setEstoque("")
+}
+
+function handleEdit(prod: Produto) {
+  setNome(prod.nome)
+
+  setPrecoFormatado(
+    prod.preco.toLocaleString("pt-BR", {
+      style: "currency",
+      currency: "BRL",
+    })
+  )
+
+  setCategoriaId(prod.categoriaId)
+  setEstoque(String(prod.estoque ?? 0))
+  setEditandoId(prod.id)
+}
 
   async function handleDelete(id: string) {
     if (!confirm("Deseja excluir este produto?")) return
@@ -142,7 +153,14 @@ export default function ProdutosPage() {
             placeholder="R$ 0,00"
             className="w-full p-3 rounded bg-gray-700 outline-none"
           />
-
+          <input
+            type="number"
+            min="0"
+            value={estoque}
+            onChange={(e) => setEstoque(e.target.value)}
+            placeholder="Quantidade em estoque"
+            className="w-full p-3 rounded bg-gray-700 outline-none"
+          />
           <select
             value={categoriaId}
             onChange={(e) => setCategoriaId(e.target.value)}
@@ -192,6 +210,9 @@ export default function ProdutosPage() {
                   </p>
                   <p className="text-sm text-gray-500">
                     {prod.ativo ? "Ativo" : "Inativo"}
+                  </p>
+                  <p className="text-sm text-yellow-400 font-semibold">
+                    Estoque: {prod.estoque ?? 0}
                   </p>
                 </div>
 

@@ -1,4 +1,13 @@
-import { collection, addDoc, Timestamp } from "firebase/firestore"
+import {
+  collection,
+  addDoc,
+  Timestamp,
+  getDocs,
+  query,
+  where,
+  updateDoc,
+  doc
+} from "firebase/firestore"
 import { db } from "./firebase"
 
 type Item = {
@@ -29,6 +38,43 @@ export async function criarPedido(
     (acc, item) => acc + item.preco * item.quantidade,
     0
   )
+
+  // 🔥 VALIDA E DESCONTA ESTOQUE
+
+for (const item of itens) {
+
+  const produtosRef = collection(db, "produtos")
+
+  const q = query(
+    produtosRef,
+    where("nome", "==", item.nome)
+  )
+
+  const snapshot = await getDocs(q)
+
+  if (snapshot.empty) {
+    throw new Error(`Produto não encontrado: ${item.nome}`)
+  }
+
+  const produtoDoc = snapshot.docs[0]
+
+  const produto = produtoDoc.data()
+
+  const estoqueAtual = produto.estoque ?? 0
+
+  if (estoqueAtual < item.quantidade) {
+    throw new Error(
+      `${item.nome} sem estoque suficiente`
+    )
+  }
+
+  await updateDoc(
+    doc(db, "produtos", produtoDoc.id),
+    {
+      estoque: estoqueAtual - item.quantidade
+    }
+  )
+}
 
   const pedido = {
     nomeCliente: nome,
