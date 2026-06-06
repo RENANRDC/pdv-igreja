@@ -32,7 +32,8 @@ export default function ProdutosPage() {
   const [estoque, setEstoque] = useState("")
   const { categorias } = useCategorias()
   const { produtos } = useProdutos()
-
+  const [busca, setBusca] = useState("")
+  const [statusFiltro, setStatusFiltro] = useState("todos")
   function formatarReal(valor: string) {
     const numero = valor.replace(/\D/g, "")
     return (Number(numero) / 100).toLocaleString("pt-BR", {
@@ -108,9 +109,20 @@ function handleEdit(prod: Produto) {
     return categorias.find((c) => c.id === id)?.nome || "Sem categoria"
   }
 
-  const produtosFiltrados = categoriaFiltro
-    ? produtos.filter((p) => p.categoriaId === categoriaFiltro)
-    : produtos
+const produtosFiltrados = produtos.filter((p: Produto) => {
+  const categoriaOk =
+    !categoriaFiltro || p.categoriaId === categoriaFiltro
+
+  const buscaOk =
+    p.nome.toLowerCase().includes(busca.toLowerCase())
+
+  const statusOk =
+    statusFiltro === "todos" ||
+    (statusFiltro === "ativos" && p.ativo) ||
+    (statusFiltro === "inativos" && !p.ativo)
+
+  return categoriaOk && buscaOk && statusOk
+})
 
   return (
     <PageContainer>
@@ -184,18 +196,40 @@ function handleEdit(prod: Produto) {
 
         <div className="md:col-span-2 space-y-4">
 
-          <select
-            value={categoriaFiltro}
-            onChange={(e) => setCategoriaFiltro(e.target.value)}
-            className="p-3 rounded bg-gray-800 w-full"
-          >
-            <option value="">Todas categorias</option>
-            {categorias.map((cat) => (
-              <option key={cat.id} value={cat.id}>
-                {cat.nome}
-              </option>
-            ))}
-          </select>
+<div className="grid md:grid-cols-3 gap-3">
+
+  <input
+    type="text"
+    placeholder="Pesquisar produto..."
+    value={busca}
+    onChange={(e) => setBusca(e.target.value)}
+    className="p-3 rounded bg-gray-800"
+  />
+
+  <select
+    value={categoriaFiltro}
+    onChange={(e) => setCategoriaFiltro(e.target.value)}
+    className="p-3 rounded bg-gray-800"
+  >
+    <option value="">Todas categorias</option>
+    {categorias.map((cat) => (
+      <option key={cat.id} value={cat.id}>
+        {cat.nome}
+      </option>
+    ))}
+  </select>
+
+  <select
+    value={statusFiltro}
+    onChange={(e) => setStatusFiltro(e.target.value)}
+    className="p-3 rounded bg-gray-800"
+  >
+    <option value="todos">Todos os status</option>
+    <option value="ativos">Ativos</option>
+    <option value="inativos">Inativos</option>
+  </select>
+
+</div>
 
           <div className="space-y-2">
             {produtosFiltrados.map((prod: Produto) => (
