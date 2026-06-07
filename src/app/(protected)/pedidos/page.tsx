@@ -263,7 +263,7 @@ const finalizados = pedidos
       </div>
 
 {pedidoSelecionado.status === "pendente" ? (
-  <div className="grid grid-cols-2 gap-2">
+  <div className="grid grid-cols-3 gap-2">
     <button
       onClick={() => setPedidoSelecionado(null)}
       className="bg-gray-700 h-10 rounded-lg text-sm flex items-center justify-center"
@@ -280,6 +280,14 @@ const finalizados = pedidos
     >
       Assumir
     </button>
+
+<button
+  onClick={confirmarFinalizar}
+  className="bg-green-600 h-10 rounded-lg text-sm font-semibold flex items-center justify-center"
+>
+  Finalizar
+</button>
+
   </div>
 ) : pedidoSelecionado.status === "em_preparo" ? (
   <div className="grid grid-cols-3 gap-2">
@@ -308,7 +316,7 @@ const finalizados = pedidos
     </button>
   </div>
 ) : (
-  <div className="grid grid-cols-2 gap-2">
+  <div className="grid grid-cols-3 gap-2">
     <button
       onClick={() => setPedidoSelecionado(null)}
       className="bg-gray-700 h-10 rounded-lg text-sm flex items-center justify-center"
