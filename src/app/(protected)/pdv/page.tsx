@@ -766,25 +766,25 @@ onFocus={() => {
         createdAt: Date.now()
       })
 
-const itensCozinha = itensPedido.filter((item) => {
+const temItemPreparo = itensPedido.some((item) => {
   const produto = produtos.find(
     (p) => p.nome === item.nome
   )
 
   return produto?.precisaPreparo === true
 })
-if (itensCozinha.length > 0) {
+
+if (temItemPreparo) {
 
   await addDoc(collection(db, "fila_cozinha"), {
     codigo: codigoPedido,
     nome: nomePedido,
-    itens: itensCozinha,
+    itens: itensPedido, // TODOS OS ITENS
     status: "pendente",
     createdAt: Date.now()
   })
 
 }
-
       console.log("ENVIADO COM SUCESSO")
 
       setTimeout(() => {
