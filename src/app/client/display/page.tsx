@@ -7,6 +7,7 @@ import {
   query,
   orderBy,
   doc,
+  Timestamp,
 } from "firebase/firestore"
 import { db } from "@/services/firebase"
 import DisplayHeader from "@/components/display/DisplayHeader"
@@ -15,12 +16,14 @@ type Pedido = {
   id: string
   codigo: string
   status: "pendente" | "em_preparo" | "finalizado"
+  avisoAt?: Timestamp
+precisaPreparo?: boolean
 }
 
 export default function DisplayPage() {
   const [pedidos, setPedidos] = useState<Pedido[]>([])
   const [highlightId, setHighlightId] = useState<string | null>(null)
-  const [audioLiberado, setAudioLiberado] = useState(false)
+const [audioLiberado, setAudioLiberado] = useState(false)
   const [limiteProntos, setLimiteProntos] = useState(20)
   const [precisaScroll, setPrecisaScroll] = useState(false)
 
@@ -33,9 +36,26 @@ export default function DisplayPage() {
   const contentProntosRef = useRef<HTMLDivElement>(null)
 
   const statusAnterior = useRef<Record<string, string>>({})
+  const avisoAnterior = useRef<Record<string, number>>({})
   const audioRef = useRef<HTMLAudioElement | null>(null)
   const audioLiberadoRef = useRef(false)
+useEffect(() => {
+  audioLiberadoRef.current = audioLiberado
+}, [audioLiberado])
+useEffect(() => {
+  if (typeof window === "undefined") return
 
+  const audioAtivado =
+    window.localStorage.getItem("display-audio")
+
+  if (audioAtivado === "1") {
+    audioLiberadoRef.current = true
+
+    setTimeout(() => {
+      setAudioLiberado(true)
+    }, 0)
+  }
+}, [])
   // 🔥 config dinâmica
   useEffect(() => {
     const unsubscribe = onSnapshot(doc(db, "config", "display"), (docSnap) => {
@@ -47,11 +67,14 @@ export default function DisplayPage() {
   }, [])
 
   // 🔊 áudio
-  useEffect(() => {
-    const audio = new Audio("/sounds/pronto2.wav")
-    audio.volume = 1
-    audioRef.current = audio
-  }, [])
+useEffect(() => {
+  const audio = new Audio("/sounds/pronto2.wav")
+
+  audio.volume = 1
+  audio.preload = "auto"
+
+  audioRef.current = audio
+}, [])
 
   function ativarAlerta(id: string) {
     setHighlightId(id)
@@ -78,7 +101,11 @@ export default function DisplayPage() {
 
       lista.forEach((pedido) => {
         const anterior = statusAnterior.current[pedido.id]
+const avisoAtual =
+  pedido.avisoAt?.seconds || 0
 
+const avisoAnteriorPedido =
+  avisoAnterior.current[pedido.id] || 0
         if (
           anterior &&
           anterior !== "finalizado" &&
@@ -86,6 +113,14 @@ export default function DisplayPage() {
         ) {
           ativarAlerta(pedido.id)
         }
+        if (
+  avisoAtual > 0 &&
+  avisoAtual !== avisoAnteriorPedido
+) {
+  ativarAlerta(pedido.id)
+}
+
+avisoAnterior.current[pedido.id] = avisoAtual
 
         statusAnterior.current[pedido.id] = pedido.status
       })
@@ -97,13 +132,22 @@ export default function DisplayPage() {
   }, [])
 
   // 🔥 EM PREPARO
-  const emPreparo = pedidos.filter(
-    (p) => p.status === "pendente" || p.status === "em_preparo"
-  )
+const emPreparo = pedidos.filter(
+  (p) =>
+    p.precisaPreparo === true &&
+    (
+      p.status === "pendente" ||
+      p.status === "em_preparo"
+    )
+)
 
   // 🔥 PRONTOS
 const prontos = pedidos
-  .filter((p) => p.status === "finalizado")
+  .filter(
+    (p) =>
+      p.precisaPreparo === true &&
+      p.status === "finalizado"
+  )
   .slice(0, limiteProntos)
 
   // 🔥 scroll EM PREPARO
@@ -180,11 +224,17 @@ useEffect(() => {
 
         {!audioLiberado && (
           <button
-            onClick={() => {
-              audioRef.current?.play().catch(() => {})
-              setAudioLiberado(true)
-              audioLiberadoRef.current = true
-            }}
+onClick={() => {
+  audioRef.current?.play().catch(() => {})
+
+  setAudioLiberado(true)
+  audioLiberadoRef.current = true
+
+  localStorage.setItem(
+    "display-audio",
+    "1"
+  )
+}}
             className="fixed top-4 left-1/2 -translate-x-1/2 bg-gray-800 px-4 py-2 rounded-lg z-50"
           >
             🔊 Ativar som

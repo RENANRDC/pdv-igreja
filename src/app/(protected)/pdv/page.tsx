@@ -163,17 +163,28 @@ const troco =
     ? Math.max(0, parseReal(valorRecebido) - total)
     : 0
 
-  function handlePedido() {
+function handlePedido() {
 
-    if (itens.length === 0) {
-      setErro("Adicione pelo menos 1 item")
-      return
-    }
-
-    setConfirmando(true)
+  if (!nome.trim()) {
+    setErro("nome")
+    return
   }
 
+  if (itens.length === 0) {
+    setErro("Adicione pelo menos 1 item")
+    return
+  }
+
+  setConfirmando(true)
+}
+
 async function handleConfirmarPagamento() {
+
+  if (!nome.trim()) {
+    setErro("nome")
+    return
+  }
+
   if (formaPagamento === "dinheiro") {
     const valor = parseReal(valorRecebido)
 
@@ -183,14 +194,15 @@ async function handleConfirmarPagamento() {
     }
   }
 
-try {
-  const nomeFinal = nome.trim() || "Não Identificado"
+  try {
+    const nomeFinal = nome.trim()
 
-  const res = await criarPedido(
-    nomeFinal,
-    itens,
-    formaPagamento
-  )
+    const res = await criarPedido(
+      nomeFinal,
+      itens,
+      formaPagamento
+    )
+
 
   const url = `${window.location.origin}/client/${res.id}`
 
@@ -365,7 +377,15 @@ onFocus={() => {
 <div className="lg:col-span-2 flex flex-col">
 
   {/* CATEGORIAS */}
-  <div className="flex gap-2 mb-3 overflow-x-auto pb-1">
+<div
+  className="
+    flex gap-2 mb-3 pb-2
+    overflow-x-scroll
+    scroll-smooth
+    snap-x snap-mandatory
+    scrollbar-hide
+  "
+>
 
     {categorias.filter(c => c.ativo).length === 0 && (
       <p className="text-gray-400">Nenhuma categoria cadastrada</p>
@@ -377,7 +397,7 @@ onFocus={() => {
         <button
           key={cat.id}
           onClick={() => setCategoriaSelecionada(cat.id)}
-          className={`px-4 py-2 rounded-lg font-semibold whitespace-nowrap border transition ${
+          className={`px-4 py-2 rounded-lg font-semibold whitespace-nowrap border transition shrink-0 snap-start ${
             categoriaSelecionada === cat.id
               ? "bg-green-600 border-green-500 text-white"
               : "bg-gray-800 border-gray-700 text-gray-300 hover:bg-gray-700"
@@ -746,14 +766,24 @@ onFocus={() => {
         createdAt: Date.now()
       })
 
-      // 🍔 Impressora da cozinha
-      await addDoc(collection(db, "fila_cozinha"), {
-        codigo: codigoPedido,
-        nome: nomePedido,
-        itens: itensPedido,
-        status: "pendente",
-        createdAt: Date.now()
-      })
+const itensCozinha = itensPedido.filter((item) => {
+  const produto = produtos.find(
+    (p) => p.nome === item.nome
+  )
+
+  return produto?.precisaPreparo === true
+})
+if (itensCozinha.length > 0) {
+
+  await addDoc(collection(db, "fila_cozinha"), {
+    codigo: codigoPedido,
+    nome: nomePedido,
+    itens: itensCozinha,
+    status: "pendente",
+    createdAt: Date.now()
+  })
+
+}
 
       console.log("ENVIADO COM SUCESSO")
 

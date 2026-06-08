@@ -21,6 +21,7 @@ type Produto = {
   categoriaId: string
   ativo: boolean
   estoque?: number
+  precisaPreparo?: boolean
 }
 
 export default function ProdutosPage() {
@@ -30,10 +31,16 @@ export default function ProdutosPage() {
   const [categoriaFiltro, setCategoriaFiltro] = useState("")
   const [editandoId, setEditandoId] = useState<string | null>(null)
   const [estoque, setEstoque] = useState("")
+  const [precisaPreparo, setPrecisaPreparo] = useState(true)
   const { categorias } = useCategorias()
   const { produtos } = useProdutos()
   const [busca, setBusca] = useState("")
   const [statusFiltro, setStatusFiltro] = useState("todos")
+  const [confirmacao, setConfirmacao] = useState<{
+  titulo: string
+  descricao: string
+  acao: () => Promise<void>
+} | null>(null)
   function formatarReal(valor: string) {
     const numero = valor.replace(/\D/g, "")
     return (Number(numero) / 100).toLocaleString("pt-BR", {
@@ -46,37 +53,45 @@ export default function ProdutosPage() {
     return Number(precoFormatado.replace(/\D/g, "")) / 100
   }
 
+function limparFormulario() {
+  setNome("")
+  setPrecoFormatado("")
+  setCategoriaId("")
+  setEstoque("")
+  setPrecisaPreparo(true)
+  setEditandoId(null)
+}
+
 async function handleAdd() {
   if (!nome || !precoFormatado || !categoriaId) return
 
   const preco = parsePreco()
 
   if (editandoId) {
-    await updateDoc(doc(db, "produtos", editandoId), {
-      nome,
-      preco,
-      categoriaId,
-      estoque: Number(estoque || 0),
-    })
+await updateDoc(doc(db, "produtos", editandoId), {
+  nome,
+  preco,
+  categoriaId,
+  estoque: Number(estoque || 0),
+  precisaPreparo,
+})
 
-    setEditandoId(null)
+    
 
   } else {
 
-    await addDoc(collection(db, "produtos"), {
-      nome,
-      preco,
-      categoriaId,
-      ativo: true,
-      estoque: Number(estoque || 0),
-    })
+await addDoc(collection(db, "produtos"), {
+  nome,
+  preco,
+  categoriaId,
+  ativo: true,
+  estoque: Number(estoque || 0),
+  precisaPreparo,
+})
 
   }
 
-  setNome("")
-  setPrecoFormatado("")
-  setCategoriaId("")
-  setEstoque("")
+limparFormulario()
 }
 
 function handleEdit(prod: Produto) {
@@ -89,21 +104,39 @@ function handleEdit(prod: Produto) {
     })
   )
 
-  setCategoriaId(prod.categoriaId)
-  setEstoque(String(prod.estoque ?? 0))
-  setEditandoId(prod.id)
+setCategoriaId(prod.categoriaId)
+setEstoque(String(prod.estoque ?? 0))
+setPrecisaPreparo(prod.precisaPreparo ?? true)
+setEditandoId(prod.id)
 }
 
-  async function handleDelete(id: string) {
-    if (!confirm("Deseja excluir este produto?")) return
-    await deleteDoc(doc(db, "produtos", id))
-  }
+function handleDelete(prod: Produto) {
+  setConfirmacao({
+    titulo: "Excluir produto",
+    descricao: `Deseja excluir "${prod.nome}"?`,
+    acao: async () => {
+      await deleteDoc(doc(db, "produtos", prod.id))
+    }
+  })
+}
 
-  async function toggleProduto(prod: Produto) {
-    await updateDoc(doc(db, "produtos", prod.id), {
-      ativo: !prod.ativo,
-    })
-  }
+function toggleProduto(prod: Produto) {
+  setConfirmacao({
+    titulo: prod.ativo
+      ? "Desativar produto"
+      : "Ativar produto",
+
+    descricao: prod.ativo
+      ? `Deseja desativar "${prod.nome}"?`
+      : `Deseja ativar "${prod.nome}"?`,
+
+    acao: async () => {
+      await updateDoc(doc(db, "produtos", prod.id), {
+        ativo: !prod.ativo,
+      })
+    }
+  })
+}
 
   function getCategoriaNome(id: string) {
     return categorias.find((c) => c.id === id)?.nome || "Sem categoria"
@@ -165,14 +198,23 @@ const produtosFiltrados = produtos.filter((p: Produto) => {
             placeholder="R$ 0,00"
             className="w-full p-3 rounded bg-gray-700 outline-none"
           />
-          <input
-            type="number"
-            min="0"
-            value={estoque}
-            onChange={(e) => setEstoque(e.target.value)}
-            placeholder="Quantidade em estoque"
-            className="w-full p-3 rounded bg-gray-700 outline-none"
-          />
+<input
+  type="number"
+  min="0"
+  value={estoque}
+  onChange={(e) => setEstoque(e.target.value)}
+  placeholder="Quantidade em estoque"
+  className="w-full p-3 rounded bg-gray-700 outline-none"
+/>
+
+<label className="flex items-center gap-2 text-sm">
+  <input
+    type="checkbox"
+    checked={precisaPreparo}
+    onChange={(e) => setPrecisaPreparo(e.target.checked)}
+  />
+  Precisa preparo na cozinha
+</label>
           <select
             value={categoriaId}
             onChange={(e) => setCategoriaId(e.target.value)}
@@ -187,11 +229,39 @@ const produtosFiltrados = produtos.filter((p: Produto) => {
           </select>
 
           <button
-            onClick={handleAdd}
+            onClick={() => {
+              if (!nome || !precoFormatado || !categoriaId) {
+                return
+              }
+
+              setConfirmacao({
+                titulo: editandoId
+                  ? "Salvar alterações"
+                  : "Adicionar produto",
+
+                descricao: editandoId
+                  ? `Salvar alterações de "${nome}"?`
+                  : `Adicionar "${nome}" ao catálogo?`,
+
+                acao: async () => {
+                  await handleAdd()
+                }
+              })
+            }}
             className="bg-green-600 w-full p-3 rounded font-semibold"
           >
             {editandoId ? "Salvar Alterações" : "Adicionar"}
           </button>
+
+            {editandoId && (
+              <button
+                onClick={limparFormulario}
+                className="bg-gray-600 w-full p-3 rounded font-semibold"
+              >
+                Cancelar edição
+              </button>
+            )}
+
         </div>
 
         <div className="md:col-span-2 space-y-4">
@@ -274,7 +344,7 @@ const produtosFiltrados = produtos.filter((p: Produto) => {
                     </button>
 
                     <button
-                      onClick={() => handleDelete(prod.id)}
+                      onClick={() => handleDelete(prod)}
                       className="px-3 py-1 rounded bg-gray-600 text-sm"
                     >
                       Excluir
@@ -288,6 +358,49 @@ const produtosFiltrados = produtos.filter((p: Produto) => {
         </div>
 
       </div>
+
+      {confirmacao && (
+  <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50">
+
+    <div className="bg-gray-900 w-[420px] max-w-[95vw] rounded-2xl p-6 border border-gray-700">
+
+      <h2 className="text-xl font-bold mb-2">
+        {confirmacao.titulo}
+      </h2>
+
+      <p className="text-gray-400 mb-6">
+        {confirmacao.descricao}
+      </p>
+
+      <div className="flex gap-3">
+
+        <button
+          onClick={() => setConfirmacao(null)}
+          className="flex-1 h-11 rounded-xl bg-gray-700 font-semibold"
+        >
+          Cancelar
+        </button>
+
+        <button
+          onClick={async () => {
+            await confirmacao.acao()
+            setConfirmacao(null)
+          }}
+          className={`flex-1 h-11 rounded-xl font-semibold ${
+            confirmacao.titulo.includes("Excluir")
+              ? "bg-red-600"
+              : "bg-green-600"
+          }`}
+        >
+          Confirmar
+        </button>
+
+      </div>
+
+    </div>
+
+  </div>
+)}
     </PageContainer>
   )
 }

@@ -35,7 +35,7 @@ export default function ControlePedidos() {
   const [pedidos, setPedidos] = useState<Pedido[]>([])
   const [pedidoSelecionado, setPedidoSelecionado] = useState<Pedido | null>(null)
   const [aba, setAba] = useState<"pendente" | "em_preparo" | "finalizado">("pendente")
-
+  const [busca, setBusca] = useState("")
   const [whatsNumero, setWhatsNumero] = useState("")
   const [erroWhats, setErroWhats] = useState(false)
   const [imprimindo, setImprimindo] = useState(false)
@@ -58,9 +58,21 @@ export default function ControlePedidos() {
     return () => unsub()
   }, [])
 
-  const pendentes = pedidos.filter(p => p.status === "pendente")
-  const emPreparo = pedidos.filter(p => p.status === "em_preparo")
-  const finalizados = pedidos.filter(p => p.status === "finalizado")
+const filtroBusca = (p: Pedido) =>
+  p.codigo.toLowerCase().includes(busca.toLowerCase()) ||
+  p.nomeCliente.toLowerCase().includes(busca.toLowerCase())
+
+const pendentes = pedidos.filter(
+  p => p.status === "pendente" && filtroBusca(p)
+)
+
+const emPreparo = pedidos.filter(
+  p => p.status === "em_preparo" && filtroBusca(p)
+)
+
+const finalizados = pedidos.filter(
+  p => p.status === "finalizado" && filtroBusca(p)
+)
 
   const lista =
     aba === "pendente"
@@ -182,7 +194,20 @@ export default function ControlePedidos() {
         <BackButton href="/pdv" />
       </div>
 
+<div className="mb-4">
+  <input
+    type="text"
+    placeholder="Pesquisar pedido..."
+    value={busca}
+    onChange={(e) => setBusca(e.target.value)}
+    className="w-full p-3 rounded-xl bg-gray-800 border border-gray-700 outline-none"
+  />
+</div>
+
+<div className="flex gap-2 mb-4 lg:hidden"></div>
+
       <div className="flex gap-2 mb-4 lg:hidden">
+
         <button onClick={() => setAba("pendente")} className={`flex-1 p-2 rounded text-sm font-semibold ${aba === "pendente" ? "bg-yellow-500 text-black" : "bg-gray-800"}`}>
           Pendentes ({pendentes.length})
         </button>

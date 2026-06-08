@@ -39,6 +39,8 @@ export async function criarPedido(
     0
   )
 
+let precisaPreparo = false
+
   // 🔥 VALIDA E DESCONTA ESTOQUE
 
 for (const item of itens) {
@@ -59,6 +61,9 @@ for (const item of itens) {
   const produtoDoc = snapshot.docs[0]
 
   const produto = produtoDoc.data()
+  if (produto.precisaPreparo === true) {
+  precisaPreparo = true
+}
 
   const estoqueAtual = produto.estoque ?? 0
 
@@ -76,22 +81,26 @@ for (const item of itens) {
   )
 }
 
-  const pedido = {
-    nomeCliente: nome,
-    codigo,
-    status: "pendente",
+const pedido = {
+  nomeCliente: nome,
+  codigo,
 
-    // ✅ CORREÇÃO AQUI
-    total: total,
+  status: precisaPreparo
+    ? "pendente"
+    : "finalizado",
 
-    barracaId: "geral",
-    itens,
+  precisaPreparo,
 
-    pago: true,
-    formaPagamento,
+  total: total,
 
-    createdAt: Timestamp.now(),
-  }
+  barracaId: "geral",
+  itens,
+
+  pago: true,
+  formaPagamento,
+
+  createdAt: Timestamp.now(),
+}
 
   const docRef = await addDoc(collection(db, "pedidos"), pedido)
 
