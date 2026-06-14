@@ -4,6 +4,7 @@ import { useState, useEffect } from "react"
 import { criarPedido } from "@/services/pedidos"
 import { QRCodeCanvas } from "qrcode.react"
 import Link from "next/link"
+import { Search } from "lucide-react"
 import { useVendaMode } from "@/hooks/useVendaMode"
 import { useCategorias } from "@/hooks/useCategorias"
 import { useProdutos } from "@/hooks/useProdutos"
@@ -72,12 +73,20 @@ const { categorias } = useCategorias()
 const { produtos } = useProdutos()
 
 const [categoriaSelecionada, setCategoriaSelecionada] = useState<string | null>(null)
+const [buscaProduto, setBuscaProduto] = useState("")
+const produtosFiltrados = produtos.filter((p) => {
 
-const produtosFiltrados = categoriaSelecionada
-  ? produtos.filter(
-      (p) => p.categoriaId === categoriaSelecionada && p.ativo
-    )
-  : []
+  const categoriaOk =
+    !categoriaSelecionada ||
+    p.categoriaId === categoriaSelecionada
+
+  const buscaOk =
+    p.nome
+      .toLowerCase()
+      .includes(buscaProduto.toLowerCase())
+
+  return categoriaOk && buscaOk && p.ativo
+})
 
 
 const { vendaMode, setVendaMode, isLoaded } = useVendaMode()
@@ -387,6 +396,20 @@ onFocus={() => {
   "
 >
 
+<button
+  onClick={() => {
+    setCategoriaSelecionada(null)
+    setBuscaProduto("")
+  }}
+  className={`px-4 py-2 rounded-lg font-semibold whitespace-nowrap border transition shrink-0 snap-start ${
+    categoriaSelecionada === null
+      ? "bg-green-600 border-green-500 text-white"
+      : "bg-gray-800 border-gray-700 text-gray-300 hover:bg-gray-700"
+  }`}
+>
+  TODOS
+</button>
+
     {categorias.filter(c => c.ativo).length === 0 && (
       <p className="text-gray-400">Nenhuma categoria cadastrada</p>
     )}
@@ -396,7 +419,10 @@ onFocus={() => {
       .map((cat) => (
         <button
           key={cat.id}
-          onClick={() => setCategoriaSelecionada(cat.id)}
+          onClick={() => {
+  setCategoriaSelecionada(cat.id)
+  setBuscaProduto("")
+}}
           className={`px-4 py-2 rounded-lg font-semibold whitespace-nowrap border transition shrink-0 snap-start ${
             categoriaSelecionada === cat.id
               ? "bg-green-600 border-green-500 text-white"
@@ -407,6 +433,31 @@ onFocus={() => {
         </button>
       ))}
   </div>
+
+<div className="relative mb-3">
+  <Search
+    size={18}
+    className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+  />
+
+  <input
+    type="text"
+    placeholder="Pesquisar produto..."
+    value={buscaProduto}
+    onChange={(e) => setBuscaProduto(e.target.value)}
+    className="
+      w-full
+      pl-10
+      pr-3
+      py-3
+      bg-gray-800
+      border border-gray-700
+      rounded-xl
+      outline-none
+      focus:border-green-500
+    "
+  />
+</div>
 
   {/* PRODUTOS */}
   <div className="grid grid-cols-2 md:grid-cols-3 gap-3 max-h-[45vh] lg:max-h-[60vh] overflow-y-auto pr-1 pb-6">
