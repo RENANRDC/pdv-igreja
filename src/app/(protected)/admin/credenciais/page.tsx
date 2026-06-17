@@ -55,12 +55,13 @@ const [createForm, setCreateForm] = useState({
   caixa: "caixa01",
 })
 
-  const [editForm, setEditForm] = useState({
-    newUsername: "",
-    newPassword: "",
-    confirmNewPassword: "",
-    role: "user" as Role,
-  })
+const [editForm, setEditForm] = useState({
+  newUsername: "",
+  newPassword: "",
+  confirmNewPassword: "",
+  role: "user" as Role,
+  caixa: "caixa01",
+})
 
   function showToast(message: string, type: "success" | "error") {
     setToast({ message, type })
@@ -120,13 +121,13 @@ setUsers(cached.users || [])
       await fetchWithAuth("/api/admin/users", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-body: JSON.stringify({
-  action: "create",
-  username,
-  password,
-  role,
-  caixa: createForm.caixa,
-}),
+        body: JSON.stringify({
+          action: "create",
+          username,
+          password,
+          role,
+          caixa: createForm.caixa,
+        }),
       })
 
       clearCacheKey("/api/admin/users")
@@ -171,8 +172,10 @@ await loadUsers()
           newUsername,
           newPassword,
           role,
-        }),
+          caixa: editForm.caixa,
+}),
       })
+
 clearCacheKey("/api/admin/users")
 const auth = getAuth()
 const currentUser = auth.currentUser
@@ -316,12 +319,13 @@ return (
           <button
             onClick={() => {
               setSelectedUser(user)
-              setEditForm({
-                newUsername: user.username,
-                newPassword: "",
-                confirmNewPassword: "",
-                role: user.role,
-              })
+setEditForm({
+  newUsername: user.username,
+  newPassword: "",
+  confirmNewPassword: "",
+  role: user.role,
+  caixa: user.caixa || "caixa01",
+})
               setModal("edit")
             }}
             className="flex-1 bg-blue-600/20 text-blue-400 p-2 rounded"
@@ -388,7 +392,34 @@ return (
   <option value="caixa02">Caixa 2</option>
 </select>
 
-              <Button onClick={createUser} loading={isLoading} label="Criar usuário" />
+           <div className="flex gap-2">
+
+  <button
+    onClick={() => {
+      setModal(null)
+
+      setCreateForm({
+        username: "",
+        password: "",
+        confirmPassword: "",
+        role: "user",
+        caixa: "caixa01",
+      })
+    }}
+    className="flex-1 bg-zinc-700 p-2 rounded"
+  >
+    Cancelar
+  </button>
+
+  <button
+    onClick={createUser}
+    disabled={isLoading}
+    className="flex-1 bg-green-600 hover:bg-green-700 p-2 rounded"
+  >
+    {isLoading ? "Processando..." : "Criar usuário"}
+  </button>
+
+</div>
             </>
           )}
 
@@ -419,6 +450,19 @@ return (
                 value={editForm.role}
                 onChange={e => setEditForm({ ...editForm, role: e.target.value as Role })}
               />
+              <select
+                value={editForm.caixa}
+                onChange={(e) =>
+                  setEditForm({
+                    ...editForm,
+                    caixa: e.target.value,
+                  })
+                }
+                className="w-full p-2 mb-3 bg-zinc-800 rounded-md"
+              >
+                <option value="caixa01">Caixa 1</option>
+                <option value="caixa02">Caixa 2</option>
+              </select>
 
               <div className="flex gap-2">
   <button

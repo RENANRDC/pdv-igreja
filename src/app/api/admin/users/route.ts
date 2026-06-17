@@ -194,13 +194,13 @@ await adminDb.collection("users").doc(userRecord.uid).set({
         await adminAuth.updateUser(user.uid, updates)
       }
 
-      if (newUsername || role) {
-await adminDb.collection("users").doc(user.uid).update({
-  ...(newUsername && { username: newUsername }),
-  ...(role && { role }),
-  ...(caixa && { caixa }),
-})
-      }
+if (newUsername || role || caixa) {
+  await adminDb.collection("users").doc(user.uid).update({
+    ...(newUsername && { username: newUsername }),
+    ...(role && { role }),
+    ...(caixa && { caixa }),
+  })
+}
 
       return json({ success: true })
     }
