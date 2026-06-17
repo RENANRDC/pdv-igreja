@@ -3,13 +3,13 @@ import { collection, onSnapshot } from "firebase/firestore"
 import { db } from "@/services/firebase"
 import { cache } from "@/lib/cache"
 
-type Item = {
+export type Item = {
   nome: string
   quantidade: number
   preco?: number
 }
 
-type Pedido = {
+export type Pedido = {
   id: string
   codigo?: string
   nomeCliente?: string

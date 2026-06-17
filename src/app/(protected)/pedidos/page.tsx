@@ -1,87 +1,32 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useState } from "react"
+
 import {
   collection,
-  onSnapshot,
-  query,
-  orderBy,
   addDoc,
 } from "firebase/firestore"
+
 import { formatarCaixa } from "@/utils/caixa"
 import { db } from "@/services/firebase"
 import PageContainer from "@/components/ui/PageContainer"
 import BackButton from "@/components/ui/BackButton"
 import UserInfo from "@/components/ui/UserInfo"
 import { getCachedUser } from "@/hooks/useAdminGuard"
+import { usePedidos, type Pedido } from "@/hooks/usePedidos"
 import {
   Printer,
   Search,
 } from "lucide-react"
 
-type Item = {
-  nome: string
-  quantidade: number
-  preco?: number
-}
-
-type Pedido = {
-  id: string
-  codigo: string
-  nomeCliente: string
-  total?: number
-  valor?: number
-  formaPagamento?: string
-  caixa?: string
-  itens?: Item[]
-  createdAt?: {
-    seconds: number
-  }
-}
-
 export default function ControlePedidos() {
-  const [pedidos, setPedidos] = useState<Pedido[]>(() => {
-  if (typeof window === "undefined") return []
-
-  const local = localStorage.getItem("registros-pedidos")
-
-  if (local) {
-    return JSON.parse(local)
-  }
-
-  return []
-})
+  const { pedidos } = usePedidos()
   const [busca, setBusca] = useState("")
   const [filtroCaixa, setFiltroCaixa] = useState("todos")
   const [pedidoSelecionado, setPedidoSelecionado] =
     useState<Pedido | null>(null)
 
   const [imprimindo, setImprimindo] = useState(false)
-
-  useEffect(() => {
-    const q = query(
-      collection(db, "pedidos"),
-      orderBy("createdAt", "desc")
-    )
-
-    const unsub = onSnapshot(q, (snapshot) => {
-      const lista = snapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      })) as Pedido[]
-
-      localStorage.setItem(
-  "registros-pedidos",
-  JSON.stringify(lista)
-)
-
-setPedidos(lista)
-    })
-
-    return () => unsub()
-  }, [])
-
-  
 
 const pedidosFiltrados = pedidos.filter((pedido) => {
   const termo = busca.toLowerCase()
@@ -106,16 +51,18 @@ const pedidosFiltrados = pedidos.filter((pedido) => {
   function getTotal(pedido: Pedido) {
     return pedido.total ?? pedido.valor ?? 0
   }
-function getHora(pedido: Pedido) {
-  if (!pedido.createdAt?.seconds) return "--:--"
 
-  return new Date(
-    pedido.createdAt.seconds * 1000
-  ).toLocaleTimeString("pt-BR", {
-    hour: "2-digit",
-    minute: "2-digit",
-  })
+  function getHora(pedido: Pedido) {
+  if (!pedido.createdAt?.toDate) return "--:--"
+
+  return pedido.createdAt
+    .toDate()
+    .toLocaleTimeString("pt-BR", {
+      hour: "2-digit",
+      minute: "2-digit",
+    })
 }
+
   async function handlePrint(pedido: Pedido) {
     try {
       setImprimindo(true)
