@@ -47,17 +47,19 @@ export async function reauthenticate(username: string, password: string): Promis
 export async function createUser(
   username: string,
   password: string,
-  role: "admin" | "user"
+  role: "admin" | "user",
+  caixa: "caixa01" | "caixa02" = "caixa01"
 ): Promise<void> {
   const email = usernameToEmail(username)
 
   const userCredential: UserCredential =
     await createUserWithEmailAndPassword(auth, email, password)
 
-  await setDoc(doc(db, "users", userCredential.user.uid), {
-    username,
-    role
-  })
+await setDoc(doc(db, "users", userCredential.user.uid), {
+  username,
+  role,
+  caixa
+})
 }
 
 /* =====================================================

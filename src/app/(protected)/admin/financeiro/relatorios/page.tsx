@@ -9,9 +9,10 @@ import {
   Timestamp
 } from "firebase/firestore"
 import { db } from "@/services/firebase"
-
+import { formatarCaixa } from "@/utils/caixa"
 import PageContainer from "@/components/ui/PageContainer"
 import BackButton from "@/components/ui/BackButton"
+import UserInfo from "@/components/ui/UserInfo"
 import * as XLSX from "xlsx"
 import { cache, persistCache } from "@/lib/cache"
 
@@ -35,6 +36,7 @@ type Pedido = {
   total?: number
   valor?: number
   formaPagamento?: string
+  caixa?: string
   itens?: Item[]
   createdAt?: FirestoreDate
 }
@@ -171,13 +173,14 @@ export default function RelatoriosPage() {
     const hoje = new Date()
     const dataFormatada = hoje.toLocaleDateString("pt-BR").replace(/\//g, "-")
 
-    const pedidosData = lista.map(p => ({
-      Pedido: p.codigo,
-      Consumidor: p.nomeCliente || "",
-      Pagamento: p.formaPagamento || "",
-      Total: p.total || p.valor || 0,
-      Data: formatarData(p.createdAt),
-    }))
+const pedidosData = lista.map(p => ({
+  Pedido: p.codigo,
+  Consumidor: p.nomeCliente || "",
+  Caixa: formatarCaixa(p.caixa),
+  Pagamento: p.formaPagamento || "",
+  Total: p.total || p.valor || 0,
+  Data: formatarData(p.createdAt),
+}))
 
     const itensData: ItemExport[] = []
 
@@ -280,6 +283,7 @@ XLSX.utils.book_append_sheet(
           <div>
             <h1 className="text-base font-bold">Central Gourmet</h1>
             <p className="text-xs text-gray-400">Relatórios</p>
+            <UserInfo />
           </div>
         </div>
 

@@ -8,7 +8,7 @@ import { getAuth, signOut } from "firebase/auth"
 import { cache, persistCache, clearCacheKey } from "@/lib/cache"
 import PageContainer from "@/components/ui/PageContainer"
 import { Search } from "lucide-react"
-
+import UserInfo from "@/components/ui/UserInfo"
 /* ================= TYPES ================= */
 
 type Role = "admin" | "user"
@@ -16,6 +16,7 @@ type Role = "admin" | "user"
 type User = {
   username: string
   role: Role
+  caixa?: "caixa01" | "caixa02"
 }
 
 type ModalType = "create" | "edit" | null
@@ -46,12 +47,13 @@ export default function CredenciaisPage() {
   const [isLoading, setIsLoading] = useState(false)
   const [toast, setToast] = useState<ToastType>(null)
 
-  const [createForm, setCreateForm] = useState({
-    username: "",
-    password: "",
-    confirmPassword: "",
-    role: "user" as Role,
-  })
+const [createForm, setCreateForm] = useState({
+  username: "",
+  password: "",
+  confirmPassword: "",
+  role: "user" as Role,
+  caixa: "caixa01",
+})
 
   const [editForm, setEditForm] = useState({
     newUsername: "",
@@ -118,24 +120,26 @@ setUsers(cached.users || [])
       await fetchWithAuth("/api/admin/users", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          action: "create",
-          username,
-          password,
-          role,
-        }),
+body: JSON.stringify({
+  action: "create",
+  username,
+  password,
+  role,
+  caixa: createForm.caixa,
+}),
       })
 
       clearCacheKey("/api/admin/users")
       showToast("Usuário criado", "success")
       setModal(null)
 
-      setCreateForm({
-        username: "",
-        password: "",
-        confirmPassword: "",
-        role: "user",
-      })
+setCreateForm({
+  username: "",
+  password: "",
+  confirmPassword: "",
+  role: "user",
+  caixa: "caixa01",
+})
 
 await loadUsers()
 
@@ -255,6 +259,7 @@ return (
           <p className="text-xs text-gray-400">
             Credenciais
           </p>
+          <UserInfo />
         </div>
       </div>
 
@@ -368,6 +373,20 @@ return (
                 value={createForm.role}
                 onChange={e => setCreateForm({ ...createForm, role: e.target.value as Role })}
               />
+
+              <select
+  value={createForm.caixa}
+  onChange={(e) =>
+    setCreateForm({
+      ...createForm,
+      caixa: e.target.value,
+    })
+  }
+  className="w-full p-2 mb-3 bg-zinc-800 rounded-md"
+>
+  <option value="caixa01">Caixa 1</option>
+  <option value="caixa02">Caixa 2</option>
+</select>
 
               <Button onClick={createUser} loading={isLoading} label="Criar usuário" />
             </>

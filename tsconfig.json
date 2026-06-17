@@ -29,6 +29,6 @@
     ".next/types/**/*.ts",
     ".next/dev/types/**/*.ts",
     "**/*.mts"
-, "../res/Header.tsx", "scripts/createMaster.mjs"  ],
+, "/Header.tsx", "scripts/createMaster.mjs"  ],
   "exclude": ["node_modules"]
 }

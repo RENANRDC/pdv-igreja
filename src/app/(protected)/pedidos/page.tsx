@@ -6,418 +6,402 @@ import {
   onSnapshot,
   query,
   orderBy,
-  doc,
-  updateDoc,
+  addDoc,
 } from "firebase/firestore"
+import { formatarCaixa } from "@/utils/caixa"
 import { db } from "@/services/firebase"
-import BackButton from "@/components/ui/BackButton"
-import { cache } from "@/lib/cache"
 import PageContainer from "@/components/ui/PageContainer"
-import { Timestamp } from "firebase/firestore"
-import { addDoc } from "firebase/firestore"
+import BackButton from "@/components/ui/BackButton"
+import UserInfo from "@/components/ui/UserInfo"
+import { getCachedUser } from "@/hooks/useAdminGuard"
+import {
+  Printer,
+  Search,
+} from "lucide-react"
+
+type Item = {
+  nome: string
+  quantidade: number
+  preco?: number
+}
 
 type Pedido = {
   id: string
-  nomeCliente: string
   codigo: string
-  status: "pendente" | "em_preparo" | "finalizado"
-  precisaPreparo?: boolean
-  avisoAt?: Timestamp
-  itens: {
-    nome: string
-    quantidade: number
-  }[]
-  finalizadoAt?: Timestamp
+  nomeCliente: string
+  total?: number
+  valor?: number
+  formaPagamento?: string
+  caixa?: string
+  itens?: Item[]
+  createdAt?: {
+    seconds: number
+  }
 }
 
-export default function Cozinha() {
-
-  const key = "cozinha-pedidos"
-
+export default function ControlePedidos() {
   const [pedidos, setPedidos] = useState<Pedido[]>([])
-  const [pedidoSelecionado, setPedidoSelecionado] = useState<Pedido | null>(null)
-  const [aba, setAba] = useState<"pendente" | "em_preparo" | "finalizado">("pendente")
-const [busca, setBusca] = useState("")
-  useEffect(() => {
-    const load = () => {
-      const local = localStorage.getItem(key)
+  const [busca, setBusca] = useState("")
+  const [filtroCaixa, setFiltroCaixa] = useState("todos")
+  const [pedidoSelecionado, setPedidoSelecionado] =
+    useState<Pedido | null>(null)
 
-      if (local) {
-        setPedidos(JSON.parse(local) as Pedido[])
-      } else if (cache[key]) {
-        setPedidos(cache[key] as Pedido[])
-      }
-    }
-
-    queueMicrotask(load)
-  }, [])
+  const [imprimindo, setImprimindo] = useState(false)
 
   useEffect(() => {
     const q = query(
       collection(db, "pedidos"),
-      orderBy("createdAt", "asc")
+      orderBy("createdAt", "desc")
     )
 
-    const unsubscribe = onSnapshot(q, (snapshot) => {
-      const lista: Pedido[] = snapshot.docs.map((doc) => ({
+    const unsub = onSnapshot(q, (snapshot) => {
+      const lista = snapshot.docs.map((doc) => ({
         id: doc.id,
         ...doc.data(),
       })) as Pedido[]
 
-      cache[key] = lista
-      localStorage.setItem(key, JSON.stringify(lista))
-
       setPedidos(lista)
     })
 
-    return () => unsubscribe()
+    return () => unsub()
   }, [])
 
-  async function assumirPedido(id: string) {
-    await updateDoc(doc(db, "pedidos", id), {
-      status: "em_preparo",
-    })
-  }
+  
 
-  async function voltarParaPendente(id: string) {
-    await updateDoc(doc(db, "pedidos", id), {
-      status: "pendente",
-    })
-  }
+const pedidosFiltrados = pedidos.filter((pedido) => {
+  const termo = busca.toLowerCase()
 
-  async function confirmarFinalizar() {
-    if (!pedidoSelecionado) return
+  const buscaOk =
+    (pedido.codigo || "")
+      .toLowerCase()
+      .includes(termo) ||
+    (pedido.nomeCliente || "")
+      .toLowerCase()
+      .includes(termo)
 
-await updateDoc(doc(db, "pedidos", pedidoSelecionado.id), {
-  status: "finalizado",
-  finalizadoAt: new Date(), // 🔥 ESSENCIAL
+  const caixaOk =
+    filtroCaixa === "todos" ||
+    (pedido.caixa || "").trim().toLowerCase() ===
+    filtroCaixa.trim().toLowerCase()
+
+
+  return buscaOk && caixaOk
 })
 
-    setPedidoSelecionado(null)
+  function getTotal(pedido: Pedido) {
+    return pedido.total ?? pedido.valor ?? 0
   }
+function getHora(pedido: Pedido) {
+  if (!pedido.createdAt?.seconds) return "--:--"
 
-  async function voltarParaPreparo(id: string) {
-    await updateDoc(doc(db, "pedidos", id), {
-      status: "em_preparo",
-    })
-  }
-
-  async function reenviarAviso(id: string) {
-  await updateDoc(doc(db, "pedidos", id), {
-    avisoAt: new Date(),
+  return new Date(
+    pedido.createdAt.seconds * 1000
+  ).toLocaleTimeString("pt-BR", {
+    hour: "2-digit",
+    minute: "2-digit",
   })
 }
+  async function handlePrint(pedido: Pedido) {
+    try {
+      setImprimindo(true)
+const user = getCachedUser()
 
-async function reimprimirComanda(pedido: Pedido) {
-  await addDoc(collection(db, "fila_cozinha"), {
-    codigo: pedido.codigo,
-    nome: pedido.nomeCliente,
-    itens: pedido.itens,
-    status: "pendente",
-    createdAt: Date.now(),
-  })
-}
+const fila =
+  user?.caixa === "caixa02"
+    ? "fila_impressao_caixa02"
+    : "fila_impressao_caixa01"
 
-const pendentes = pedidos.filter(
-  p => p.precisaPreparo && p.status === "pendente"
-)
+      const total = (pedido.itens || []).reduce(
+        (acc, item) =>
+          acc + (item.preco || 0) * item.quantidade,
+        0
+      )
 
-const emPreparo = pedidos.filter(
-  p => p.precisaPreparo && p.status === "em_preparo"
-)
+      const link = `${window.location.origin}/client/${pedido.id}`
 
-const finalizados = pedidos
-  .filter(
-    p => p.precisaPreparo &&
-    p.status === "finalizado"
-  )
+await addDoc(collection(db, fila), {
+  codigo: pedido.codigo,
+  nome: pedido.nomeCliente,
+  itens: pedido.itens || [],
+  total: total.toFixed(2),
 
-const filtrar = (lista: Pedido[]) =>
-  lista.filter((pedido) =>
-    pedido.codigo?.toString().includes(busca) ||
-    pedido.nomeCliente?.toLowerCase().includes(busca.toLowerCase())
-  )
+  pagamento:
+    pedido.formaPagamento?.toUpperCase() || "PIX",
 
-const listaBase =
-  aba === "pendente"
-    ? pendentes
-    : aba === "em_preparo"
-    ? emPreparo
-    : finalizados
+  valorPago: total,
+  troco: 0,
 
-const lista = listaBase.filter((pedido) =>
-  pedido.codigo?.toString().includes(busca) ||
-  pedido.nomeCliente?.toLowerCase().includes(busca.toLowerCase())
-)
+  caixa: user?.caixa || "caixa01",
 
-  const btnBase = "w-full h-12 rounded-lg text-sm font-semibold flex items-center justify-center"
+  link,
+
+  status: "pendente",
+
+  createdAt: Date.now(),
+})
+
+      setTimeout(() => {
+        setImprimindo(false)
+        setPedidoSelecionado(null)
+      }, 800)
+    } catch (err) {
+      console.error(err)
+      setImprimindo(false)
+    }
+  }
 
   return (
     <PageContainer>
+      {/* HEADER PADRÃO */}
+      <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center gap-3">
+          <img
+            src="/logo.png"
+            className="h-10 w-10"
+          />
 
-<div className="flex items-center justify-between mb-6">
-  <div className="flex items-center gap-3">
-    <img src="/logo.png" className="h-12 w-10" />
-    <div>
-      <h1 className="text-base font-bold">Central Gourmet</h1>
-      <p className="text-xs text-gray-400">Cozinha</p>
-    </div>
+          <div>
+            <h1 className="text-base font-bold">
+              Central Gourmet
+            </h1>
+
+            <p className="text-xs text-gray-400">
+              Registros
+            </p>
+            <UserInfo />
+          </div>
+        </div>
+
+        <BackButton href="/" />
+      </div>
+
+      {/* BUSCA */}
+ {/* BUSCA */}
+<div className="flex gap-2 mb-5">
+
+  <div className="relative flex-1">
+    <Search
+      size={18}
+      className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+    />
+
+    <input
+      type="text"
+      placeholder="Buscar por código ou consumidor..."
+      value={busca}
+      onChange={(e) => setBusca(e.target.value)}
+      className="
+        w-full
+        pl-10
+        pr-3
+        py-3
+        bg-gray-800
+        border
+        border-gray-700
+        rounded-xl
+        outline-none
+        focus:border-green-500
+      "
+    />
   </div>
 
-  <BackButton href="/" />
+  <select
+    value={filtroCaixa}
+    onChange={(e) =>
+      setFiltroCaixa(e.target.value)
+    }
+    className="
+      px-3
+      min-w-[120px]
+      bg-gray-800
+      border
+      border-gray-700
+      rounded-xl
+      outline-none
+      text-sm
+    "
+  >
+    <option value="todos">
+      Todos
+    </option>
+
+    <option value="caixa01">
+      Caixa 1
+    </option>
+
+    <option value="caixa02">
+      Caixa 2
+    </option>
+  </select>
+
 </div>
-
-<div className="mb-4">
-  <input
-    type="text"
-    placeholder="Buscar por pedido ou cliente..."
-    value={busca}
-    onChange={(e) => setBusca(e.target.value)}
-    className="w-full h-11 px-4 rounded-xl bg-gray-800 border border-gray-700 text-white outline-none"
-  />
-</div>
-
-
-      {/* MOBILE */}
-      <div className="flex gap-2 mb-4 lg:hidden">
-        <button onClick={() => setAba("pendente")} className={`flex-1 p-2 rounded text-sm font-semibold ${aba === "pendente" ? "bg-yellow-500 text-black" : "bg-gray-800"}`}>
-          Pendentes ({pendentes.length})
-        </button>
-
-        <button onClick={() => setAba("em_preparo")} className={`flex-1 p-2 rounded text-sm font-semibold ${aba === "em_preparo" ? "bg-blue-600" : "bg-gray-800"}`}>
-          Preparo ({emPreparo.length})
-        </button>
-
-        <button onClick={() => setAba("finalizado")} className={`flex-1 p-2 rounded text-sm font-semibold ${aba === "finalizado" ? "bg-green-600" : "bg-gray-800"}`}>
-          Prontos ({finalizados.length})
-        </button>
-      </div>
 
       {/* LISTA */}
-      <div className="space-y-3 lg:hidden">
-        {lista.map((pedido) => (
-          <div key={pedido.id} className="bg-gray-800 px-4 min-h-[90px] py-3 rounded-xl flex flex-col justify-center">
+      {pedidosFiltrados.length === 0 ? (
+        <div className="text-center text-gray-400 py-20">
+          Nenhum registro encontrado
+        </div>
+      ) : (
+        <div className="grid md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-2">
+          {pedidosFiltrados.map((pedido) => (
+            <button
+              key={pedido.id}
+              onClick={() =>
+                setPedidoSelecionado(pedido)
+              }
+className="
+  min-h-[95px]
+  bg-gray-800
+  border
+  border-gray-700
+  hover:bg-gray-700
+  transition
+  rounded-xl
+  p-3
+  text-left
+"
+            >
+              <div className="flex justify-between items-start">
+                <div>
+                  <p className="font-bold">
+                    #{pedido.codigo}
+                  </p>
 
-            <span className="font-bold mb-2">
-              #{pedido.codigo} • {pedido.nomeCliente}
-            </span>
+                  <p className="text-xs text-gray-400 truncate">
+                    {pedido.nomeCliente}
+                  </p>
+                </div>
 
-{pedido.status === "pendente" && (
-  <button
-    onClick={() => setPedidoSelecionado(pedido)}
-    className={`${btnBase} bg-yellow-500 text-black`}
-  >
-    Detalhes
-  </button>
-)}
+                <span className="font-bold text-green-400 shrink-0">
+                  R$ {getTotal(pedido).toFixed(2)}
+                </span>
+              </div>
 
-            {pedido.status === "em_preparo" && (
-              <button
-                onClick={() => setPedidoSelecionado(pedido)}
-                className={`${btnBase} bg-blue-600`}
-              >
-                Detalhes
-              </button>
-            )}
+<div className="mt-1 text-[11px] text-gray-500">
+  {pedido.formaPagamento?.toUpperCase() || "PIX"}
+</div>
 
-{pedido.status === "finalizado" && (
-  <button
-    onClick={() => setPedidoSelecionado(pedido)}
-    className={`${btnBase} bg-green-600 text-white`}
-  >
-    Detalhes
-  </button>
-)}
+<div className="text-[11px] text-blue-400 font-semibold">
+  {formatarCaixa(pedido.caixa)} • {getHora(pedido)}
+</div>
+            </button>
+          ))}
+        </div>
+      )}
 
-          </div>
-        ))}
-      </div>
+      {/* MODAL */}
+      {pedidoSelecionado && (
+        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50">
+          <div className="bg-gray-900 rounded-2xl p-6 w-full max-w-md mx-4">
 
-      {/* DESKTOP */}
-      <div className="hidden lg:grid grid-cols-3 gap-4">
-
-        {[
-{ lista: filtrar(pendentes), cor: "yellow", titulo: "Pendentes" },
-{ lista: filtrar(emPreparo), cor: "blue", titulo: "Em preparo" },
-{ lista: filtrar(finalizados), cor: "green", titulo: "Prontos" },
-        ].map((col, i) => (
-          <div key={i} className={`bg-${col.cor}-500/10 border border-${col.cor}-500/30 p-3 rounded-xl`}>
-            <h2 className={`text-${col.cor}-400 font-semibold mb-3`}>
-              {col.titulo} ({col.lista.length})
+            <h2 className="text-2xl font-bold mb-1">
+              Pedido #{pedidoSelecionado.codigo}
             </h2>
 
-            <div className="space-y-3 max-h-[75vh] overflow-y-auto pr-1">
-              {col.lista.map((pedido) => (
-                <div key={pedido.id} className="bg-gray-800 px-4 min-h-[90px] py-3 rounded-xl flex flex-col justify-center">
+<p className="text-sm text-blue-400 font-semibold mb-4">
+  {formatarCaixa(pedidoSelecionado.caixa)} • {getHora(pedidoSelecionado)}
+</p>
 
-                  <span className="font-semibold mb-2">
-                    #{pedido.codigo} • {pedido.nomeCliente}
-                  </span>
+<p className="text-gray-400">
+  Consumidor: <span className="text-white font-medium">
+    {pedidoSelecionado.nomeCliente}
+  </span>
+</p>
 
-{pedido.status === "pendente" && (
-  <button
-    onClick={() => setPedidoSelecionado(pedido)}
-    className={`${btnBase} bg-yellow-500 text-black`}
-  >
-    Detalhes
-  </button>
-)}
 
-                  {pedido.status === "em_preparo" && (
-                    <button onClick={() => setPedidoSelecionado(pedido)} className={`${btnBase} bg-blue-600`}>
-                      Detalhes
-                    </button>
-                  )}
+            <div className="border-t border-gray-700 pt-4">
+              <h3 className="font-semibold mb-3">
+                Itens
+              </h3>
 
-{pedido.status === "finalizado" && (
-  <button
-    onClick={() => setPedidoSelecionado(pedido)}
-    className={`${btnBase} bg-green-600 text-white`}
-  >
-    Detalhes
-  </button>
-)}
+              <div className="space-y-2">
+                {pedidoSelecionado.itens?.map(
+                  (item, index) => (
+                    <div
+                      key={index}
+                      className="flex justify-between text-sm"
+                    >
+                      <span>
+                        {item.quantidade}x {item.nome}
+                      </span>
 
-                </div>
-              ))}
+                      <span>
+                        R$
+                        {(
+                          (item.preco || 0) *
+                          item.quantidade
+                        ).toFixed(2)}
+                      </span>
+                    </div>
+                  )
+                )}
+              </div>
+            </div>
+
+            <div className="border-t border-gray-700 mt-4 pt-4">
+              <p className="text-sm text-gray-400">
+                Forma de pagamento
+              </p>
+
+              <p className="font-semibold">
+                {pedidoSelecionado.formaPagamento?.toUpperCase() ||
+                  "PIX"}
+              </p>
+
+              <p className="text-green-400 font-bold text-xl mt-3">
+                Total: R${" "}
+                {getTotal(
+                  pedidoSelecionado
+                ).toFixed(2)}
+              </p>
+            </div>
+
+            <div className="flex flex-col gap-2 mt-6">
+              <button
+                onClick={() =>
+                  handlePrint(pedidoSelecionado)
+                }
+                className="
+                  w-full
+                  p-3
+                  rounded-xl
+                  bg-blue-600
+                  hover:bg-blue-700
+                  transition
+                  font-bold
+                  flex
+                  items-center
+                  justify-center
+                  gap-2
+                "
+              >
+                <Printer size={18} />
+
+                {imprimindo
+                  ? "Enviando..."
+                  : "Reimprimir"}
+              </button>
+
+              <button
+                onClick={() =>
+                  setPedidoSelecionado(null)
+                }
+                className="
+                  w-full
+                  p-3
+                  rounded-xl
+                  bg-gray-700
+                  hover:bg-gray-600
+                  transition
+                  font-bold
+                "
+              >
+                Fechar
+              </button>
             </div>
           </div>
-        ))}
-
-      </div>
-
-{/* MODAL */}
-{pedidoSelecionado && (
-  <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50">
-    <div className="bg-gray-900 p-6 rounded-xl w-[650px] max-w-[95vw]">
-
-      <h2 className="text-xl font-bold mb-3">
-        Pedido #{pedidoSelecionado.codigo}
-      </h2>
-
-      <p className="text-sm text-gray-400 mb-3">
-        {pedidoSelecionado.nomeCliente}
-      </p>
-
-      <div className="mb-4 space-y-1">
-        {pedidoSelecionado.itens.map((item, i) => (
-          <div key={i} className="flex justify-between text-sm">
-            <span>{item.nome}</span>
-            <span>x{item.quantidade}</span>
-          </div>
-        ))}
-      </div>
-
-{pedidoSelecionado.status === "pendente" ? (
-  <div className="grid grid-cols-4 gap-2">
-    <button
-      onClick={() => setPedidoSelecionado(null)}
-      className="bg-gray-700 h-12 rounded-lg text-sm flex items-center justify-center"
-    >
-      Fechar
-    </button>
-
-    <button
-      onClick={async () => {
-        await assumirPedido(pedidoSelecionado.id)
-        setPedidoSelecionado(null)
-      }}
-      className="bg-yellow-500 text-black h-12 rounded-lg text-sm font-semibold flex items-center justify-center"
-    >
-      Assumir
-    </button>
-
-<button
-  onClick={() => reimprimirComanda(pedidoSelecionado)}
-  className="bg-blue-600 text-white h-12 rounded-lg text-sm font-semibold"
->
-  Imprimir
-</button>
-
-<button
-  onClick={confirmarFinalizar}
-  className="bg-green-600 h-12 rounded-lg text-sm font-semibold flex items-center justify-center"
->
-  Finalizar
-</button>
-
-  </div>
-) : pedidoSelecionado.status === "em_preparo" ? (
-  <div className="grid grid-cols-4 gap-2">
-    <button
-      onClick={() => setPedidoSelecionado(null)}
-      className="bg-gray-700 h-12 rounded-lg text-sm flex items-center justify-center"
-    >
-      Fechar
-    </button>
-
-    <button
-      onClick={async () => {
-        await voltarParaPendente(pedidoSelecionado.id)
-        setPedidoSelecionado(null)
-      }}
-      className="bg-yellow-500 text-black h-12 rounded-lg text-sm font-semibold flex items-center justify-center"
-    >
-      Voltar
-    </button>
-
-<button
-  onClick={() => reimprimirComanda(pedidoSelecionado)}
-  className="bg-blue-600 text-white h-12 rounded-lg text-sm font-semibold"
->
-  Imprimir
-</button>
-
-    <button
-      onClick={confirmarFinalizar}
-      className="bg-green-600 h-12 rounded-lg text-sm font-semibold flex items-center justify-center"
-    >
-      Finalizar
-    </button>
-  </div>
-) : (
-  <div className="grid grid-cols-4 gap-2">
-
-    <button
-      onClick={() => setPedidoSelecionado(null)}
-      className="bg-gray-700 h-12 rounded-lg text-sm flex items-center justify-center"
-    >
-      Fechar
-    </button>
-
-    <button
-      onClick={async () => {
-        await voltarParaPreparo(pedidoSelecionado.id)
-        setPedidoSelecionado(null)
-      }}
-      className="bg-red-600 text-white h-12 rounded-lg text-sm font-semibold flex items-center justify-center"
-    >
-      Desfazer
-    </button>
-
-<button
-  onClick={() => reimprimirComanda(pedidoSelecionado)}
-  className="bg-blue-600 text-white h-12 rounded-lg text-sm font-semibold"
->
-  Imprimir
-</button>
-
-    <button
-      onClick={async () => {
-        await reenviarAviso(pedidoSelecionado.id)
-      }}
-      className="bg-green-600 text-white h-12 rounded-lg text-sm font-semibold flex items-center justify-center"
-    >
-      Reavisar
-    </button>
-
-  </div>
-)
-
-}
-    </div>
-  </div>
-)}
+        </div>
+      )}
     </PageContainer>
   )
 }

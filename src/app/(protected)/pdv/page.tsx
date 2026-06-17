@@ -9,6 +9,7 @@ import { useVendaMode } from "@/hooks/useVendaMode"
 import { useCategorias } from "@/hooks/useCategorias"
 import { useProdutos } from "@/hooks/useProdutos"
 import BackButton from "@/components/ui/BackButton"
+import UserInfo from "@/components/ui/UserInfo"
 import {
   Receipt,
   Smartphone,
@@ -23,15 +24,20 @@ type Item = {
   preco: number
   barracaId: string
   quantidade: number
+  categoriaId?: string
+  categoriaNome?: string
+  observacao?: string
 }
 
 type FormaPagamento = "pix" | "dinheiro" | "cartao"
 import { db } from "@/services/firebase"
 import { addDoc, collection } from "firebase/firestore"
 import { doc, onSnapshot } from "firebase/firestore"
+import { getCachedUser } from "@/hooks/useAdminGuard"
 export default function Home() {
-
+  const user = getCachedUser()
   const [nome, setNome] = useState("")
+
   const [nomePedido, setNomePedido] = useState("") // 🔥 snapshot nome
   const [mensagem, setMensagem] = useState("")
   const [itens, setItens] = useState<Item[]>([])
@@ -71,7 +77,6 @@ function parseReal(valor: string) {
 
 const { categorias } = useCategorias()
 const { produtos } = useProdutos()
-
 const [categoriaSelecionada, setCategoriaSelecionada] = useState<string | null>(null)
 const [buscaProduto, setBuscaProduto] = useState("")
 const produtosFiltrados = produtos.filter((p) => {
@@ -90,6 +95,13 @@ const produtosFiltrados = produtos.filter((p) => {
 
 
 const { vendaMode, setVendaMode, isLoaded } = useVendaMode()
+
+useEffect(() => {
+  if (isLoaded && !vendaMode) {
+    setVendaMode("balcao")
+  }
+}, [isLoaded, vendaMode, setVendaMode])
+
 const [printerIp, setPrinterIp] = useState("")
 const [imprimindo, setImprimindo] = useState(false)
 
@@ -128,35 +140,24 @@ function adicionarItem(produto: Omit<Item, "quantidade">) {
     return
   }
 
-  setItens((prev) => {
-    const existe = prev.find((i) => i.nome === produto.nome)
-
-    if (existe) {
-      return prev.map((i) =>
-        i.nome === produto.nome
-          ? { ...i, quantidade: i.quantidade + 1 }
-          : i
-      )
-    }
-
-    return [...prev, { ...produto, quantidade: 1 }]
-  })
+setItens((prev) => [
+  ...prev,
+  {
+    ...produto,
+    quantidade: 1,
+    observacao: "",
+  },
+])
 
   setUltimoItem(produto.nome)
   setTimeout(() => setUltimoItem(null), 200)
 }
 
-  function removerItem(nome: string) {
-    setItens((prev) =>
-      prev
-        .map((i) =>
-          i.nome === nome
-            ? { ...i, quantidade: i.quantidade - 1 }
-            : i
-        )
-        .filter((i) => i.quantidade > 0)
-    )
-  }
+function removerItem(index: number) {
+  setItens((prev) =>
+    prev.filter((_, i) => i !== index)
+  )
+}
 
   function limparCarrinho() {
     setItens([])
@@ -206,12 +207,12 @@ async function handleConfirmarPagamento() {
   try {
     const nomeFinal = nome.trim()
 
-    const res = await criarPedido(
-      nomeFinal,
-      itens,
-      formaPagamento
-    )
-
+const res = await criarPedido(
+  nomeFinal,
+  itens,
+  formaPagamento,
+  user?.caixa ?? "caixa01"
+)
 
   const url = `${window.location.origin}/client/${res.id}`
 
@@ -261,12 +262,15 @@ if (!whatsNumero.trim()) {
         .reduce((acc, i) => acc + i.preco * i.quantidade, 0)
         .toFixed(2)
 
-      const itensTexto = itensPedido
-        .map(
-          (i) =>
-            `• ${i.nome} x${i.quantidade} (R$ ${(i.preco * i.quantidade).toFixed(2)})`
-        )
-        .join("\n")
+const itensTexto = itensPedido
+  .map((i) => {
+    const obs = i.observacao
+      ? `\n   Obs: ${i.observacao}`
+      : ""
+
+    return `• ${i.nome} x${i.quantidade} (R$ ${(i.preco * i.quantidade).toFixed(2)})${obs}`
+  })
+  .join("\n")
 
       let texto =
         `Pedido criado com sucesso!\n\n` +
@@ -308,8 +312,9 @@ return (
         Central Gourmet
       </h1>
       <p className="text-xs text-gray-400">
-        PDV
+        Caixa
       </p>
+      <UserInfo />
     </div>
   </div>
 
@@ -320,6 +325,7 @@ return (
 <div className="flex items-center justify-between mb-4">
 
   {/* ESQUERDA → NAVEGAÇÃO */}
+{false && (
   <Link
     href="/pedidos/controle"
     className="flex items-center gap-2 px-4 h-10 rounded-xl bg-gray-800 hover:bg-gray-700 text-sm font-semibold"
@@ -327,68 +333,29 @@ return (
     <ClipboardList size={16} />
     Pedidos
   </Link>
+)}
 
   {/* DIREITA → MODO */}
-<div className="flex items-center">
+{false && (
+  <div className="flex items-center">
 
-<button
-  onClick={() => setVendaMode(null)}
-  className={`flex items-center gap-2 px-4 h-10 rounded-xl text-white font-semibold transition ${
-    vendaMode === "balcao"
-      ? "bg-blue-600 hover:bg-blue-700"
-      : vendaMode === "mesa"
-      ? "bg-green-600 hover:bg-green-700"
-      : "bg-gray-700 hover:bg-gray-600"
-  }`}
->
-  {!vendaMode && <RefreshCw size={16} />}
+    <button
+      onClick={() => setVendaMode(null)}
+      className=""
+    >
+    </button>
 
-  {vendaMode === "balcao" && (
-    <>
-      <Receipt size={16} />
-      Balcão
-    </>
-  )}
-
-  {vendaMode === "mesa" && (
-    <>
-      <Smartphone size={16} />
-      Mesa
-    </>
-  )}
-</button>
+  </div>
+)}
 
 </div>
 
-</div>
-
-    <input
-      placeholder={erro === "nome" ? "Digite o nome do consumidor" : "Consumidor"}
-      value={nome}
-onChange={(e) => {
-  setNome(e.target.value)
-}}
-
-onFocus={() => {
-  if (erro === "nome") setErro(null)
-}}
-      className={`w-full p-3 rounded-lg mb-4 outline-none transition ${
-        erro === "nome"
-          ? "bg-red-900 border border-red-500 placeholder-red-300"
-          : "bg-gray-800 border border-transparent focus:border-green-500"
-      }`}
-    />
-
-  {/* 🔥 LAYOUT RESPONSIVO */}
-  <div className="flex flex-col lg:grid lg:grid-cols-3 gap-4">
-
-{/* PRODUTOS */}
-<div className="lg:col-span-2 flex flex-col">
-
-  {/* CATEGORIAS */}
+ {/* CATEGORIAS */}
 <div
   className="
-    flex gap-2 mb-3 pb-2
+    sticky top-0 z-20
+    bg-gray-900
+    flex gap-2 mb-3 pb-2 pt-2
     overflow-x-scroll
     scroll-smooth
     snap-x snap-mandatory
@@ -401,7 +368,7 @@ onFocus={() => {
     setCategoriaSelecionada(null)
     setBuscaProduto("")
   }}
-  className={`px-4 py-2 rounded-lg font-semibold whitespace-nowrap border transition shrink-0 snap-start ${
+  className={`px-4 py-2 rounded-xl font-semibold whitespace-nowrap border transition shrink-0 snap-start ${
     categoriaSelecionada === null
       ? "bg-green-600 border-green-500 text-white"
       : "bg-gray-800 border-gray-700 text-gray-300 hover:bg-gray-700"
@@ -423,7 +390,7 @@ onFocus={() => {
   setCategoriaSelecionada(cat.id)
   setBuscaProduto("")
 }}
-          className={`px-4 py-2 rounded-lg font-semibold whitespace-nowrap border transition shrink-0 snap-start ${
+          className={`px-4 py-2 rounded-xl font-semibold whitespace-nowrap border transition shrink-0 snap-start ${
             categoriaSelecionada === cat.id
               ? "bg-green-600 border-green-500 text-white"
               : "bg-gray-800 border-gray-700 text-gray-300 hover:bg-gray-700"
@@ -434,7 +401,14 @@ onFocus={() => {
       ))}
   </div>
 
-<div className="relative mb-3">
+  {/* 🔥 LAYOUT RESPONSIVO */}
+  <div className="flex flex-col lg:grid lg:grid-cols-3 gap-4">
+
+{/* PRODUTOS */}
+<div className="order-2 lg:order-1 lg:col-span-2 flex flex-col">
+
+ 
+<div className="sticky top-14 z-20 bg-gray-900 pb-2 mb-3">
   <Search
     size={18}
     className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
@@ -460,7 +434,7 @@ onFocus={() => {
 </div>
 
   {/* PRODUTOS */}
-  <div className="grid grid-cols-2 md:grid-cols-3 gap-3 max-h-[45vh] lg:max-h-[60vh] overflow-y-auto pr-1 pb-6">
+  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 content-start lg:h-[75vh] lg:overflow-y-auto pr-1 pb-6">
 
     {produtosFiltrados.length === 0 && (
       <div className="col-span-full text-center text-gray-400 py-10">
@@ -473,13 +447,18 @@ onFocus={() => {
       key={prod.id}
       disabled={(prod.estoque ?? 0) <= 0}
       onClick={() =>
-        adicionarItem({
-          nome: prod.nome,
-          preco: prod.preco,
-          barracaId: prod.categoriaId,
-        })
+adicionarItem({
+  nome: prod.nome,
+  preco: prod.preco,
+  barracaId: prod.categoriaId,
+  categoriaId: prod.categoriaId,
+  categoriaNome:
+    categorias.find(
+      (c) => c.id === prod.categoriaId
+    )?.nome || "Sem categoria",
+})
       }
-      className={`p-4 rounded-xl text-left border transition-all ${
+    className={`self-start p-5 rounded-xl text-left border transition-all ${
         (prod.estoque ?? 0) <= 0
           ? "bg-gray-900 border-red-500 opacity-50 cursor-not-allowed"
           : ultimoItem === prod.nome
@@ -511,11 +490,37 @@ onFocus={() => {
 </div>
 
     {/* CARRINHO */}
-    <div className="bg-gray-800 p-3 rounded-lg mb-4 lg:mb-0 flex flex-col lg:sticky lg:top-4 h-fit">
+<div className="order-1 lg:order-2 bg-gray-800 p-3 rounded-xl mb-4 lg:mb-0 flex flex-col lg:sticky lg:top-4 lg:h-[75vh]">
 
-      <h3 className="font-bold mb-2">Carrinho</h3>
+      <h3 className="font-bold mb-3 pb-2 border-b border-gray-700">
+  Carrinho
+</h3>
 
-      <div className="flex-1 overflow-y-auto max-h-80 lg:max-h-none">
+      <div className="mb-3">
+  <label className="block text-xs text-gray-400 mb-1">
+    Consumidor
+  </label>
+
+  <input
+    placeholder={
+      erro === "nome"
+        ? "Digite o nome do consumidor"
+        : "Nome do consumidor"
+    }
+    value={nome}
+    onChange={(e) => setNome(e.target.value)}
+    onFocus={() => {
+      if (erro === "nome") setErro(null)
+    }}
+    className={`w-full p-3 rounded-xl outline-none transition ${
+      erro === "nome"
+        ? "bg-red-900 border border-red-500 placeholder-red-300"
+        : "bg-gray-700 border border-transparent focus:border-green-500"
+    }`}
+  />
+</div>
+
+      <div className="flex-1 overflow-y-auto pr-1 min-h-0">
 
         {itens.length === 0 ? (
           <p className="text-gray-400">Nenhum item</p>
@@ -533,6 +538,25 @@ onFocus={() => {
                 <p className="font-semibold text-white">
                   {item.nome}
                 </p>
+
+                <input
+  type="text"
+  placeholder="Observação do item"
+  value={item.observacao || ""}
+onChange={(e) => {
+  setItens((prev) =>
+    prev.map((p, index) =>
+      index === i
+        ? {
+            ...p,
+            observacao: e.target.value,
+          }
+        : p
+    )
+  )
+}}
+  className="mt-2 w-full p-2 text-xs rounded bg-gray-800 border border-gray-600"
+/>
 
                 {!compacto && (
                   <>
@@ -555,11 +579,11 @@ onFocus={() => {
 
               {/* DIREITA */}
               <div className={`flex items-center bg-gray-800 overflow-hidden ${
-                compacto ? "rounded-lg" : "rounded-xl"
+                compacto ? "rounded-xl" : "rounded-xl"
               }`}>
 
 <button
-  onClick={() => removerItem(item.nome)}
+  onClick={() => removerItem(i)}
   className={`flex items-center justify-center bg-red-600 hover:bg-red-700 active:scale-95 transition font-bold ${
     compacto ? "w-9 h-9" : "w-11 h-11"
   }`}
@@ -574,7 +598,15 @@ onFocus={() => {
                 </div>
 
                 <button
-                  onClick={() => adicionarItem(item)}
+                  onClick={() =>
+  adicionarItem({
+    nome: item.nome,
+    preco: item.preco,
+    barracaId: item.barracaId,
+    categoriaId: item.categoriaId,
+    categoriaNome: item.categoriaNome,
+  })
+}
                   className={`flex items-center justify-center bg-green-600 hover:bg-green-700 active:scale-95 transition font-bold ${
                     compacto ? "w-9 h-9" : "w-11 h-11"
                   }`}
@@ -740,14 +772,29 @@ onFocus={() => {
             </div>
 
             {/* ITENS */}
-            <div className="bg-gray-100 p-3 rounded mb-3">
-              {itensPedido.map((item, i) => (
-                <div key={i} className="flex justify-between text-sm mb-1">
-                  <span>{item.nome} x{item.quantidade}</span>
-                  <span>R$ {(item.preco * item.quantidade).toFixed(2)}</span>
-                </div>
-              ))}
-            </div>
+<div className="bg-gray-100 p-3 rounded mb-3">
+  {itensPedido.map((item, i) => (
+    <div key={i} className="mb-2">
+
+      <div className="flex justify-between text-sm">
+        <span>
+          {item.nome} x{item.quantidade}
+        </span>
+
+        <span>
+          R$ {(item.preco * item.quantidade).toFixed(2)}
+        </span>
+      </div>
+
+      {item.observacao && (
+        <div className="text-xs text-orange-500 mt-1 pl-2">
+          📝 Obs: {item.observacao}
+        </div>
+      )}
+
+    </div>
+  ))}
+</div>
 
             {/* TOTAL */}
             <div className="flex justify-between font-bold text-lg mb-2">
@@ -802,7 +849,13 @@ onFocus={() => {
       console.log("ENVIANDO PARA FILAS")
 
       // 🖨️ Impressora do balcão
-      await addDoc(collection(db, "fila_impressao"), {
+
+    const fila =
+    (user?.caixa ?? "caixa01") === "caixa02"
+    ? "fila_impressao_caixa02"
+    : "fila_impressao_caixa01"
+
+      await addDoc(collection(db, fila), {
         codigo: codigoPedido,
         nome: nomePedido,
         itens: itensPedido,
@@ -813,6 +866,9 @@ onFocus={() => {
         valorPago: valorRecebidoPedido,
         troco: trocoPedido,
         link: qrUrl,
+
+        caixa: user?.caixa ?? "caixa01",
+
         status: "pendente",
         createdAt: Date.now()
       })
@@ -856,31 +912,33 @@ if (temItemPreparo) {
 )}
 
 {/* WHATSAPP (todos os modos) */}
-<>
-<input
-  placeholder={
-    erroWhats
-      ? "Digite o número do WhatsApp"
-      : "Número WhatsApp (ex: 44999999999)"
-  }
-  value={whatsNumero}
-  onChange={(e) => {
-    setWhatsNumero(e.target.value)
-    if (erroWhats) setErroWhats(false)
-  }}
-  className={`w-full p-3 border rounded ${
-    erroWhats ? "border-red-500 bg-red-100" : ""
-  }`}
-/>
+{false && (
+  <>
+    <input
+      placeholder={
+        erroWhats
+          ? "Digite o número do WhatsApp"
+          : "Número WhatsApp (ex: 44999999999)"
+      }
+      value={whatsNumero}
+      onChange={(e) => {
+        setWhatsNumero(e.target.value)
+        if (erroWhats) setErroWhats(false)
+      }}
+      className={`w-full p-3 border rounded ${
+        erroWhats ? "border-red-500 bg-red-100" : ""
+      }`}
+    />
 
-<button
-  onClick={handleWhatsApp}
-  className="w-full bg-green-600 text-white p-3 rounded-xl font-bold flex items-center justify-center gap-2"
->
-  <Send size={18} />
-  Enviar via WhatsApp
-</button>
-</>
+    <button
+      onClick={handleWhatsApp}
+      className="w-full bg-green-600 text-white p-3 rounded-xl font-bold flex items-center justify-center gap-2"
+    >
+      <Send size={18} />
+      Enviar via WhatsApp
+    </button>
+  </>
+)}
               
 
               <button
@@ -955,35 +1013,8 @@ if (temItemPreparo) {
 
       )}
 
-      {isLoaded && !vendaMode && (
-  <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50">
-    <div className="bg-white text-black p-6 rounded-2xl w-full max-w-sm text-center">
-
-      <h2 className="text-xl font-bold mb-4">
-        Tipo de atendimento
-      </h2>
-
-      <div className="flex flex-col gap-3">
-
-<button
-  onClick={() => setVendaMode("balcao")}
-  className="bg-blue-600 text-white p-4 rounded-xl font-bold flex items-center justify-center gap-2"
->
-  <Receipt size={18} />
-  Balcão
-</button>
-
-<button
-  onClick={() => setVendaMode("mesa")}
-  className="bg-green-600 text-white p-4 rounded-xl font-bold flex items-center justify-center gap-2"
->
-  <Smartphone size={18} />
-  Mesa
-</button>
-      </div>
-
-    </div>
-  </div>
+{false && (
+  <></>
 )}
 
 </PageContainer>

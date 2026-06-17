@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation"
 export type User = {
   role: "admin" | "user"
   username: string | null
+  caixa: "caixa01" | "caixa02"
 }
 
 let cachedUser: User | null = null

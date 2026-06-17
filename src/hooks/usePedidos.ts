@@ -16,6 +16,7 @@ type Pedido = {
   total?: number
   valor?: number
   formaPagamento?: string
+  caixa?: string
   status: "pendente" | "em_preparo" | "finalizado" | "fechado"
   itens?: Item[]
   createdAt?: { toDate: () => Date }

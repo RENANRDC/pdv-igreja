@@ -15,6 +15,9 @@ type Item = {
   preco: number
   barracaId: string
   quantidade: number
+  categoriaId?: string
+  categoriaNome?: string
+  observacao?: string
 }
 
 type FormaPagamento = "pix" | "dinheiro" | "cartao"
@@ -26,8 +29,10 @@ function gerarCodigo(): string {
 export async function criarPedido(
   nome: string,
   itens: Item[],
-  formaPagamento: FormaPagamento = "pix"
-) {
+  formaPagamento: string,
+  caixa: string
+)
+ {
   if (!nome || !itens.length) {
     throw new Error("Dados inválidos")
   }
@@ -98,6 +103,8 @@ const pedido = {
 
   pago: true,
   formaPagamento,
+
+  caixa,
 
   createdAt: Timestamp.now(),
 }

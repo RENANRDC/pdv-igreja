@@ -13,6 +13,8 @@ import { useCategorias } from "@/hooks/useCategorias"
 import { useProdutos } from "@/hooks/useProdutos"
 import PageContainer from "@/components/ui/PageContainer"
 import BackButton from "@/components/ui/BackButton"
+import UserInfo from "@/components/ui/UserInfo"
+import { Search } from "lucide-react"
 
 type Produto = {
   id: string
@@ -171,6 +173,7 @@ const produtosFiltrados = produtos.filter((p: Produto) => {
             <p className="text-xs text-gray-400">
               Produtos
             </p>
+            <UserInfo />
           </div>
         </div>
 
@@ -264,42 +267,60 @@ const produtosFiltrados = produtos.filter((p: Produto) => {
 
         </div>
 
-        <div className="md:col-span-2 space-y-4">
+ <div className="md:col-span-2 space-y-4">
 
-<div className="grid md:grid-cols-3 gap-3">
+  <div className="flex gap-2 mb-2">
 
-  <input
-    type="text"
-    placeholder="Pesquisar produto..."
-    value={busca}
-    onChange={(e) => setBusca(e.target.value)}
-    className="p-3 rounded bg-gray-800"
-  />
+    <div className="relative flex-1">
+      <Search
+        size={18}
+        className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+      />
 
-  <select
-    value={categoriaFiltro}
-    onChange={(e) => setCategoriaFiltro(e.target.value)}
-    className="p-3 rounded bg-gray-800"
-  >
-    <option value="">Todas categorias</option>
-    {categorias.map((cat) => (
-      <option key={cat.id} value={cat.id}>
-        {cat.nome}
-      </option>
-    ))}
-  </select>
+      <input
+        type="text"
+        placeholder="Buscar produto..."
+        value={busca}
+        onChange={(e) => setBusca(e.target.value)}
+        className="
+          w-full
+          pl-10
+          pr-3
+          py-3
+          bg-gray-800
+          border
+          border-gray-700
+          rounded-xl
+          outline-none
+          focus:border-green-500
+        "
+      />
+    </div>
 
-  <select
-    value={statusFiltro}
-    onChange={(e) => setStatusFiltro(e.target.value)}
-    className="p-3 rounded bg-gray-800"
-  >
-    <option value="todos">Todos os status</option>
-    <option value="ativos">Ativos</option>
-    <option value="inativos">Inativos</option>
-  </select>
+    <select
+      value={categoriaFiltro}
+      onChange={(e) => setCategoriaFiltro(e.target.value)}
+      className="p-3 rounded bg-gray-800"
+    >
+      <option value="">Todas categorias</option>
+      {categorias.map((cat) => (
+        <option key={cat.id} value={cat.id}>
+          {cat.nome}
+        </option>
+      ))}
+    </select>
 
-</div>
+    <select
+      value={statusFiltro}
+      onChange={(e) => setStatusFiltro(e.target.value)}
+      className="p-3 rounded bg-gray-800"
+    >
+      <option value="todos">Todos os status</option>
+      <option value="ativos">Ativos</option>
+      <option value="inativos">Inativos</option>
+    </select>
+
+  </div>
 
           <div className="space-y-2">
             {produtosFiltrados.map((prod: Produto) => (

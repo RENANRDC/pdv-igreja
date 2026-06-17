@@ -5,10 +5,28 @@ import { getClientIp } from "@/lib/getIp"
 
 type Role = "admin" | "user"
 
+type Caixa = "caixa01" | "caixa02"
+
 type Body =
-  | { action: "create"; username: string; password: string; role: Role }
-  | { action: "update"; username: string; newUsername?: string; newPassword?: string; role?: Role }
-  | { action: "delete"; username: string }
+  | {
+      action: "create"
+      username: string
+      password: string
+      role: Role
+      caixa?: Caixa
+    }
+  | {
+      action: "update"
+      username: string
+      newUsername?: string
+      newPassword?: string
+      role?: Role
+      caixa?: Caixa
+    }
+  | {
+      action: "delete"
+      username: string
+    }
 
 const MASTER_USER = process.env.MASTER_USER || "renan_master"
 
@@ -79,8 +97,9 @@ export async function GET(request: NextRequest) {
     const users = snapshot.docs
       .map(doc => ({
         id: doc.id,
-        username: doc.data().username as string,
-        role: doc.data().role as Role,
+username: doc.data().username as string,
+role: doc.data().role as Role,
+caixa: doc.data().caixa || "caixa01",
       }))
       // 🔥 remove master da listagem
       .filter(user => user.username !== MASTER_USER)
@@ -114,7 +133,7 @@ export async function POST(request: NextRequest) {
     const body: Body = await request.json()
 
     if (body.action === "create") {
-      const { username, password, role } = body
+      const { username, password, role, caixa } = body
 
       if (!username || !password) {
         return json({ error: "Dados inválidos" }, 400)
@@ -132,16 +151,23 @@ export async function POST(request: NextRequest) {
         password,
       })
 
-      await adminDb.collection("users").doc(userRecord.uid).set({
-        username,
-        role,
-      })
+await adminDb.collection("users").doc(userRecord.uid).set({
+  username,
+  role,
+  caixa: caixa || "caixa01",
+})
 
       return json({ success: true })
     }
 
     if (body.action === "update") {
-      const { username, newUsername, newPassword, role } = body
+      const {
+  username,
+  newUsername,
+  newPassword,
+  role,
+  caixa
+} = body
 
       // 🔥 bloqueia edição do master
       if (username === MASTER_USER) {
@@ -169,10 +195,11 @@ export async function POST(request: NextRequest) {
       }
 
       if (newUsername || role) {
-        await adminDb.collection("users").doc(user.uid).update({
-          ...(newUsername && { username: newUsername }),
-          ...(role && { role }),
-        })
+await adminDb.collection("users").doc(user.uid).update({
+  ...(newUsername && { username: newUsername }),
+  ...(role && { role }),
+  ...(caixa && { caixa }),
+})
       }
 
       return json({ success: true })

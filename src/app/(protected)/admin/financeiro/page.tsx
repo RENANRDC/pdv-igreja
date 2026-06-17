@@ -13,9 +13,10 @@ import { db } from "@/services/firebase"
 import { usePedidos } from "@/hooks/usePedidos"
 import PageContainer from "@/components/ui/PageContainer"
 import BackButton from "@/components/ui/BackButton"
+import UserInfo from "@/components/ui/UserInfo"
 import { useRouter } from "next/navigation"
 import { FolderOpen, Trash2 } from "lucide-react"
-
+import { formatarCaixa } from "@/utils/caixa"
 type Item = {
   nome: string
   quantidade: number
@@ -29,6 +30,7 @@ type Pedido = {
   total?: number
   valor?: number
   formaPagamento?: string
+  caixa?: string
   status: "pendente" | "em_preparo" | "finalizado" | "fechado"
   itens?: Item[]
   createdAt?: { toDate: () => Date }
@@ -115,14 +117,31 @@ async function confirmarExclusaoPedido() {
         )
       )
 
-      // 🔥 APAGA FILA DE IMPRESSÃO (GARANTIDO)
-      const filaSnap = await getDocs(collection(db, "fila_impressao"))
+// 🔥 APAGA FILA CAIXA 01
+const fila01 = await getDocs(
+  collection(db, "fila_impressao_caixa01")
+)
 
-      await Promise.all(
-        filaSnap.docs.map(d =>
-          deleteDoc(doc(db, "fila_impressao", d.id))
-        )
-      )
+await Promise.all(
+  fila01.docs.map(d =>
+    deleteDoc(
+      doc(db, "fila_impressao_caixa01", d.id)
+    )
+  )
+)
+
+// 🔥 APAGA FILA CAIXA 02
+const fila02 = await getDocs(
+  collection(db, "fila_impressao_caixa02")
+)
+
+await Promise.all(
+  fila02.docs.map(d =>
+    deleteDoc(
+      doc(db, "fila_impressao_caixa02", d.id)
+    )
+  )
+)
 
       setConfirmModal(false)
       setSuccessModal(true)
@@ -147,6 +166,7 @@ async function confirmarExclusaoPedido() {
             <p className="text-xs text-gray-400">
               Financeiro
             </p>
+            <UserInfo />
           </div>
         </div>
 
@@ -217,12 +237,13 @@ async function confirmarExclusaoPedido() {
 <div className="text-xs text-gray-400 flex justify-between">
   <span>{p.formaPagamento}</span>
 
-  <span>
-    {p.createdAt?.toDate?.()?.toLocaleTimeString("pt-BR", {
-      hour: "2-digit",
-      minute: "2-digit",
-    }) || "--:--"}
-  </span>
+<span>
+  {formatarCaixa(p.caixa)} •{" "}
+  {p.createdAt?.toDate?.()?.toLocaleTimeString("pt-BR", {
+    hour: "2-digit",
+    minute: "2-digit",
+  }) || "--:--"}
+</span>
 </div>
           </div>
         ))}

@@ -8,7 +8,7 @@ import { Folder, Package, DollarSign, Lock, Settings } from "lucide-react"
 import Card3D from "@/components/ui/Card3D"
 import PageContainer from "@/components/ui/PageContainer"
 import BackButton from "@/components/ui/BackButton"
-
+import UserInfo from "@/components/ui/UserInfo"
 export default function AdminPage() {
   const router = useRouter()
 
@@ -41,8 +41,9 @@ export default function AdminPage() {
               Central Gourmet
             </h1>
             <p className="text-xs text-gray-400">
-              Configurações
+              Painel ADM
             </p>
+            <UserInfo />
           </div>
         </div>
 
@@ -71,13 +72,6 @@ export default function AdminPage() {
           icon={<DollarSign size={22} />}
           title="Financeiro"
           description="Relatórios e vendas"
-        />
-
-        <Card3D
-          href="/admin/ajustes"
-          icon={<Settings size={22} />}
-          title="Ajustes"
-          description="Ajustes do sistema"
         />
 
         <Card3D

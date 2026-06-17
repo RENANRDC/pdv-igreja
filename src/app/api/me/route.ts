@@ -5,7 +5,6 @@ export async function GET(request: Request) {
   try {
     const cookie = request.headers.get("cookie")
     const token = cookie?.match(/session=([^;]+)/)?.[1]
-
     if (!token) {
       return NextResponse.json({ error: "Não autenticado" }, { status: 401 })
     }
@@ -21,10 +20,11 @@ export async function GET(request: Request) {
 
     const userData = userDoc.data()
 
-    return NextResponse.json({
-      role: userData?.role || "user",
-      username: userData?.username || null,
-    })
+return NextResponse.json({
+  role: userData?.role || "user",
+  username: userData?.username || null,
+  caixa: userData?.caixa || "caixa01",
+})
 
   } catch (error) {
     console.error("ME error:", error)

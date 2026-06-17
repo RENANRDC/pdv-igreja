@@ -13,12 +13,14 @@ import {
   Receipt,
   ChefHat,
   Shield,
-  Tv
+  Tv,
+  Clipboard
 } from "lucide-react"
 
 import Card3D from "@/components/ui/Card3D"
 import PageContainer from "@/components/ui/PageContainer"
 import Button from "@/components/ui/Button"
+import UserInfo from "@/components/ui/UserInfo"
 import { LogOut } from "lucide-react"
 
 export default function MenuPage() {
@@ -30,7 +32,13 @@ export default function MenuPage() {
   useEffect(() => {
     const cached = getCachedUser()
     Promise.resolve().then(() => {
-      setUser(cached || { role: "user", username: null })
+      setUser(
+  cached || {
+    role: "user",
+    username: null,
+    caixa: "caixa01"
+  }
+)
     })
   }, [])
 
@@ -63,6 +71,7 @@ export default function MenuPage() {
             <p className="text-xs text-gray-400">
               Painel
             </p>
+            <UserInfo />
           </div>
         </div>
 
@@ -81,22 +90,15 @@ export default function MenuPage() {
         <Card3D
           href="/pdv"
           icon={<Receipt size={22} />}
-          title="PDV"
+          title="Caixa"
           description="Realizar pedidos"
         />
 
         <Card3D
           href="/pedidos"
-          icon={<ChefHat size={22} />}
-          title="Cozinha"
+          icon={<Clipboard size={22} />}
+          title="Registros"
           description="Gerenciar pedidos"
-        />
-
-        <Card3D
-          href="/client/display"
-          icon={<Tv size={22} />}
-          title="Painel ao vivo"
-          description="Display Otimizado para TV"
         />
 
         {user.role === "admin" && (

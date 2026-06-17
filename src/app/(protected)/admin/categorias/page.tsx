@@ -14,7 +14,8 @@ import { useCategorias } from "@/hooks/useCategorias"
 
 import PageContainer from "@/components/ui/PageContainer"
 import BackButton from "@/components/ui/BackButton"
-
+import UserInfo from "@/components/ui/UserInfo"
+import { Search } from "lucide-react"
 type Categoria = {
   id: string
   nome: string
@@ -26,6 +27,7 @@ export default function CategoriasPage() {
   const router = useRouter()
 
   const [nome, setNome] = useState("")
+  const [busca, setBusca] = useState("")
   const [editandoId, setEditandoId] = useState<string | null>(null)
 
   const { categorias } = useCategorias()
@@ -69,6 +71,12 @@ export default function CategoriasPage() {
     setEditandoId(null)
   }
 
+const categoriasFiltradas = categorias.filter((cat) =>
+  (cat.nome || "")
+    .toLowerCase()
+    .includes(busca.toLowerCase())
+)
+
   return (
     <PageContainer>
 
@@ -84,6 +92,7 @@ export default function CategoriasPage() {
             <p className="text-xs text-gray-400">
               Categorias
             </p>
+            <UserInfo />
           </div>
         </div>
 
@@ -130,7 +139,33 @@ export default function CategoriasPage() {
 
         <div className="md:col-span-2 space-y-2">
 
-          {categorias.map((cat) => (
+            <div className="relative mb-3">
+  <Search
+    size={18}
+    className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+  />
+
+  <input
+    type="text"
+    placeholder="Buscar categoria..."
+    value={busca}
+    onChange={(e) => setBusca(e.target.value)}
+    className="
+      w-full
+      pl-10
+      pr-3
+      py-3
+      bg-gray-800
+      border
+      border-gray-700
+      rounded-xl
+      outline-none
+      focus:border-green-500
+    "
+  />
+</div>
+
+          {categoriasFiltradas.map((cat) => (
             <div
               key={cat.id}
               className="bg-gray-800 p-4 rounded flex justify-between items-center"

@@ -21,7 +21,6 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false)
   const [mostrarSenha, setMostrarSenha] = useState(false)
   const router = useRouter()
-
   async function handleLogin() {
     setErro("")
 
@@ -61,21 +60,25 @@ export default function LoginPage() {
       clearCache()
 
       // 🔥 pega role com segurança (sem quebrar login)
-      let role: "admin" | "user" = "user"
+let me: {
+  role: "admin" | "user"
+  caixa: "caixa01" | "caixa02"
+} = {
+  role: "user",
+  caixa: "caixa01"
+}
 
-      try {
-        const me = await fetchWithAuth("/api/me")
-        role = me.role === "admin" ? "admin" : "user"
-      } catch (err) {
-        console.warn("Falha ao buscar /api/me:", err)
-        // não quebra login
-      }
+try {
+  me = await fetchWithAuth("/api/me")
+} catch (err) {
+  console.warn("Falha ao buscar /api/me:", err)
+}
 
-      // 🔥 salva usuário corretamente
-      setCachedUser({
-        role,
-        username: usuario,
-      })
+setCachedUser({
+  role: me.role === "admin" ? "admin" : "user",
+  username: usuario,
+  caixa: me.caixa
+})
 
       // 🚀 redireciona
       router.replace("/")
