@@ -40,7 +40,17 @@ type Pedido = {
 }
 
 export default function ControlePedidos() {
-  const [pedidos, setPedidos] = useState<Pedido[]>([])
+  const [pedidos, setPedidos] = useState<Pedido[]>(() => {
+  if (typeof window === "undefined") return []
+
+  const local = localStorage.getItem("registros-pedidos")
+
+  if (local) {
+    return JSON.parse(local)
+  }
+
+  return []
+})
   const [busca, setBusca] = useState("")
   const [filtroCaixa, setFiltroCaixa] = useState("todos")
   const [pedidoSelecionado, setPedidoSelecionado] =
@@ -60,7 +70,12 @@ export default function ControlePedidos() {
         ...doc.data(),
       })) as Pedido[]
 
-      setPedidos(lista)
+      localStorage.setItem(
+  "registros-pedidos",
+  JSON.stringify(lista)
+)
+
+setPedidos(lista)
     })
 
     return () => unsub()
