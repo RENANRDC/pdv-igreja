@@ -144,12 +144,20 @@ function toggleProduto(prod: Produto) {
     return categorias.find((c) => c.id === id)?.nome || "Sem categoria"
   }
 
+function normalizarTexto(texto: string) {
+  return texto
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+}
+
 const produtosFiltrados = produtos.filter((p: Produto) => {
   const categoriaOk =
     !categoriaFiltro || p.categoriaId === categoriaFiltro
 
-  const buscaOk =
-    p.nome.toLowerCase().includes(busca.toLowerCase())
+const buscaOk =
+  normalizarTexto(p.nome)
+    .includes(normalizarTexto(busca))
 
   const statusOk =
     statusFiltro === "todos" ||

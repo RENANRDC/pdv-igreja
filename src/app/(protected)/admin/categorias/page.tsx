@@ -71,10 +71,16 @@ export default function CategoriasPage() {
     setEditandoId(null)
   }
 
-const categoriasFiltradas = categorias.filter((cat) =>
-  (cat.nome || "")
+function normalizarTexto(texto: string) {
+  return texto
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
     .toLowerCase()
-    .includes(busca.toLowerCase())
+}
+
+const categoriasFiltradas = categorias.filter((cat) =>
+  normalizarTexto(cat.nome || "")
+    .includes(normalizarTexto(busca))
 )
 
   return (

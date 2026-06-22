@@ -79,16 +79,23 @@ const { categorias } = useCategorias()
 const { produtos } = useProdutos()
 const [categoriaSelecionada, setCategoriaSelecionada] = useState<string | null>(null)
 const [buscaProduto, setBuscaProduto] = useState("")
+
+  function normalizarTexto(texto: string) {
+  return texto
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+}
+
 const produtosFiltrados = produtos.filter((p) => {
 
   const categoriaOk =
     !categoriaSelecionada ||
     p.categoriaId === categoriaSelecionada
 
-  const buscaOk =
-    p.nome
-      .toLowerCase()
-      .includes(buscaProduto.toLowerCase())
+const buscaOk =
+  normalizarTexto(p.nome)
+    .includes(normalizarTexto(buscaProduto))
 
   return categoriaOk && buscaOk && p.ativo
 })
@@ -104,7 +111,7 @@ useEffect(() => {
 
 const [printerIp, setPrinterIp] = useState("")
 const [imprimindo, setImprimindo] = useState(false)
-
+const [salvando, setSalvando] = useState(false)
 useEffect(() => {
   const ref = doc(db, "config", "printer")
 
@@ -190,6 +197,8 @@ function handlePedido() {
 
 async function handleConfirmarPagamento() {
 
+  if (salvando) return
+
   if (!nome.trim()) {
     setErro("nome")
     return
@@ -203,6 +212,8 @@ async function handleConfirmarPagamento() {
       return
     }
   }
+
+  setSalvando(true)
 
   try {
     const nomeFinal = nome.trim()
@@ -234,15 +245,21 @@ const res = await criarPedido(
   setConfirmando(false)
   setValorRecebido("")
   setCategoriaSelecionada(null)
+  setSalvando(false)
 
 } catch (err: unknown) {
   console.error(err)
 
-  setErro(
+  const mensagem =
     err instanceof Error
       ? err.message
       : "Erro ao criar pedido"
-  )
+
+  alert(mensagem)
+
+  setErro(mensagem)
+
+  setSalvando(false)
 }
 
 }  // <-- adicionar esta chave
@@ -466,7 +483,7 @@ adicionarItem({
           : "bg-gray-800 border-gray-700 hover:bg-gray-700"
       }`}
     >
-        <div className="font-semibold text-white text-sm leading-tight">
+        <div className="font-semibold text-white text-sm leading-tight min-h-[40px] flex items-start">
           {prod.nome}
         </div>
 
@@ -735,14 +752,15 @@ onChange={(e) => {
                 Cancelar
               </button>
 
-              <button
-                onClick={handleConfirmarPagamento}
-                disabled={
-                  formaPagamento === "dinheiro" && !valorRecebido
-                }
+<button
+  onClick={handleConfirmarPagamento}
+  disabled={
+    salvando ||
+    (formaPagamento === "dinheiro" && !valorRecebido)
+  }
                 className="flex-1 bg-green-600 text-white p-3 rounded disabled:opacity-50"
               >
-                Confirmar
+                {salvando ? "Processando..." : "Confirmar"}
               </button>
             </div>
 

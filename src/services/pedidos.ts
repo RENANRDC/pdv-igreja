@@ -33,6 +33,7 @@ export async function criarPedido(
   caixa: string
 )
  {
+  console.log("=== INICIO criarPedido ===")
   if (!nome || !itens.length) {
     throw new Error("Dados inválidos")
   }
@@ -50,6 +51,8 @@ let precisaPreparo = false
 
 for (const item of itens) {
 
+  console.log("VALIDANDO:", item.nome)
+
   const produtosRef = collection(db, "produtos")
 
   const q = query(
@@ -57,7 +60,11 @@ for (const item of itens) {
     where("nome", "==", item.nome)
   )
 
-  const snapshot = await getDocs(q)
+console.log("BUSCANDO:", item.nome)
+
+const snapshot = await getDocs(q)
+
+console.log("ENCONTROU:", item.nome)
 
   if (snapshot.empty) {
     throw new Error(`Produto não encontrado: ${item.nome}`)
@@ -78,12 +85,16 @@ for (const item of itens) {
     )
   }
 
-  await updateDoc(
-    doc(db, "produtos", produtoDoc.id),
-    {
-      estoque: estoqueAtual - item.quantidade
-    }
-  )
+console.log("ATUALIZANDO ESTOQUE:", item.nome)
+
+await updateDoc(
+  doc(db, "produtos", produtoDoc.id),
+  {
+    estoque: estoqueAtual - item.quantidade
+  }
+)
+
+console.log("ESTOQUE ATUALIZADO:", item.nome)
 }
 
 const pedido = {
@@ -108,9 +119,10 @@ const pedido = {
 
   createdAt: Timestamp.now(),
 }
-
+  console.log("CRIANDO PEDIDO FIRESTORE")
   const docRef = await addDoc(collection(db, "pedidos"), pedido)
-
+  console.log("PEDIDO CRIADO:", docRef.id)
+  
   return {
     id: docRef.id,
     codigo,
